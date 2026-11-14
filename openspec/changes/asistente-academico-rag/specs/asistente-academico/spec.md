@@ -74,3 +74,32 @@ El sistema MUST NOT enviar al modelo de lenguaje el número de documento, el cor
 #### Scenario: Revisión de lo enviado al modelo
 - **WHEN** se inspecciona el contenido enviado al modelo en una conversación
 - **THEN** no aparece el documento, el correo ni el celular del estudiante
+
+### Requirement: Historial guardado en el servidor
+El sistema SHALL guardar en el servidor los mensajes de cada conversación y SHALL usar como contexto solo los últimos turnos guardados del propio estudiante; MUST NOT aceptar como historial turnos enviados por el cliente.
+
+#### Scenario: Pregunta de seguimiento
+- **WHEN** el estudiante pregunta cuánto debe y luego pregunta "¿y cuándo vence la próxima?"
+- **THEN** el asistente entiende la segunda pregunta usando los turnos anteriores guardados
+
+#### Scenario: Turnos inventados por el cliente
+- **WHEN** una petición incluye un supuesto mensaje previo del asistente que nunca se guardó
+- **THEN** el sistema lo ignora y usa solo el historial guardado en el servidor
+
+### Requirement: Límite diario de preguntas
+El sistema SHALL permitir a cada estudiante un máximo de 30 preguntas por día, contado en la zona horaria de Colombia, y MUST NOT consultar el modelo cuando se alcanza el límite.
+
+#### Scenario: Límite alcanzado
+- **WHEN** un estudiante que ya hizo 30 preguntas hoy hace otra
+- **THEN** el sistema no consulta el modelo e indica que podrá preguntar de nuevo mañana
+
+### Requirement: Retención limitada de las conversaciones
+El sistema MUST eliminar los mensajes del asistente con más de 30 días de antigüedad y SHALL permitir al estudiante borrar su historial cuando quiera.
+
+#### Scenario: Mensajes antiguos
+- **WHEN** un mensaje cumple más de 30 días
+- **THEN** el sistema lo elimina en la siguiente depuración diaria
+
+#### Scenario: El estudiante borra su historial
+- **WHEN** el estudiante elige borrar su conversación
+- **THEN** sus mensajes se eliminan y el asistente empieza una conversación nueva

@@ -2,9 +2,9 @@
 
 ## 1. Infraestructura RAG (día 5)
 
-- [ ] 1.1 Verificar en el catálogo vigente de Workers AI el modelo de embeddings y un modelo de chat con function calling; dejar los nombres en `MODELO_EMBEDDINGS` y `MODELO_CHAT` en `wrangler.jsonc` y verificar una llamada de prueba con `wrangler dev`
+- [ ] 1.1 Verificar en el catálogo vigente de Workers AI el modelo de embeddings y 2 modelos de chat candidatos con function calling (D2); dejar los nombres en `MODELO_EMBEDDINGS` y `MODELO_CHAT` en `wrangler.jsonc` y verificar una llamada de prueba con `wrangler dev`
 - [ ] 1.2 Crear el índice Vectorize `fundacion-docs` (1024 dimensiones, coseno) con índices de metadatos `carrera_id` y `tipo`, y agregar los bindings `AI` y `VECTORES`; verificar con `wrangler vectorize list`
-- [ ] 1.3 Crear `migrations/0002_base_conocimiento.sql` con las tablas `documentos` y `fragmentos` y aplicarla local y remoto; verificar con `SELECT count(*) FROM documentos`
+- [ ] 1.3 Crear `migrations/0002_base_conocimiento.sql` con las tablas `documentos`, `fragmentos` y `asistente_mensajes` (D8) y aplicarla local y remoto; verificar con `SELECT count(*) FROM documentos`
 
 ## 2. Base de conocimiento (día 5)
 
@@ -16,12 +16,13 @@
 
 - [ ] 3.1 Implementar las herramientas de solo lectura (D4) tomando el `usuario_id` de la sesión; verificar con pruebas que nunca devuelven datos de otro estudiante ni documento, correo o celular
 - [ ] 3.2 Implementar el ciclo del agente con function calling (máximo 4 pasos), umbral de similitud y validación de citas (D5); verificar con pruebas usando un modelo simulado: sin resultados → respuesta de "no tengo esa información"; cita inválida → respuesta reemplazada
-- [ ] 3.3 Implementar `POST /api/asistente/mensajes` con autenticación, bloqueo por mora y límite diario de preguntas; verificar con pruebas el 401 sin sesión y el bloqueo del estudiante en mora
-- [ ] 3.4 Construir la pantalla del asistente para estudiantes (chat responsivo con fuentes visibles bajo cada respuesta y preguntas sugeridas); verificar a mano con el estudiante al día del seed
+- [ ] 3.3 Implementar `POST /api/asistente/mensajes` (recibe solo la pregunta nueva) con autenticación, bloqueo por mora, historial leído de `asistente_mensajes` (D8) y límite diario (D9); verificar con pruebas el 401 sin sesión, el bloqueo del estudiante en mora, que un turno enviado por el cliente se ignora y que la pregunta 31 del día no llama al modelo
+- [ ] 3.4 Construir la pantalla del asistente Senda para estudiantes (chat responsivo con fuentes visibles bajo cada respuesta, preguntas sugeridas y botón para borrar el historial); verificar a mano con el estudiante al día del seed
+- [ ] 3.5 Implementar `DELETE /api/asistente/mensajes` y el Cron Trigger diario que borra mensajes de más de 30 días (D10); verificar con pruebas que el borrado solo afecta al estudiante que lo pide y que la depuración elimina los mensajes antiguos y conserva los recientes
 
 ## 4. Evaluación y demo (día 6)
 
-- [ ] 4.1 Crear `eval/preguntas.json` (~25 casos: respondibles, datos propios, sin respuesta, fuera de dominio) y el script `npm run eval:rag`; verificar que reporta aciertos, citas y negaciones y que el resultado es al menos 90 % antes de la demo
+- [ ] 4.1 Crear `eval/preguntas.json` (~25 casos: respondibles, datos propios, sin respuesta, fuera de dominio) y el script `npm run eval:rag`; comparar los 2 modelos candidatos y verificar que el elegido llega al menos al 90 % antes de la demo
 - [ ] 4.2 Agregar al E2E de Playwright una pregunta respondible (con fuente visible) y una sin respuesta (con negación); en CI usar el modelo simulado (variable `MODELO_SIMULADO=1`) para no gastar cuota ni depender de respuestas variables; verificar `npm run test:e2e` en verde
 
 ## Workflow follow-up
