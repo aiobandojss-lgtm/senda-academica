@@ -29,25 +29,33 @@ El sistema SHALL permitir al administrador crear cursos dentro de una carrera, c
 - **THEN** el curso aparece en la lista de cursos de ese docente
 
 ### Requirement: Registro de estudiantes
-El sistema SHALL registrar cada estudiante con tipo y número de documento, nombres, apellidos, correo, celular opcional, carrera y fecha de ingreso. El número de documento MUST ser único entre todos los usuarios.
+El sistema SHALL registrar cada estudiante con tipo y número de documento, nombres, apellidos, correo, celular opcional, carrera, semestre actual y fecha de ingreso. El número de documento MUST ser único entre todos los usuarios.
 
 #### Scenario: Registrar estudiante nuevo
 - **WHEN** el administrador registra un estudiante con un documento no registrado
-- **THEN** el estudiante queda creado con usuario igual a su documento y una contraseña temporal
+- **THEN** el estudiante queda creado con usuario igual a su documento y una contraseña temporal aleatoria que se muestra una sola vez al administrador
 
 #### Scenario: Documento duplicado
 - **WHEN** el administrador registra un estudiante con un documento ya existente
 - **THEN** el sistema rechaza el registro e indica el documento repetido
 
 ### Requirement: Inscripción automática en los cursos
-El sistema SHALL inscribir a cada estudiante en los cursos de su carrera correspondientes a su semestre actual.
+El sistema SHALL mantener a cada estudiante activo inscrito en los cursos activos de su carrera correspondientes a su semestre actual: al registrarlo, al cambiar su semestre actual y al crear un curso nuevo. Al cambiar de semestre, el sistema MUST conservar las inscripciones anteriores para no perder el historial de entregas y notas.
 
 #### Scenario: Estudiante de primer semestre
 - **WHEN** se registra un estudiante en primer semestre de una carrera
 - **THEN** el estudiante ve todos los cursos de primer semestre de esa carrera
 
+#### Scenario: Curso creado después de registrar a los estudiantes
+- **WHEN** el administrador crea un curso de primer semestre en una carrera que ya tiene estudiantes activos de primer semestre
+- **THEN** esos estudiantes quedan inscritos en el curso nuevo
+
+#### Scenario: Cambio de semestre
+- **WHEN** el administrador cambia el semestre actual de un estudiante de 1 a 2
+- **THEN** el estudiante queda inscrito en los cursos de segundo semestre y conserva sus entregas y notas de primer semestre
+
 ### Requirement: Consulta y búsqueda de estudiantes
-El sistema SHALL permitir al administrador listar estudiantes, buscarlos por nombre o documento y filtrarlos por carrera y por estado de cartera (al día, en riesgo, bloqueado).
+El sistema SHALL permitir al administrador listar estudiantes, buscarlos por nombre o documento y filtrarlos por carrera y por estado de cartera (al día, en riesgo, bloqueado o con excepción).
 
 #### Scenario: Buscar por documento
 - **WHEN** el administrador busca un número de documento
@@ -57,12 +65,20 @@ El sistema SHALL permitir al administrador listar estudiantes, buscarlos por nom
 - **WHEN** el administrador filtra por estado "bloqueado"
 - **THEN** el sistema muestra solo estudiantes con acceso bloqueado por mora
 
+#### Scenario: Filtrar con excepción
+- **WHEN** el administrador filtra por estado "con excepción"
+- **THEN** el sistema muestra solo estudiantes que cumplen la regla de bloqueo pero tienen una excepción vigente
+
 ### Requirement: Carga masiva desde CSV
-El sistema SHALL permitir cargar estudiantes desde un archivo CSV con una plantilla descargable, validar todas las filas antes de guardar y SHALL NOT guardar ninguna fila si alguna tiene errores.
+El sistema SHALL permitir cargar estudiantes desde un archivo CSV con una plantilla descargable, validar todas las filas antes de guardar y SHALL NOT guardar ninguna fila si alguna tiene errores. Cada estudiante creado SHALL recibir una contraseña temporal aleatoria; el sistema SHALL entregar al administrador, una sola vez, un archivo con el documento y la contraseña temporal de cada estudiante creado, y MUST NOT guardar esas contraseñas en texto plano.
 
 #### Scenario: Archivo válido
 - **WHEN** el administrador carga un CSV en el que todas las filas son válidas
-- **THEN** el sistema crea todos los estudiantes y muestra cuántos se crearon
+- **THEN** el sistema crea todos los estudiantes, muestra cuántos se crearon y ofrece descargar el archivo de credenciales iniciales
+
+#### Scenario: Archivo de credenciales no recuperable
+- **WHEN** el administrador cierra la pantalla de resultados sin descargar el archivo de credenciales
+- **THEN** el sistema no puede volver a mostrar esas contraseñas y el administrador debe restablecerlas una por una
 
 #### Scenario: Archivo con errores
 - **WHEN** el CSV tiene filas con documento repetido, carrera inexistente o correo inválido
@@ -74,3 +90,18 @@ El sistema SHALL permitir al administrador registrar docentes con documento, nom
 #### Scenario: Registrar docente
 - **WHEN** el administrador registra un docente nuevo
 - **THEN** el docente puede iniciar sesión y ser asignado a cursos
+
+### Requirement: Desactivar y reactivar usuarios
+El sistema SHALL permitir al administrador desactivar y reactivar estudiantes y docentes. Un usuario desactivado MUST NOT poder ingresar y sus sesiones abiertas MUST quedar invalidadas; su información, entregas, notas y pagos MUST conservarse.
+
+#### Scenario: Estudiante retirado
+- **WHEN** el administrador desactiva a un estudiante que se retiró
+- **THEN** el estudiante no puede ingresar y su historial académico y de pagos sigue disponible para el administrador
+
+#### Scenario: Reactivar estudiante
+- **WHEN** el administrador reactiva a un estudiante desactivado
+- **THEN** el estudiante puede volver a ingresar con su contraseña
+
+#### Scenario: Estudiante desactivado fuera de las inscripciones automáticas
+- **WHEN** el administrador crea un curso en la carrera y el semestre de un estudiante desactivado
+- **THEN** el estudiante desactivado no queda inscrito en el curso nuevo

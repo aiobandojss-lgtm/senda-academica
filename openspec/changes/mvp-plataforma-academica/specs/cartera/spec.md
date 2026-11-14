@@ -14,11 +14,19 @@ El sistema SHALL permitir al administrador generar el plan de cuotas de un estud
 - **THEN** el estudiante queda con 6 cuotas que vencen el día 5 de agosto a enero
 
 ### Requirement: Cuotas individuales
-El sistema SHALL permitir al administrador agregar una cuota individual (por ejemplo, la matrícula) y editar valor o fecha de una cuota sin pagos.
+El sistema SHALL permitir al administrador agregar una cuota individual (por ejemplo, la matrícula) y editar el valor o la fecha, o eliminar, una cuota que no tenga pagos registrados. Una cuota con pagos registrados, incluidos los anulados, MUST NOT poder editarse ni eliminarse, para conservar el historial.
 
 #### Scenario: Editar cuota con pagos
 - **WHEN** el administrador intenta cambiar el valor de una cuota que ya tiene pagos
 - **THEN** el sistema rechaza el cambio
+
+#### Scenario: Eliminar cuota creada por error
+- **WHEN** el administrador elimina una cuota que no tiene pagos registrados
+- **THEN** la cuota desaparece del plan del estudiante y deja de contar para su saldo
+
+#### Scenario: Eliminar cuota con pagos
+- **WHEN** el administrador intenta eliminar una cuota que tiene un pago, aunque esté anulado
+- **THEN** el sistema rechaza la eliminación
 
 ### Requirement: Registro de pagos
 El sistema SHALL permitir al administrador registrar pagos totales o parciales a una cuota, con fecha, valor, medio de pago (efectivo, transferencia o consignación) y soporte opcional. El valor MUST ser mayor que cero y MUST NOT superar el saldo de la cuota.
@@ -36,11 +44,15 @@ El sistema SHALL permitir al administrador registrar pagos totales o parciales a
 - **THEN** el sistema rechaza el pago e indica el saldo actual
 
 ### Requirement: Anulación de pagos
-El sistema SHALL permitir al administrador anular un pago registrado por error indicando un motivo; el pago anulado MUST conservarse en el historial y MUST NOT contar para el saldo.
+El sistema SHALL permitir al administrador anular un pago registrado por error indicando un motivo; el pago anulado MUST conservarse en el historial y MUST NOT contar para el saldo. Un pago registrado MUST NOT poder modificarse ni volver a activarse: la única corrección permitida es anularlo y registrar uno nuevo.
 
 #### Scenario: Anular pago
 - **WHEN** el administrador anula un pago con el motivo "valor errado"
 - **THEN** el saldo de la cuota vuelve a incluir ese valor y el pago aparece como anulado
+
+#### Scenario: Intentar modificar un pago
+- **WHEN** se intenta cambiar el valor o la fecha de un pago ya registrado
+- **THEN** el sistema rechaza el cambio
 
 ### Requirement: Estado de cuenta
 El sistema SHALL mostrar a cada estudiante y al administrador el estado de cuenta: cada cuota con vencimiento, valor, pagado, saldo y estado (pagada, pendiente o vencida con días de atraso), más el total adeudado.

@@ -25,6 +25,17 @@ El sistema SHALL considerar bloqueado a un estudiante cuando tiene al menos una 
 - **WHEN** ninguna cuota vencida tiene saldo
 - **THEN** el estudiante está "al día"
 
+### Requirement: Estados de cartera
+El sistema SHALL clasificar a cada estudiante en uno de cuatro estados de cartera: "al día" (ninguna cuota vencida con saldo), "en riesgo" (alguna cuota vencida con saldo, ninguna con más de 30 días), "bloqueado" (cumple la regla de bloqueo sin excepción vigente) o "con excepción" (cumple la regla de bloqueo pero tiene una excepción vigente). Solo el estado "bloqueado" MUST impedir el acceso.
+
+#### Scenario: Estudiante en mora con excepción
+- **WHEN** un estudiante cumple la regla de bloqueo y tiene una excepción vigente
+- **THEN** su estado es "con excepción" y puede ingresar
+
+#### Scenario: Estudiante en riesgo
+- **WHEN** la única cuota vencida con saldo de un estudiante venció hace 10 días
+- **THEN** su estado es "en riesgo" y puede ingresar
+
 ### Requirement: Estudiante bloqueado no puede ingresar
 El sistema MUST impedir el ingreso de un estudiante bloqueado y SHALL mostrarle un mensaje que indique que su acceso está suspendido por mora y cómo comunicarse con la Fundación.
 

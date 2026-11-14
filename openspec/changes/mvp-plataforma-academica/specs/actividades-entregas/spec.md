@@ -33,25 +33,29 @@ El sistema SHALL permitir al estudiante subir un archivo por actividad en format
 - **THEN** el sistema rechaza el archivo e indica los formatos permitidos
 
 ### Requirement: Reemplazo de la entrega
-El sistema SHALL permitir al estudiante reemplazar su entrega mientras no haya sido calificada, y MUST NOT permitirlo después de calificada.
+El sistema SHALL permitir al estudiante reemplazar su entrega mientras no haya sido calificada, y MUST NOT permitirlo después de calificada. Al reemplazarla, el sistema MUST eliminar el archivo anterior del almacenamiento.
 
 #### Scenario: Reemplazar antes de la nota
 - **WHEN** el estudiante sube un archivo nuevo a una actividad aún sin calificar
-- **THEN** el nuevo archivo reemplaza al anterior y se actualiza la fecha de entrega
+- **THEN** el nuevo archivo reemplaza al anterior, el archivo anterior se elimina del almacenamiento y se actualiza la fecha de entrega
 
 #### Scenario: Intentar reemplazar después de la nota
 - **WHEN** el estudiante intenta subir un archivo a una actividad ya calificada
 - **THEN** el sistema rechaza el cambio
 
 ### Requirement: Entregas tardías
-El sistema SHALL aceptar entregas después de la fecha límite y SHALL marcarlas como tardías.
+El sistema SHALL aceptar entregas después de la fecha límite y SHALL marcarlas como tardías comparando la fecha de entrega con la fecha límite vigente de la actividad, de modo que un cambio de la fecha límite se refleje en la marca.
 
 #### Scenario: Entrega fuera de plazo
 - **WHEN** el estudiante entrega después de la fecha límite
 - **THEN** la entrega queda guardada con la marca "tardía", visible para el docente
 
+#### Scenario: El docente amplía el plazo
+- **WHEN** el docente amplía la fecha límite de una actividad hasta una fecha posterior a una entrega marcada como tardía
+- **THEN** esa entrega deja de aparecer como tardía
+
 ### Requirement: Seguimiento de entregas por el docente
-El sistema SHALL mostrar al docente, por actividad, la lista de estudiantes del curso con su estado: sin entregar, entregada, tardía o calificada, y permitirle descargar cada archivo.
+El sistema SHALL mostrar al docente, por actividad, la lista de estudiantes del curso (nombres y apellidos) con su estado: sin entregar, entregada, tardía o calificada, y permitirle descargar cada archivo.
 
 #### Scenario: Revisar quién entregó
 - **WHEN** el docente abre una actividad

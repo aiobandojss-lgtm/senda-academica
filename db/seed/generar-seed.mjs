@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-// Genera datos FICTICIOS pero realistas para la plataforma de la Fundación.
-// Uso:  node db/seed/generar-seed.mjs [--fecha-referencia 2026-11-21] [--estudiantes 60]
+// Genera datos FICTICIOS pero realistas para Senda, la plataforma académica de la Fundación.
+// Uso:  node db/seed/generar-seed.mjs [--fecha-referencia 2026-11-21] [--estudiantes 60] [--aviso-version 2026-11]
 // Salida: db/seed/seed.sql, db/seed/placeholder.pdf y db/seed/CUENTAS-DEMO.md
 //
 // - Es determinista: con los mismos parámetros produce exactamente los mismos datos.
 // - Las cuotas se calculan respecto a la fecha de referencia (el día de la demo), para que
-//   los perfiles de cartera (al día, en riesgo, bloqueado, excepción) se vean igual ese día.
+//   los perfiles de cartera (al día, en riesgo, bloqueado, con excepción) se vean igual ese día.
 // - Documentos con prefijo 99 y celulares vacíos: no corresponden a personas reales.
 // - Todas las cuentas usan la contraseña de demostración "Demo2026*".
+// - --aviso-version debe coincidir con la variable AVISO_PRIVACIDAD_VERSION del Worker.
 
 import { pbkdf2Sync } from 'node:crypto';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -21,6 +22,7 @@ const args = Object.fromEntries(
 const FECHA_REF = args['fecha-referencia'] ?? '2026-11-21';
 const N_ESTUDIANTES = Number(args['estudiantes'] ?? 60);
 const PASSWORD_DEMO = 'Demo2026*';
+const AVISO_VERSION = args['aviso-version'] ?? '2026-11';
 const DIR = dirname(fileURLToPath(import.meta.url));
 if (!/^\d{4}-\d{2}-\d{2}$/.test(FECHA_REF)) throw new Error('--fecha-referencia debe ser YYYY-MM-DD');
 if (N_ESTUDIANTES < 10) throw new Error('--estudiantes debe ser al menos 10');
@@ -61,7 +63,7 @@ function estadoMora(cuotas, excepciones, hoy) {
   const vencidas = cuotas.filter((c) => c.saldo > 0 && c.vence < hoy);
   const maxAtraso = vencidas.reduce((m, c) => Math.max(m, diasEntre(c.vence, hoy)), 0);
   const excepcion = excepciones.some((e) => e.hasta >= hoy);
-  if (maxAtraso > 30) return excepcion ? 'excepcion' : 'bloqueado';
+  if (maxAtraso > 30) return excepcion ? 'con_excepcion' : 'bloqueado';
   if (maxAtraso > 0) return 'en_riesgo';
   return 'al_dia';
 }
@@ -133,7 +135,7 @@ add('-- Contraseña de todas las cuentas: Demo2026*');
 add('-- ============================================================');
 add('DELETE FROM excepciones_mora;'); add('DELETE FROM pagos;'); add('DELETE FROM cuotas;'); add('DELETE FROM entregas;');
 add('DELETE FROM actividades;'); add('DELETE FROM inscripciones;'); add('DELETE FROM cursos;'); add('DELETE FROM estudiantes;');
-add('DELETE FROM usuarios;'); add('DELETE FROM carreras;');
+add('DELETE FROM intentos_fallidos;'); add('DELETE FROM usuarios;'); add('DELETE FROM carreras;');
 add('');
 
 // Usuarios: administrador y docentes
@@ -156,6 +158,7 @@ const PERFILES_DEMO = [
   { perfil: 'en_riesgo', nota: 'Última cuota vencida hace menos de 30 días: puede entrar' },
   { perfil: 'excepcion', nota: 'En mora pero con excepción vigente: puede entrar' },
   { perfil: 'mora_parcial', nota: 'Bloqueado: abonó parte de la cuota vencida' },
+  { perfil: 'al_dia', primerIngreso: true, nota: 'Primer ingreso: debe cambiar la contraseña temporal y aceptar el aviso de privacidad' },
 ];
 const usados = new Set();
 const estudiantes = [];
@@ -174,11 +177,16 @@ for (let i = 0; i < N_ESTUDIANTES; i++) {
   const id = 100 + i;
   const base = `${quitarTildes(nombres.split(' ')[0]).toLowerCase()}.${quitarTildes(apellidos.split(' ')[0]).toLowerCase()}`;
   estudiantes.push({ id, nombres, apellidos, carrera, perfil, demo: demo ? PERFILES_DEMO[i].nota : null,
+    primerIngreso: demo && PERFILES_DEMO[i].primerIngreso === true,
     documento: `99000${String(1001 + i).padStart(5, '0')}`, correo: `${base}${i + 1}@demo.test` });
 }
 
+// Las cuentas normales ya cambiaron su contraseña y aceptaron el aviso de privacidad (D16);
+// la cuenta de primer ingreso no, para poder mostrar ese flujo en la demo.
+const avisoAceptadoEn = `${fechaIngreso}T13:00:00Z`;
 for (const u of [...usuarios, ...estudiantes.map((e) => ({ ...e, rol: 'estudiante' }))]) {
-  add(`INSERT INTO usuarios (id, rol, tipo_documento, documento, nombres, apellidos, correo, celular, password_hash, debe_cambiar_password, activo) VALUES (${u.id}, ${q(u.rol)}, 'CC', ${q(u.documento)}, ${q(u.nombres)}, ${q(u.apellidos)}, ${q(u.correo)}, NULL, ${q(hashPassword(PASSWORD_DEMO))}, 0, 1);`);
+  const primerIngreso = u.primerIngreso === true;
+  add(`INSERT INTO usuarios (id, rol, tipo_documento, documento, nombres, apellidos, correo, celular, password_hash, debe_cambiar_password, aviso_version_aceptada, aviso_aceptado_en, activo) VALUES (${u.id}, ${q(u.rol)}, 'CC', ${q(u.documento)}, ${q(u.nombres)}, ${q(u.apellidos)}, ${q(u.correo)}, NULL, ${q(hashPassword(PASSWORD_DEMO))}, ${primerIngreso ? 1 : 0}, ${primerIngreso ? 'NULL' : q(AVISO_VERSION)}, ${primerIngreso ? 'NULL' : q(avisoAceptadoEn)}, 1);`);
 }
 for (const e of estudiantes) {
   add(`INSERT INTO estudiantes (usuario_id, carrera_id, semestre_actual, cohorte, fecha_ingreso) VALUES (${e.id}, ${e.carrera.id}, 1, ${q(cohorte)}, ${q(fechaIngreso)});`);
@@ -237,13 +245,14 @@ for (const a of actividades) {
       n = nota(); com = n >= 4.5 ? elegir(COMENTARIOS_ALTOS) : n >= 3.5 ? elegir(COMENTARIOS_MEDIOS) : n < 3 ? elegir(COMENTARIOS_BAJOS) : null;
       calEn = horaBogota(sumarDias(limiteDia, entre(2, 5)), entre(8, 20), entre(0, 59)); calPor = docentePorCurso(a.curso);
     }
-    add(`INSERT INTO entregas (id, actividad_id, estudiante_id, archivo_key, nombre_archivo, tipo_mime, tamano_bytes, entregado_en, tardia, nota, comentario, calificado_en, calificado_por) VALUES (${entId++}, ${a.id}, ${e.id}, 'seed/placeholder.pdf', ${q(`taller${a.orden}_${apellido}.pdf`)}, 'application/pdf', ${entre(150000, 2500000)}, ${q(entregadoEn)}, ${tardia ? 1 : 0}, ${n === null ? 'NULL' : n.toFixed(1)}, ${q(com)}, ${q(calEn)}, ${q(calPor)});`);
+    // "Tardía" no se guarda (D20): se deduce de entregado_en > fecha_limite.
+    add(`INSERT INTO entregas (id, actividad_id, estudiante_id, archivo_key, nombre_archivo, tipo_mime, tamano_bytes, entregado_en, nota, comentario, calificado_en, calificado_por) VALUES (${entId++}, ${a.id}, ${e.id}, 'seed/placeholder.pdf', ${q(`taller${a.orden}_${apellido}.pdf`)}, 'application/pdf', ${entre(150000, 2500000)}, ${q(entregadoEn)}, ${n === null ? 'NULL' : n.toFixed(1)}, ${q(com)}, ${q(calEn)}, ${q(calPor)});`);
   }
 }
 
 // Cuotas, pagos y excepciones
 let cuotaId = 1, pagoId = 1, excId = 1;
-const resumen = { al_dia: 0, en_riesgo: 0, bloqueado: 0, excepcion: 0 };
+const resumen = { al_dia: 0, en_riesgo: 0, bloqueado: 0, con_excepcion: 0 };
 const MEDIOS = ['transferencia', 'transferencia', 'consignacion', 'efectivo'];
 for (const e of estudiantes) {
   const cuotas = [
@@ -281,7 +290,7 @@ for (const e of estudiantes) {
     add(`INSERT INTO excepciones_mora (id, estudiante_id, motivo, hasta, creado_por) VALUES (${excId++}, ${e.id}, ${q(`Acuerdo de pago: se pone al día a más tardar el ${hasta}`)}, ${q(hasta)}, ${ADMIN_ID});`);
   }
   e.estado = estadoMora(cuotas, excepciones, FECHA_REF);
-  const esperado = { al_dia: 'al_dia', en_riesgo: 'en_riesgo', en_mora: 'bloqueado', mora_parcial: 'bloqueado', excepcion: 'excepcion' }[e.perfil];
+  const esperado = { al_dia: 'al_dia', en_riesgo: 'en_riesgo', en_mora: 'bloqueado', mora_parcial: 'bloqueado', excepcion: 'con_excepcion' }[e.perfil];
   if (e.estado !== esperado) console.warn(`AVISO: ${e.documento} quedó "${e.estado}" y se esperaba "${esperado}" (revisa la fecha de referencia).`);
   resumen[e.estado]++;
 }
@@ -318,9 +327,11 @@ const md = [
   '|---|---|---|---|',
   fila(usuarios[0], 'Administrador', 'Registrar pagos, excepciones y ver cartera'),
   fila(usuarios[3], 'Docente', `Docente de ${CARRERAS[2].nombre} (cursos de los estudiantes demo)`),
-  ...estudiantes.slice(0, PERFILES_DEMO.length).map((e) => fila(e, `Estudiante (${{ al_dia: 'al día', en_riesgo: 'en riesgo', bloqueado: 'bloqueado', excepcion: 'con excepción' }[e.estado]})`, e.demo)),
+  ...estudiantes.slice(0, PERFILES_DEMO.length).map((e) => fila(e, `Estudiante (${{ al_dia: 'al día', en_riesgo: 'en riesgo', bloqueado: 'bloqueado', con_excepcion: 'con excepción' }[e.estado]}${e.primerIngreso ? ', primer ingreso' : ''})`, e.demo)),
   '',
-  `Resumen de los ${N_ESTUDIANTES} estudiantes en la fecha de referencia: ${resumen.al_dia} al día, ${resumen.en_riesgo} en riesgo, ${resumen.bloqueado} bloqueados, ${resumen.excepcion} con excepción vigente.`,
+  `Resumen de los ${N_ESTUDIANTES} estudiantes en la fecha de referencia: ${resumen.al_dia} al día, ${resumen.en_riesgo} en riesgo, ${resumen.bloqueado} bloqueados, ${resumen.con_excepcion} con excepción vigente.`,
+  '',
+  `Todas las cuentas ya aceptaron la versión \`${AVISO_VERSION}\` del aviso de privacidad, excepto la de primer ingreso (la variable \`AVISO_PRIVACIDAD_VERSION\` del Worker debe tener ese mismo valor). La cuenta de primer ingreso usa \`${PASSWORD_DEMO}\` como contraseña temporal: después de cambiarla, regenera y recarga el seed para repetir la demo.`,
   '',
   `Para la demo en vivo, el estudiante al día tiene pendiente el "Taller 3" de ${cursoDemo.nombre}, con fecha límite ${sumarDias(FECHA_REF, 3)}.`,
   '',
