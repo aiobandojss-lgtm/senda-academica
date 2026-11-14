@@ -1,0 +1,28 @@
+schema: spec-driven
+
+context: |
+  Language: es
+  All artifacts must be written in es.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  Proyecto: plataforma académica web (MVP) para una fundación educativa que está
+  comenzando. Usuarios: administración, docentes y estudiantes. Módulos: carreras y
+  estudiantes, acceso por usuario y contraseña, talleres/evaluaciones con entregas,
+  cuotas y pagos, y bloqueo de acceso por mora (> 30 días). Encima del MVP va un
+  asistente académico con RAG (proyecto final del curso AI Agentic Engineer).
+
+  Stack: Cloudflare Workers (API con Hono + frontend React/Vite/Tailwind/shadcn-ui servido como static
+  assets), D1 (SQLite), R2 (archivos), Workers AI y Vectorize (RAG). Pruebas con
+  Vitest y Playwright. CI/CD con GitHub Actions y Wrangler.
+
+  Restricciones: costo casi cero (planes gratuitos de Cloudflare); datos personales
+  bajo la Ley 1581 de 2012 (Habeas Data); interfaz en español; aplicación web
+  responsiva, sin app móvil. Mientras no haya datos reales se usan datos ficticios
+  cargados en la base real por un script de seed.
+
+rules:
+  proposal:
+    - Indicar siempre qué queda fuera del alcance.
+  tasks:
+    - Cada tarea debe caber en una sesión de máximo 2 horas.
+    - Cada tarea indica cómo se verifica (prueba, comando o comportamiento observable).
