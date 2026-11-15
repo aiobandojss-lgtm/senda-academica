@@ -1,0 +1,72 @@
+# CI/CD de Senda: cada push y cada pull request a main pasa por la calidad;
+# solo un push a main (código ya revisado) aplica migraciones y despliega.
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Ningún paso necesita escribir en el repositorio
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    name: Calidad (lint, tipos, pruebas y build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Las actions se fijan por commit (SHA) y no por etiqueta: una etiqueta se puede mover a código malicioso
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Instalar dependencias exactas del package-lock.json
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Tipos del Worker al día con wrangler.jsonc
+        run: npm run cf-typegen -- --check
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Pruebas de la API (workerd, D1 y KV locales)
+        run: npm test
+      - name: Build de producción
+        run: npm run build
+
+  desplegar:
+    name: Migraciones y despliegue
+    needs: calidad
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # GitHub registra cada despliegue con su URL en la pestaña "Environments"
+    environment:
+      name: demo
+      url: https://senda.creativebycode.workers.dev
+    # Dos pushes seguidos no despliegan a la vez: el segundo espera al primero
+    concurrency:
+      group: despliegue-demo
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Instalar dependencias exactas del package-lock.json
+        run: npm ci
+      # Primero el esquema y después el código: el código nuevo nunca corre contra un esquema viejo.
+      # Las migraciones deben ser aditivas para que el código anterior siga funcionando si el deploy falla.
+      - name: Aplicar migraciones pendientes en la D1 remota
+        run: npx wrangler d1 migrations apply DB --remote
+      - name: Build y despliegue
+        run: npm run deploy
+      - name: Verificar que la URL pública responde
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 5 --retry-all-errors https://senda.creativebycode.workers.dev/api/salud
