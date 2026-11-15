@@ -117,18 +117,37 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 - No agregar dependencias pesadas sin explicar por qué.
 - Commits frecuentes en español, con verificación previa (lint, typecheck, pruebas según aplique).
 
-## Comandos (se crean en la tarea 1.1; ajústalos aquí si cambian)
+## Estructura del código
+
+- Un solo `package.json` y un solo proyecto Vite en la raíz (`vite.config.ts`, `index.html`, `components.json`, `wrangler.jsonc`).
+- `api/src/` – Worker con Hono; todas las rutas bajo `/api` (`basePath`). `api/worker-configuration.d.ts` lo genera `npm run cf-typegen` (se versiona; regenerarlo al cambiar `wrangler.jsonc`).
+- `web/src/` – React; alias `@/` → `web/src/`; componentes de shadcn/ui en `web/src/components/ui/` (style `radix-nova`, base Radix, utilidad `cn` del paquete `cn` de shadcn).
+- TypeScript con referencias: `tsconfig.app.json` (web), `tsconfig.worker.json` (api, tipos del runtime de Workers, sin DOM), `tsconfig.node.json` (configuración).
+- Identificadores del dominio en español, como en los specs (`calcularEstadoMora`, `AlmacenArchivos`); comentarios en español.
+
+## Dependencias (reglas aprendidas en la tarea 1.1)
+
+- **Wrangler fijo en la versión exacta que trae `@cloudflare/vite-plugin`** (hoy 4.160.0) para tener un solo `workerd`; al actualizar el plugin, actualizar Wrangler a la par.
+- **TypeScript `~6.0`**: `typescript-eslint` no soporta TypeScript 7 todavía. **Vitest `^4.1`** (lo exige pool-workers).
+- **npm 11 no ejecuta scripts de instalación sin aprobación** (`allowScripts` en `package.json`). Aprobados: `workerd` y `esbuild`. Ante un paquete nuevo con scripts: revisar quién lo publica y qué hace su script antes de `npm install-scripts approve`.
+- **`npm audit`**: 7 alertas moderadas con un solo origen (`minimatch` dentro de `typescript-eslint`, solo herramientas de desarrollo, no viaja a producción). Aceptadas; revisar cuando salga una versión nueva de `typescript-eslint`. **Nunca** `npm audit fix --force` sin leer qué cambia.
+
+## Comandos
 
 ```
-npm run dev            # servidor local con API y frontend
+npm run dev            # Vite + Worker en workerd en http://localhost:5173 (API y frontend en el mismo puerto)
+npm run build          # tsc -b + build de producción (dist/client y dist/senda)
 npm run lint           # ESLint
-npm run typecheck      # tsc --noEmit
-npm test               # Vitest
-npm run test:e2e       # Playwright
-npm run db:migrate     # wrangler d1 migrations apply DB --local
-npm run db:seed        # node db/seed/generar-seed.mjs && wrangler d1 execute DB --local --file db/seed/seed.sql
+npm run typecheck      # tsc -b (web, api y configuración)
+npm run cf-typegen     # regenera api/worker-configuration.d.ts tras cambiar wrangler.jsonc
 npm run deploy         # build + wrangler deploy
+npm test               # Vitest (se agrega en la tarea 1.5)
+npm run test:e2e       # Playwright (se agrega en la tarea 6.1)
+npm run db:migrate     # wrangler d1 migrations apply DB --local (tarea 1.3)
+npm run db:seed        # genera y carga el seed local (tarea 1.4)
 ```
+
+Para detener un servidor de desarrollo lanzado en segundo plano desde Git Bash: buscar el PID con `netstat -ano | grep ":5173 " | grep LISTENING` y terminar el árbol con `taskkill //PID <pid> //T //F`.
 
 ## Plan de los 8 días
 

@@ -19,6 +19,8 @@ Plataforma web para que una fundación educativa gestione sus estudiantes, sus t
 
 | Ruta | Para qué |
 |---|---|
+| `api/` | Worker de Cloudflare con Hono (todas las rutas bajo `/api`) |
+| `web/` | Frontend React + Tailwind + shadcn/ui |
 | `openspec/` | Especificaciones: cambios `mvp-plataforma-academica` y `asistente-academico-rag` (proposal, specs, design, tasks) |
 | `migrations/` | Esquema de D1 |
 | `db/seed/` | Generador de datos ficticios deterministas y cuentas de demostración |
@@ -32,4 +34,18 @@ Plataforma web para que una fundación educativa gestione sus estudiantes, sus t
 - OpenSpec 2: `npm i -g @fission-ai/openspec@latest`.
 - Cuenta de Cloudflare (plan gratuito) y de GitHub.
 
-Las instrucciones para correr el proyecto se completan cuando exista el código (tarea 1.1 del MVP).
+## Correr en local
+
+```bash
+npm ci            # instala exactamente lo del package-lock.json
+npm run dev       # http://localhost:5173 (frontend y API en el mismo puerto)
+```
+
+Verificación rápida: `GET http://localhost:5173/api/salud` responde `{"ok":true}`.
+
+| Script | Para qué |
+|---|---|
+| `npm run dev` | Servidor de desarrollo: React con recarga en caliente y el Worker en workerd (el runtime de producción) |
+| `npm run build` | Typecheck + build de producción |
+| `npm run lint` / `npm run typecheck` | Calidad estática |
+| `npm run deploy` | Build + despliegue con Wrangler |

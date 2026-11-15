@@ -220,7 +220,7 @@ for (const cu of cursos) {
   }
 }
 const cursoDemo = CARRERAS[2].cursos[0];
-add(`INSERT INTO actividades (id, curso_id, tipo, titulo, instrucciones, fecha_limite, archivo_apoyo_key, publicada) VALUES (${actId++}, ${cursoDemo.id}, 'taller', 'Taller 4: Proyecto integrador (borrador)', 'Borrador del docente: aún no visible para estudiantes.', ${q(limiteBogota(sumarDias(FECHA_REF, 20)))}, NULL, 0);`);
+add(`INSERT INTO actividades (id, curso_id, tipo, titulo, instrucciones, fecha_limite, archivo_apoyo_key, publicada) VALUES (${actId}, ${cursoDemo.id}, 'taller', 'Taller 4: Proyecto integrador (borrador)', 'Borrador del docente: aún no visible para estudiantes.', ${q(limiteBogota(sumarDias(FECHA_REF, 20)))}, NULL, 0);`);
 
 // Entregas
 let entId = 1;
