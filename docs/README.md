@@ -6,7 +6,7 @@
 | [identidad-visual.md](identidad-visual.md) | Guía visual de Senda (se crea en la tarea 2.0 del MVP) |
 | [decisiones/](decisiones/) | Registros de decisiones de arquitectura (ADR) |
 | [bitacora/](bitacora/) | Diario de desarrollo: qué se hizo cada día, qué se aprendió y qué problemas hubo |
-| [operacion/](operacion/) | Despliegue, paso a producción, respaldos y Habeas Data (se llena antes del despliegue real) |
+| [operacion/](operacion/) | [Despliegue y credenciales del CI](operacion/despliegue.md); después: paso a producción, respaldos y Habeas Data |
 | [presentacion/](presentacion/) | Guion, checklist de la demo y preguntas esperadas (día 7) |
 | [rag/](rag/) | Corpus del asistente: documentos ficticios de la Fundación |
 

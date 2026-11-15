@@ -2,7 +2,9 @@
 
 Plataforma web para que una fundación educativa gestione sus estudiantes, sus talleres y evaluaciones, y su cartera, con bloqueo automático de acceso por mora y un asistente académico con IA que responde con documentos oficiales y datos reales del estudiante, sin inventar.
 
-> 🚧 **En construcción** (noviembre de 2026). Proyecto final del curso *AI Agentic Engineer* y MVP para una fundación real. Desarrollado por CREATIVE BY CODE S.A.S. con desarrollo guiado por especificaciones (OpenSpec) y Claude Code.
+[![CI/CD](https://github.com/aiobandojss-lgtm/senda-academica/actions/workflows/ci.yml/badge.svg)](https://github.com/aiobandojss-lgtm/senda-academica/actions/workflows/ci.yml)
+
+> 🚧 **En construcción** (noviembre de 2026). **Demo:** <https://senda.creativebycode.workers.dev> (se despliega sola en cada push a `main`). Proyecto final del curso *AI Agentic Engineer* y MVP para una fundación real. Desarrollado por CREATIVE BY CODE S.A.S. con desarrollo guiado por especificaciones (OpenSpec) y Claude Code.
 
 ## Stack
 
