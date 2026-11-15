@@ -148,8 +148,16 @@ npm run cf-typegen     # regenera api/worker-configuration.d.ts tras cambiar wra
 npm run deploy         # build + wrangler deploy
 npm test               # Vitest: pruebas de la API en workerd (npm run test:watch para modo interactivo)
 npm run test:e2e       # Playwright (se agrega en la tarea 6.1)
-npm run db:migrate     # wrangler d1 migrations apply DB --local (tarea 1.3)
-npm run db:seed        # genera y carga el seed local (tarea 1.4)
+npm run db:migrate     # aplica las migraciones pendientes en la D1 local
+npm run db:seed        # regenera el seed (determinista), lo carga en la D1 local y sube el PDF de ejemplo al KV local
+```
+
+Las operaciones remotas **no** tienen script a propósito, porque un `npm run` remoto es demasiado fácil de ejecutar por error. Se escriben explícitas, se muestran antes de ejecutarlas y cada una tiene su costo en el plan Free:
+
+```
+npx wrangler d1 migrations apply DB --remote
+npx wrangler d1 execute DB --remote --file db/seed/seed.sql      # recarga completa: ~3.500 de las 100.000 filas escritas por día
+npx wrangler kv key put seed/placeholder.pdf --path db/seed/placeholder.pdf --binding ARCHIVOS_KV --remote
 ```
 
 Para detener un servidor de desarrollo lanzado en segundo plano desde Git Bash: buscar el PID con `netstat -ano | grep ":5173 " | grep LISTENING` y terminar el árbol con `taskkill //PID <pid> //T //F`.
