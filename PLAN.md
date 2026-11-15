@@ -1,17 +1,21 @@
-# Plan de trabajo – presentación el sábado 21 de noviembre de 2026
+# Plan de trabajo – presentación el viernes 20 de noviembre de 2026
 
 Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la URL pública actualizada.
 
 | Día | Fecha | Objetivo | Tareas de OpenSpec | Criterios de la rúbrica |
 |---|---|---|---|---|
-| 1 | Sáb 14 | Herramientas de diseño, proyecto creado, CI/CD desplegando, base con datos ficticios | MVP 1.0 – 1.7 | 5, 2 |
+| 1 | Sáb 14 | Herramientas de diseño, proyecto creado, CI/CD desplegando, base con datos ficticios | MVP 1.0 – 1.8 | 5, 2 |
 | 2 | Dom 15 | Identidad visual, login, roles, carreras y estudiantes | MVP 2.x y 3.x | 1, 2, 4 |
 | 3 | Lun 16 | Talleres, entregas y calificación | MVP 4.x | 1, 4 |
 | 4 | Mar 17 | Cuotas, pagos, bloqueo por mora y excepciones | MVP 5.x | 1, 4 |
 | 5 | Mié 18 | Asistente RAG: ingesta, agente, pantalla | RAG 1.x – 3.x | 3 |
-| 6 | Jue 19 | E2E completo, evaluación del RAG, identidad visual | MVP 6.x, RAG 4.x | 3, 4, 6 |
-| 7 | Vie 20 | Colchón para atrasos; bonus WhatsApp solo si todo está en verde; ensayo | – | Bonus |
-| 8 | Sáb 21 | Presentación | – | – |
+| 6 | Jue 19 | Mañana: E2E completo, evaluación del RAG, revisión visual. Tarde: diapositivas, guion, video de respaldo de la demo y ensayo cronometrado | MVP 6.x, RAG 4.x | 3, 4, 6 |
+| 7 | Vie 20 | Mañana: checklist de "Antes de presentar". **Presentación** | – | – |
+
+**Sin día de colchón** (la presentación pasó del sábado 21 al viernes 20, y se perdió el día de colchón). Reglas de recorte:
+- Si el miércoles 18 en la noche el MVP (tareas 1.x a 5.x) no está completo, el asistente RAG se reduce a lo que pide el criterio 3: respuesta con cita del reglamento, "no sé" cuando no hay información y consulta del estado de cuenta.
+- Las pantallas secundarias (por ejemplo, el resumen de cartera del administrador) van después del flujo de la demo.
+- El bonus de WhatsApp queda fuera, salvo que todo esté en verde el jueves al mediodía.
 
 ## Avance
 
@@ -21,7 +25,7 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 - [ ] Día 4
 - [ ] Día 5
 - [ ] Día 6
-- [ ] Día 7
+- [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
 
@@ -41,5 +45,5 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 - [ ] Proyecto corriendo en local y en la URL pública.
 - [ ] Pipeline y pruebas en verde.
 - [ ] `npm run eval:rag` con al menos 90 % de aciertos.
-- [ ] Seed regenerado con la fecha de la presentación (`node db/seed/generar-seed.mjs --fecha-referencia 2026-11-21`) y recargado en la base remota.
+- [ ] La mañana del 20: seed recargado en la base remota (`npx wrangler d1 execute DB --remote --file db/seed/seed.sql`) para deshacer los cambios de los ensayos. El seed ya está generado con la fecha de la presentación (2026-11-20).
 - [ ] Confirmar con el profesor que el seed ficticio en la base real cumple el criterio 2.

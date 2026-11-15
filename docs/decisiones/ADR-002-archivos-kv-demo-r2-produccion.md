@@ -8,7 +8,7 @@
 
 El diseño original (D7 del MVP) guarda las entregas y los soportes de pago en Cloudflare R2. Al preparar la cuenta se confirmó en la documentación de Cloudflare que **R2 exige activar una suscripción con un medio de pago** (tarjeta o PayPal), aunque su plan gratuito no cobre nada por debajo de 10 GB.
 
-Restricción del proyecto: no se registra ningún medio de pago en Cloudflare antes de la presentación del curso (21 de noviembre de 2026). Después de esa fecha sí se hará, para producción.
+Restricción del proyecto: no se registra ningún medio de pago en Cloudflare antes de la presentación del curso (viernes 20 de noviembre de 2026). Después de esa fecha sí se hará, para producción.
 
 ## Decisión
 
@@ -23,7 +23,7 @@ La variable `ALMACEN_ARCHIVOS` (`kv` o `r2`) elige la implementación. Las llave
 
 | Alternativa | Por qué no |
 |---|---|
-| Activar R2 ya con un medio de pago | Contradice la restricción de no pagar antes del 21 |
+| Activar R2 ya con un medio de pago | Contradice la restricción de no pagar antes de la presentación |
 | Guardar los archivos en D1 como BLOB | D1 limita cada fila a unos 2 MB y las entregas pueden pesar 10 MB; habría que trocearlas |
 | URLs de un servicio externo (Google Drive, etc.) | Saca datos personales del proveedor único, agrega credenciales y complica los permisos |
 
@@ -38,7 +38,7 @@ La variable `ALMACEN_ARCHIVOS` (`kv` o `r2`) elige la implementación. Las llave
 - **KV es eventualmente consistente entre ubicaciones:** cada subida usa una llave nueva (`<uuid>`) y nunca se sobrescribe, así que en la misma ubicación el archivo se lee de inmediato; en otra región puede tardar hasta un minuto. Aceptable para la demo.
 - **Pruebas:** en local y en CI, Miniflare emula KV y R2 sin cuenta, así que ambas implementaciones se prueban igual.
 
-## Plan de migración a R2 (después del 21)
+## Plan de migración a R2 (después de la presentación)
 
 1. Registrar el medio de pago y activar R2; crear el bucket.
 2. Agregar el binding `ARCHIVOS_R2` en `wrangler.jsonc` y cambiar `ALMACEN_ARCHIVOS` a `r2`.

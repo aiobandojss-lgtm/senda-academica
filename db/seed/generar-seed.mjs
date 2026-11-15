@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Genera datos FICTICIOS pero realistas para Senda, la plataforma académica de la Fundación.
-// Uso:  node db/seed/generar-seed.mjs [--fecha-referencia 2026-11-21] [--estudiantes 60] [--aviso-version 2026-11]
+// Uso:  node db/seed/generar-seed.mjs [--fecha-referencia 2026-11-20] [--estudiantes 60] [--aviso-version 2026-11]
 // Salida: db/seed/seed.sql, db/seed/placeholder.pdf y db/seed/CUENTAS-DEMO.md
 //
 // - Es determinista: con los mismos parámetros produce exactamente los mismos datos.
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, v, i, arr) => (v.startsWith('--') ? [...acc, [v.slice(2), arr[i + 1]]] : acc), [])
 );
-const FECHA_REF = args['fecha-referencia'] ?? '2026-11-21';
+const FECHA_REF = args['fecha-referencia'] ?? '2026-11-20';
 const N_ESTUDIANTES = Number(args['estudiantes'] ?? 60);
 const PASSWORD_DEMO = 'Demo2026*';
 const AVISO_VERSION = args['aviso-version'] ?? '2026-11';
