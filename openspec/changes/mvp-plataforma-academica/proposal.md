@@ -33,6 +33,6 @@ Fuera del alcance de este cambio: app móvil nativa, pasarela de pagos en línea
 
 ## Impact
 
-- Proyecto nuevo: Worker de Cloudflare `senda` (API y frontend), base D1, bucket R2.
+- Proyecto nuevo: Worker de Cloudflare `senda` (API y frontend), base D1 y almacén de archivos (Workers KV en la demo, R2 en producción).
 - Datos personales de estudiantes (nombre, documento, correo): aplica la Ley 1581 de 2012; la Fundación es responsable y CREATIVE BY CODE encargado. El texto del aviso de privacidad lo aporta la Fundación.
 - Mientras no existan datos reales, la base se carga con datos ficticios mediante un script de seed que luego se reemplaza por la carga real.

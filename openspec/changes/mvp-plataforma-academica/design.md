@@ -37,8 +37,8 @@ Formato guardado: `pbkdf2_sha256$100000$<sal_base64>$<hash_base64>` (sal de 16 b
 ### D6. Mora calculada al vuelo, no guardada
 El estado (`al_dia` / `en_riesgo` / `bloqueado` / `con_excepcion`) se calcula con una consulta sobre `cuotas`, `pagos` (no anulados) y `excepciones_mora`, usando la fecha actual en America/Bogota. Se encapsula en una función pura `calcularEstadoMora(cuotas, excepciones, hoy)` probada con unit tests, y un middleware la aplica en el login y en cada petición de un estudiante; solo `bloqueado` impide el acceso. Alternativa: un campo `bloqueado` actualizado por un cron; descartada porque puede quedar desactualizado y el desbloqueo no sería inmediato.
 
-### D7. Archivos en R2 con acceso por la API
-Las entregas se guardan en R2 con llave `entregas/<actividad_id>/<estudiante_id>/<uuid>.<ext>`. Nunca se exponen URLs públicas: la descarga pasa por `/api/archivos/...`, que valida permisos. La subida se hace por la API (multipart) validando tipo y tamaño (10 MB). Al reemplazar una entrega, primero se guarda el archivo nuevo y se actualiza la fila; después se borra el objeto anterior de R2 (si el borrado falla, queda un objeto huérfano, nunca una entrega sin archivo). Alternativa: URLs prefirmadas; más complejas y no necesarias para este volumen.
+### D7. Archivos detrás de `AlmacenArchivos`, con acceso solo por la API
+Las entregas y soportes se guardan con llave `entregas/<actividad_id>/<estudiante_id>/<uuid>.<ext>` (o `soportes/...`). Nunca se exponen URLs públicas: la descarga pasa por `/api/archivos/...`, que valida permisos. La subida se hace por la API (multipart) validando tipo y tamaño (10 MB). El código usa la interfaz `AlmacenArchivos` (`guardar`, `obtener`, `eliminar`) con dos implementaciones elegidas por la variable `ALMACEN_ARCHIVOS`: **Workers KV** (`ARCHIVOS_KV`) mientras la cuenta no tenga medio de pago, y **R2** (`ARCHIVOS_R2`) en producción (R2 exige una suscripción con medio de pago aunque su plan gratuito no cobre; ver `docs/decisiones/ADR-002`). Al reemplazar una entrega, primero se guarda el archivo nuevo y se actualiza la fila; después se borra el objeto anterior (si el borrado falla, queda un objeto huérfano, nunca una entrega sin archivo). Cada subida usa una llave nueva, nunca se sobrescribe. Alternativa: URLs prefirmadas de R2; más complejas, no necesarias para este volumen y no disponibles en KV.
 
 ### D8. Carga masiva en CSV
 CSV UTF-8 con separador coma o punto y coma (Excel en español usa `;`). Columnas de la plantilla: `tipo_documento, documento, nombres, apellidos, correo, celular, codigo_carrera, semestre, cohorte, fecha_ingreso`. Se valida todo el archivo y se inserta en un `batch` de D1 (todo o nada). Alternativa: leer `.xlsx`; agrega una dependencia pesada sin aportar al MVP.
@@ -50,7 +50,7 @@ Fechas de negocio como texto ISO `YYYY-MM-DD`; fechas-hora en UTC ISO 8601 con f
 `db/seed/generar-seed.mjs` crea datos realistas y deterministas a partir de una fecha de referencia (por defecto el día de la presentación), con perfiles de cartera predefinidos para la demo y una cuenta de primer ingreso. Para pasar a producción se borra la base y se cargan los datos reales con el mismo esquema.
 
 ### D11. Pruebas
-- Unitarias e integración de la API con Vitest y `@cloudflare/vitest-pool-workers` (D1 y R2 locales). La versión 0.23 de pool-workers exige vitest `^4.1`: no usar vitest 5 hasta que pool-workers lo soporte.
+- Unitarias e integración de la API con Vitest y `@cloudflare/vitest-pool-workers` (D1, KV y R2 locales emulados por Miniflare). La versión 0.23 de pool-workers exige vitest `^4.1`: no usar vitest 5 hasta que pool-workers lo soporte.
 - E2E con Playwright contra el servidor local.
 - CI: GitHub Actions corre lint, typecheck, unitarias y E2E; si pasan y la rama es `main`, aplica las migraciones remotas y despliega con Wrangler.
 
@@ -87,7 +87,7 @@ Al crear un usuario o restablecer su contraseña se genera una contraseña aleat
 Cada ruta devuelve solo los campos que su rol necesita (proyecciones explícitas, nunca `SELECT *` hacia el cliente). El docente recibe de sus estudiantes nombres, apellidos y datos académicos; nunca documento, correo ni celular. Se prueba con pruebas de integración que inspeccionan la respuesta.
 
 ### D19. Nombre del producto e institución configurables
-Variables en `wrangler.jsonc`: `PRODUCTO_NOMBRE` ("Senda"), `FUNDACION_NOMBRE`, `CONTACTO_FUNDACION` y `AVISO_PRIVACIDAD_VERSION`. El frontend las lee de `GET /api/config/publica`; ningún nombre queda quemado en el código.
+Variables en `wrangler.jsonc`: `PRODUCTO_NOMBRE` ("Senda"), `FUNDACION_NOMBRE` ("Fundación (demo)" hasta que la Fundación autorice mostrar su nombre), `CONTACTO_FUNDACION`, `AVISO_PRIVACIDAD_VERSION` y `ALMACEN_ARCHIVOS` (D7). El frontend lee las públicas de `GET /api/config/publica`; ningún nombre queda quemado en el código.
 
 ### D20. Marca de entrega tardía calculada al vuelo
 "Tardía" se calcula en la consulta (`entregado_en > fecha_limite`) en lugar de guardarse, para que una ampliación del plazo se refleje sola; es el mismo criterio que la mora (D6).
@@ -97,6 +97,8 @@ Variables en `wrangler.jsonc`: `PRODUCTO_NOMBRE` ("Senda"), `FUNDACION_NOMBRE`, 
 - [El plazo es muy corto] → El orden de tareas prioriza el flujo de la demo (login → entrega → calificación → bloqueo) y deja pantallas secundarias para el final.
 - [Límite de CPU de 10 ms por petición en el plan Free de Workers] → La verificación PBKDF2 de 100.000 iteraciones puede superarlo (error 1102). Se mide en la tarea 1.8 con el Worker desplegado. Si lo supera: plan Workers Paid (USD 5/mes, recomendado para producción) o menos iteraciones (menos seguro). La decisión queda en `docs/decisiones/`.
 - [Límite de 100.000 iteraciones de PBKDF2 en Web Crypto] → Por debajo de la recomendación actual de OWASP para PBKDF2-SHA256; aceptable para este caso con el límite de intentos (D14) y documentado.
+- [Sin medio de pago antes del 21 de noviembre] → Todo debe funcionar en el plan Free sin tarjeta: archivos en KV (D7, ADR-002) y, si la tarea 1.8 muestra que PBKDF2 supera la CPU, menos iteraciones para la demo (se suben al pasar a Paid y cada usuario se migra en su siguiente ingreso).
+- [Límites de KV gratis: 1 GB, 1.000 escrituras al día, 25 MiB por archivo] → Suficiente para la demo; producción usa R2.
 - [Triggers dentro de migraciones de D1] → Verificar en la tarea 1.3 que `wrangler d1 migrations apply` procesa bien los bloques `BEGIN … END`, en local y en remoto.
 - [El reloj del servidor define la mora] → Toda comparación de fechas pasa por una función con la zona America/Bogota y se prueba con fechas fijas inyectadas.
 - [Datos ficticios con documentos o celulares que podrían ser reales] → Los documentos ficticios usan el prefijo 99 y los celulares quedan vacíos; nunca se envían mensajes a números del seed.
@@ -104,9 +106,9 @@ Variables en `wrangler.jsonc`: `PRODUCTO_NOMBRE` ("Senda"), `FUNDACION_NOMBRE`, 
 
 ## Migration Plan
 
-1. Crear la base D1 y el bucket R2; aplicar `migrations/0001_inicial.sql`.
-2. Cargar el seed ficticio y subir `db/seed/placeholder.pdf` a R2.
-3. Al pasar a producción: crear una base nueva, aplicar migraciones y cargar los datos reales de la Fundación.
+1. Crear la base D1 y el namespace KV de archivos; aplicar `migrations/0001_inicial.sql`.
+2. Cargar el seed ficticio y subir `db/seed/placeholder.pdf` al almacén de archivos con la llave `seed/placeholder.pdf`.
+3. Al pasar a producción: activar R2 y migrar los archivos (ADR-002), crear una base nueva, aplicar migraciones y cargar los datos reales de la Fundación.
 
 ## Open Questions
 

@@ -55,14 +55,15 @@ Flujo de trabajo (las skills se invocan como comandos):
 
 - **Cloudflare Workers** (Worker `senda`) con **Hono** para la API (`/api/*`) y **React + Vite + Tailwind + shadcn/ui** servido como static assets del mismo Worker. Un solo `wrangler deploy`.
 - **D1** (SQLite) para datos; migraciones en `migrations/` con `wrangler d1 migrations`. Las reglas críticas también viven en la base como triggers que abortan con códigos (`PAGO_SUPERA_SALDO`, `PAGO_INMUTABLE`, `CUOTA_CON_PAGOS`, `ENTREGA_CALIFICADA`); la API los traduce a mensajes en español (D13).
-- **R2** para archivos (entregas y soportes). Nunca URLs públicas: la descarga pasa por la API con permisos.
+- **Archivos** (entregas y soportes) detrás de la interfaz `AlmacenArchivos`: **Workers KV** hasta el 21 de noviembre (R2 exige medio de pago) y **R2** en producción; lo elige la variable `ALMACEN_ARCHIVOS` (D7, ADR-002). Nunca URLs públicas: la descarga pasa por la API con permisos.
 - **Sesión**: JWT HS256 en cookie HttpOnly, 8 horas desde el ingreso (`JWT_SECRET` como secreto de Wrangler), **revocable** con `usuarios.sesion_version` (D4). Compuertas de primer ingreso: contraseña temporal y aviso de privacidad (D16).
 - **Contraseñas**: PBKDF2-SHA256, 100.000 iteraciones, formato `pbkdf2_sha256$100000$<sal_b64>$<hash_b64>` (el seed usa el mismo formato). Límite de 5 intentos fallidos por documento en 15 minutos (D14). ⚠️ El plan Free de Workers da 10 ms de CPU por petición: se mide en la tarea 1.8.
 - **Mora**: se calcula al vuelo con la función pura `calcularEstadoMora(cuotas, excepciones, hoy)` → `al_dia | en_riesgo | bloqueado | con_excepcion`; "hoy" siempre en America/Bogota. Bloqueado si alguna cuota con saldo > 0 tiene **más de 30 días** de vencida (31 o más), salvo excepción vigente. Se aplica en el login y en cada petición de un estudiante.
 - **RAG**: Workers AI (embeddings `@cf/baai/bge-m3`) + Vectorize. Modelo de chat con function calling: verificar el catálogo vigente y comparar 2 candidatos. Historial en D1 (`asistente_mensajes`), 30 preguntas diarias, retención de 30 días.
 - **Pruebas**: Vitest **^4.1** (lo exige `@cloudflare/vitest-pool-workers` 0.23; no subir a vitest 5) y Playwright para E2E.
 - **Fechas**: `YYYY-MM-DD` para fechas de negocio, `YYYY-MM-DDTHH:MM:SSZ` (UTC) para fecha-hora. **Dinero**: enteros en pesos. **Notas**: 0.0 a 5.0 con un decimal. "Tardía" se calcula, no se guarda (D20).
-- **Variables del Worker**: `PRODUCTO_NOMBRE` (Senda), `FUNDACION_NOMBRE`, `CONTACTO_FUNDACION`, `AVISO_PRIVACIDAD_VERSION` (`2026-11`, igual que el seed). Ningún nombre queda quemado en el código.
+- **Variables del Worker**: `PRODUCTO_NOMBRE` (Senda), `FUNDACION_NOMBRE` (la Fundación se llama **Funafrocol**, pero la demo pública muestra "Fundación (demo)" hasta que autoricen por escrito), `CONTACTO_FUNDACION`, `AVISO_PRIVACIDAD_VERSION` (`2026-11`, igual que el seed), `ALMACEN_ARCHIVOS` (`kv` | `r2`). Ningún nombre queda quemado en el código.
+- **Cloudflare**: subdominio `creativebycode` → demo en `senda.creativebycode.workers.dev`. **Sin medio de pago hasta después del 21 de noviembre**: todo debe funcionar en el plan Free sin tarjeta. Producción irá en un dominio propio de la Fundación.
 
 ## Entorno
 
@@ -94,7 +95,7 @@ Reglas de diseño:
 - `migrations/0001_inicial.sql` – esquema del MVP (vista `v_saldo_cuotas`, tabla `intentos_fallidos` y 5 triggers). **Desde que se aplique en la tarea 1.3 queda congelada**: cualquier cambio de esquema va en una migración nueva.
 - `db/seed/generar-seed.mjs` – genera datos **ficticios** deterministas: 5 carreras, 15 cursos, 5 docentes, 60 estudiantes, actividades, entregas, cuotas y pagos, con perfiles de cartera para la demo y una cuenta de primer ingreso. Fecha de referencia por defecto: 2026-11-21.
 - `db/seed/seed.sql` – resultado ya generado (empieza borrando las tablas: sirve para reiniciar la base). `db/seed/CUENTAS-DEMO.md` – cuentas para la demo (contraseña `Demo2026*`).
-- `db/seed/placeholder.pdf` – archivo que se sube a R2 en `seed/placeholder.pdf` para que las entregas del seed se puedan descargar.
+- `db/seed/placeholder.pdf` – archivo que se sube al almacén de archivos con la llave `seed/placeholder.pdf` para que las entregas del seed se puedan descargar.
 - `docs/rag/` – documentos ficticios para el RAG (reglamento, calendario, preguntas frecuentes, 2 planes de estudio).
 
 Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones, carga real. Nada del código debe depender de datos del seed.

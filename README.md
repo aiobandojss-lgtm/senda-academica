@@ -11,7 +11,7 @@ Plataforma web para que una fundación educativa gestione sus estudiantes, sus t
 | API | Cloudflare Workers + Hono |
 | Frontend | React + Vite + Tailwind + shadcn/ui (static assets del mismo Worker) |
 | Datos | Cloudflare D1 (SQLite) con migraciones y triggers |
-| Archivos | Cloudflare R2 (descarga solo por la API, con permisos) |
+| Archivos | Workers KV en la demo, Cloudflare R2 en producción (descarga solo por la API, con permisos) |
 | IA | Workers AI (embeddings bge-m3 + modelo con function calling) y Vectorize |
 | Calidad | Vitest + Playwright; CI/CD con GitHub Actions |
 

@@ -17,3 +17,4 @@ Las especificaciones funcionales no viven aquí sino en `openspec/` (fuente de v
 | # | Decisión | Estado |
 |---|---|---|
 | [001](decisiones/ADR-001-hosting-cloudflare.md) | Hosting en Cloudflare en lugar de Supabase + Vercel | Aceptada |
+| [002](decisiones/ADR-002-archivos-kv-demo-r2-produccion.md) | Archivos en Workers KV durante la demo y en R2 en producción | Aceptada |

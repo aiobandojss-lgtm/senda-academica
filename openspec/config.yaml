@@ -12,7 +12,7 @@ context: |
   asistente académico con RAG (proyecto final del curso AI Agentic Engineer).
 
   Stack: Cloudflare Workers (API con Hono + frontend React/Vite/Tailwind/shadcn-ui servido como static
-  assets), D1 (SQLite), R2 (archivos), Workers AI y Vectorize (RAG). Pruebas con
+  assets), D1 (SQLite), archivos en Workers KV (demo) y R2 (producción), Workers AI y Vectorize (RAG). Pruebas con
   Vitest y Playwright. CI/CD con GitHub Actions y Wrangler.
 
   Restricciones: costo casi cero (planes gratuitos de Cloudflare); datos personales
