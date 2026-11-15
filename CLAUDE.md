@@ -92,7 +92,7 @@ Reglas de diseño:
 
 ## Datos
 
-- `migrations/0001_inicial.sql` – esquema del MVP (vista `v_saldo_cuotas`, tabla `intentos_fallidos` y 5 triggers). **Desde que se aplique en la tarea 1.3 queda congelada**: cualquier cambio de esquema va en una migración nueva.
+- `migrations/0001_inicial.sql` – esquema del MVP (vista `v_saldo_cuotas`, tabla `intentos_fallidos` y 5 triggers). **Aplicada en local y en remoto el 2026-11-14 (tarea 1.3): está congelada**: cualquier cambio de esquema va en una migración nueva.
 - `db/seed/generar-seed.mjs` – genera datos **ficticios** deterministas: 5 carreras, 15 cursos, 5 docentes, 60 estudiantes, actividades, entregas, cuotas y pagos, con perfiles de cartera para la demo y una cuenta de primer ingreso. Fecha de referencia por defecto: 2026-11-21.
 - `db/seed/seed.sql` – resultado ya generado (empieza borrando las tablas: sirve para reiniciar la base). `db/seed/CUENTAS-DEMO.md` – cuentas para la demo (contraseña `Demo2026*`).
 - `db/seed/placeholder.pdf` – archivo que se sube al almacén de archivos con la llave `seed/placeholder.pdf` para que las entregas del seed se puedan descargar.

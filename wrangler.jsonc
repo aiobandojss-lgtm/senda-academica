@@ -31,19 +31,22 @@
     // "kv" mientras la cuenta no tenga medio de pago; "r2" en producción (ADR-002)
     "ALMACEN_ARCHIVOS": "kv"
   },
-  // Sin database_id ni id: en local Wrangler crea los recursos en .wrangler/state.
-  // Los IDs de los recursos remotos se agregan en la tarea 1.3
+  // Los IDs no son secretos: sin la sesión de Wrangler o un API token no dan acceso.
+  // En local, Wrangler usa una copia de cada recurso en .wrangler/state
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "senda-db",
+      // Creada con --location enam (este de Norteamérica, la región de D1 más cercana a Colombia)
+      "database_id": "20de6070-4de5-459f-9934-e2e93c3d5c66",
       "migrations_dir": "migrations"
     }
   ],
   "kv_namespaces": [
     {
-      // Archivos de entregas y soportes (design.md D7)
-      "binding": "ARCHIVOS_KV"
+      // Archivos de entregas y soportes (design.md D7); en el dashboard se llama "senda-archivos"
+      "binding": "ARCHIVOS_KV",
+      "id": "fffe717334a74c03b571b45145a8f5e8"
     }
   ]
 }

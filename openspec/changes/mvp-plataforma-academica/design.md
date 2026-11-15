@@ -114,5 +114,5 @@ Variables en `wrangler.jsonc`: `PRODUCTO_NOMBRE` ("Senda"), `FUNDACION_NOMBRE` (
 
 - Texto y canal de contacto exactos del mensaje de bloqueo (configurable con la variable `CONTACTO_FUNDACION`).
 - Nombre y logo definitivos de la Fundación (variable `FUNDACION_NOMBRE`).
-- Texto definitivo del aviso de privacidad (lo aporta la Fundación como responsable del tratamiento).
+- Texto definitivo del aviso de privacidad (lo aporta la Fundación como responsable del tratamiento). Debe informar la transferencia internacional de datos (Ley 1581): D1 está en el este de Norteamérica (`enam`, EE. UU., país que la SIC reconoce con nivel adecuado de protección) y KV distribuye copias de los archivos en la red global de Cloudflare.
 - Periodos académicos y recuperación de contraseña por correo: cambios posteriores al MVP.
