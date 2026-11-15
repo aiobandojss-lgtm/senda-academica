@@ -10,7 +10,7 @@
 - [x] 1.5 Configurar Vitest (`^4.1`) con `@cloudflare/vitest-plugin` (el antiguo `@cloudflare/vitest-pool-workers`, renombrado y obsoleto) y una prueba de `/api/salud`; verificar `npm test` en verde
 - [x] 1.6 Crear el workflow de GitHub Actions (instalar, lint, typecheck, probar, build, y en `main` aplicar migraciones remotas y `wrangler deploy`) con los secretos `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; verificar que un push a `main` deja el pipeline en verde y la URL pública responde
 - [ ] 1.7 Configurar el MCP de shadcn/ui a nivel de proyecto (`npx shadcn@latest mcp init --client claude`) de forma que encuentre el `components.json` de la raíz (sus alias apuntan a `web/src`); reiniciar la sesión y verificar con `/mcp` que está conectado y que puede listar componentes
-- [ ] 1.8 Medir el costo de CPU de la verificación PBKDF2 de 100.000 iteraciones en el Worker desplegado (endpoint temporal protegido, que se elimina después); verificar en el dashboard de Cloudflare (CPU time y errores 1102) y registrar la decisión (plan Free o Paid, iteraciones) en `docs/decisiones/`
+- [x] 1.8 Medir el costo de CPU de la verificación PBKDF2 de 100.000 iteraciones en el Worker desplegado (endpoint temporal protegido, que se elimina después); verificar en el dashboard de Cloudflare (CPU time y errores 1102) y registrar la decisión (plan Free o Paid, iteraciones) en `docs/decisiones/`
 
 ## 2. Autenticación y roles (día 2)
 

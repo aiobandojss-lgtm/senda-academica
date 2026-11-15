@@ -1,12 +1,12 @@
-# ADR-003: Iteraciones de PBKDF2 según el plan de Workers
+# ADR-003: 100.000 iteraciones de PBKDF2 en el plan Free hasta pasar a Paid
 
-- **Estado:** propuesta (pendiente de aprobación)
+- **Estado:** aceptada
 - **Fecha:** 2026-11-15
 - **Decide:** Aymer Ivan (CREATIVE BY CODE)
 
 ## Contexto
 
-Las contraseñas se guardan con PBKDF2-SHA256 (design.md D5). El diseño fija 100.000 iteraciones, el máximo que acepta Web Crypto en Workers. Cada ingreso verifica la contraseña repitiendo ese cálculo, y el plan **Free** de Workers permite **10 ms de CPU por petición**. No habrá medio de pago en Cloudflare antes de la presentación del 20 de noviembre (ADR-002), así que hasta entonces Senda corre en el plan Free.
+Las contraseñas se guardan con PBKDF2-SHA256 (design.md D5). El diseño fija 100.000 iteraciones, el máximo que acepta Web Crypto en Workers. Cada ingreso verifica la contraseña repitiendo ese cálculo, y el plan **Free** de Workers permite **10 ms de CPU por petición**. No habrá medio de pago en Cloudflare antes de la presentación del 20 de noviembre (ADR-002).
 
 La documentación de Cloudflare dice que cada isolate tolera excesos **ocasionales**, pero que un Worker que supera el límite **de forma consistente** se termina con el error 1102 (*Worker exceeded resource limits*).
 
@@ -24,37 +24,31 @@ La documentación de Cloudflare dice que cada isolate tolera excesos **ocasional
 | 50.000 | 8 | 8 ms | 12 ms | 24 ms | todas `ok` |
 | 100.000 | 38 (8, y luego 30 seguidas) | 16 ms | 20 ms | 39 ms | todas `ok`, ningún `exceededCpu` |
 
-**Lectura:**
-- Con 100.000 iteraciones, **cada** ingreso consume entre 2 y 4 veces el límite contratado. Hoy funciona solo por la tolerancia de la plataforma, que no está garantizada.
-- Solo 10.000 iteraciones queda siempre dentro del límite.
+Con 100.000 iteraciones, cada ingreso consume entre 2 y 4 veces el límite del plan Free. Funciona gracias a la tolerancia a excesos ocasionales, que resistió incluso 30 ingresos seguidos.
 
-## Decisión (propuesta)
+## Decisión
 
-1. **El número de iteraciones pasa a ser configurable** con la variable `PBKDF2_ITERACIONES` de `wrangler.jsonc`.
-   - Mientras Senda esté en el plan Free (demo con datos ficticios): **10.000**.
-   - Al pasar a **Workers Paid** (USD 5/mes, después de la presentación): **100.000**.
-2. **Reprocesar el hash al ingresar:** si el hash guardado tiene menos iteraciones que las configuradas, tras verificar una contraseña correcta se recalcula y se guarda con las iteraciones actuales. Así cada usuario se migra solo en su siguiente ingreso. El formato `pbkdf2_sha256$<iteraciones>$<sal>$<hash>` ya guarda el número de iteraciones (D5).
-3. **Condición de seguridad:** ningún dato personal real entra a Senda mientras se use 10.000 iteraciones. La Fundación carga sus datos reales solo después de pasar a Paid con 100.000.
-4. **El seed se genera con 10.000 iteraciones** (parámetro del generador) mientras se use el plan Free.
+1. **Se mantienen las 100.000 iteraciones** del diseño (D5), también durante la demo en el plan Free.
+2. **Se contrata Workers Paid (USD 5/mes) después de la presentación**, antes de cargar datos reales de la Fundación. Con Paid, el límite pasa a 30 s de CPU por petición y el riesgo desaparece.
 
-Era el plan de contingencia que ya preveía design.md (riesgo "Sin medio de pago antes de la presentación"). La medición confirma que hay que activarlo.
+**Por qué:**
+- La demo y el uso previo al pago tienen **pocos ingresos**: justo el patrón de excesos ocasionales que Cloudflare tolera.
+- La medición lo respalda (38 de 38).
+- Así no se debilita la seguridad de las contraseñas ni se cambia el diseño por una situación que dura menos de una semana.
 
 ## Alternativas consideradas
 
 | Alternativa | Por qué no |
 |---|---|
-| Mantener 100.000 en el plan Free | Las 38 pruebas pasaron, pero dependen de una tolerancia no garantizada. Un error 1102 en el ingreso durante la presentación sería el peor escenario posible, y la carga masiva por CSV (60 contraseñas en una sola petición, unos 1,2 s de CPU) fallaría casi seguro. |
-| 25.000 iteraciones | Mediana de 11 ms: ya está por encima del límite la mitad de las veces |
+| Iteraciones configurables: 10.000 en Free y 100.000 en Paid, con reprocesamiento del hash al ingresar | Es el plan B. Agrega trabajo y debilita el hash para cubrir un riesgo que, con pocos ingresos y Paid inminente, es bajo |
+| 25.000 iteraciones | Mediana de 11 ms: no elimina el exceso y debilita el hash igual |
 | Pagar Workers Paid ahora | Contradice la restricción de no registrar un medio de pago antes de la presentación |
 | Otro algoritmo (bcrypt, argon2) | No están disponibles de forma nativa en Workers, y en JavaScript puro consumirían todavía más CPU |
 
 ## Consecuencias
 
-- **Seguridad durante la demo:** 10.000 iteraciones hace 10 veces más barato un ataque de fuerza bruta **fuera de línea**, es decir, si alguien robara la base. Es aceptable porque la base de la demo solo tiene datos ficticios, el ingreso en línea está limitado a 5 intentos cada 15 minutos (D14) y la condición 3 impide que entren datos reales.
-- **Carga masiva por CSV (tarea 3.3):** incluso con 10.000 iteraciones, cada contraseña temporal cuesta unos 3 ms. En el plan Free, un CSV solo cabe en el límite si tiene muy pocas filas. La demo usará un archivo pequeño, y las cargas grandes son de producción (Paid, con hasta 30 s de CPU por petición). Se tendrá en cuenta al implementar la 3.3.
-- **Cambios en el plan** (se aplican con `/openspec-update-change` si se aprueba):
-  - design.md D5: iteraciones configurables y reprocesamiento al ingresar.
-  - wrangler.jsonc: la variable `PBKDF2_ITERACIONES`.
-  - Generador del seed: parámetro de iteraciones.
-  - Tareas 2.1 y 2.2: pruebas del reprocesamiento.
-- **Paso a producción:** contratar Workers Paid, cambiar `PBKDF2_ITERACIONES` a 100.000 y comprobar en el dashboard (Metrics, CPU time) que el ingreso queda por debajo de 30 ms sin errores.
+- **Riesgo aceptado:** si Cloudflare dejara de tolerar el exceso, un ingreso fallaría con el error 1102.
+  - **Vigilancia:** en los ensayos del jueves 19 se observa `wrangler tail` o el dashboard (Metrics → Errors) mientras se ingresa con las cuentas de la demo.
+  - **Plan B, unos 10 minutos:** bajar las iteraciones de los hashes nuevos a 10.000 en el código y regenerar y recargar el seed con 10.000. La verificación lee las iteraciones de cada hash (formato de D5), así que ambos conviven sin migraciones.
+- **Carga masiva por CSV (tarea 3.3):** cada contraseña temporal cuesta unos 20 ms de CPU, y todas se calculan en la misma petición. En el plan Free, la demo de la carga masiva debe usar un CSV de **pocas filas** (2 o 3). Las cargas grandes son de producción, en Paid. Se tiene en cuenta al implementar la 3.3.
+- **Paso a producción:** contratar Workers Paid y comprobar en el dashboard (Metrics → CPU time) que el ingreso queda por debajo de 30 ms sin errores.
