@@ -120,7 +120,7 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 ## Estructura del código
 
 - Un solo `package.json` y un solo proyecto Vite en la raíz (`vite.config.ts`, `index.html`, `components.json`, `wrangler.jsonc`).
-- `api/src/` – Worker con Hono; todas las rutas bajo `/api` (`basePath`). `api/worker-configuration.d.ts` lo genera `npm run cf-typegen` (se versiona; regenerarlo al cambiar `wrangler.jsonc`).
+- `api/src/` – Worker con Hono; todas las rutas bajo `/api` (`basePath`). `api/worker-configuration.d.ts` lo genera `npm run cf-typegen` (se versiona; regenerarlo al cambiar `wrangler.jsonc`). Usa `--strict-vars=false` para que las variables queden como `string` y no como su valor literal (si no, `env.ALMACEN_ARCHIVOS === "r2"` no compila); el valor se valida en tiempo de ejecución.
 - `web/src/` – React; alias `@/` → `web/src/`; componentes de shadcn/ui en `web/src/components/ui/` (style `radix-nova`, base Radix, utilidad `cn` del paquete `cn` de shadcn).
 - TypeScript con referencias: `tsconfig.app.json` (web), `tsconfig.worker.json` (api, tipos del runtime de Workers, sin DOM), `tsconfig.node.json` (configuración).
 - Identificadores del dominio en español, como en los specs (`calcularEstadoMora`, `AlmacenArchivos`); comentarios en español.

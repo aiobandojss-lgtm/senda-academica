@@ -17,5 +17,33 @@
     "not_found_handling": "single-page-application",
     // Solo /api/* ejecuta el Worker; lo demás se sirve directo como archivo estático
     "run_worker_first": ["/api/*"]
-  }
+  },
+  // Configuración no secreta (design.md D19). Los secretos, como JWT_SECRET, nunca van aquí:
+  // en local se ponen en .dev.vars y en Cloudflare con `wrangler secret put`
+  "vars": {
+    "PRODUCTO_NOMBRE": "Senda",
+    // Se cambia por el nombre real solo cuando la Fundación lo autorice por escrito
+    "FUNDACION_NOMBRE": "Fundación (demo)",
+    // Texto provisional: el canal de contacto definitivo lo confirma la Fundación
+    "CONTACTO_FUNDACION": "la coordinación administrativa de la Fundación",
+    // Debe coincidir con la versión del aviso que acepta el seed (db/seed/generar-seed.mjs)
+    "AVISO_PRIVACIDAD_VERSION": "2026-11",
+    // "kv" mientras la cuenta no tenga medio de pago; "r2" en producción (ADR-002)
+    "ALMACEN_ARCHIVOS": "kv"
+  },
+  // Sin database_id ni id: en local Wrangler crea los recursos en .wrangler/state.
+  // Los IDs de los recursos remotos se agregan en la tarea 1.3
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "senda-db",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      // Archivos de entregas y soportes (design.md D7)
+      "binding": "ARCHIVOS_KV"
+    }
+  ]
 }
