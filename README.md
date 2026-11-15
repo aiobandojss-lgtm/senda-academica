@@ -48,4 +48,5 @@ Verificación rápida: `GET http://localhost:5173/api/salud` responde `{"ok":tru
 | `npm run dev` | Servidor de desarrollo: React con recarga en caliente y el Worker en workerd (el runtime de producción) |
 | `npm run build` | Typecheck + build de producción |
 | `npm run lint` / `npm run typecheck` | Calidad estática |
+| `npm test` | Pruebas de la API con Vitest dentro de workerd (`npm run test:watch` en modo interactivo) |
 | `npm run deploy` | Build + despliegue con Wrangler |

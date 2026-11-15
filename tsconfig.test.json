@@ -1,0 +1,25 @@
+{
+  // Pruebas de la API (api/test). Separado de tsconfig.worker.json para que el código de producción
+  // no vea los tipos de "cloudflare:test", que solo existen dentro de Vitest
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "types": ["./api/worker-configuration.d.ts", "@cloudflare/vitest-plugin/types"],
+    "skipLibCheck": true,
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["api/test"]
+}

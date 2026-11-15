@@ -60,7 +60,7 @@ Flujo de trabajo (las skills se invocan como comandos):
 - **Contraseñas**: PBKDF2-SHA256, 100.000 iteraciones, formato `pbkdf2_sha256$100000$<sal_b64>$<hash_b64>` (el seed usa el mismo formato). Límite de 5 intentos fallidos por documento en 15 minutos (D14). ⚠️ El plan Free de Workers da 10 ms de CPU por petición: se mide en la tarea 1.8.
 - **Mora**: se calcula al vuelo con la función pura `calcularEstadoMora(cuotas, excepciones, hoy)` → `al_dia | en_riesgo | bloqueado | con_excepcion`; "hoy" siempre en America/Bogota. Bloqueado si alguna cuota con saldo > 0 tiene **más de 30 días** de vencida (31 o más), salvo excepción vigente. Se aplica en el login y en cada petición de un estudiante.
 - **RAG**: Workers AI (embeddings `@cf/baai/bge-m3`) + Vectorize. Modelo de chat con function calling: verificar el catálogo vigente y comparar 2 candidatos. Historial en D1 (`asistente_mensajes`), 30 preguntas diarias, retención de 30 días.
-- **Pruebas**: Vitest **^4.1** (lo exige `@cloudflare/vitest-pool-workers` 0.23; no subir a vitest 5) y Playwright para E2E.
+- **Pruebas**: Vitest **^4.1** con `@cloudflare/vitest-plugin` (el antiguo `@cloudflare/vitest-pool-workers`, que Cloudflare renombró y marcó como obsoleto en octubre de 2026) y Playwright para E2E. Las pruebas de la API corren en workerd con D1 y KV locales y efímeros (`remoteBindings: false` en `vitest.config.ts`); viven en `api/test/` y se tipan con `tsconfig.test.json`.
 - **Fechas**: `YYYY-MM-DD` para fechas de negocio, `YYYY-MM-DDTHH:MM:SSZ` (UTC) para fecha-hora. **Dinero**: enteros en pesos. **Notas**: 0.0 a 5.0 con un decimal. "Tardía" se calcula, no se guarda (D20).
 - **Variables del Worker**: `PRODUCTO_NOMBRE` (Senda), `FUNDACION_NOMBRE` (la Fundación se llama **Funafrocol**, pero la demo pública muestra "Fundación (demo)" hasta que autoricen por escrito), `CONTACTO_FUNDACION`, `AVISO_PRIVACIDAD_VERSION` (`2026-11`, igual que el seed), `ALMACEN_ARCHIVOS` (`kv` | `r2`). Ningún nombre queda quemado en el código.
 - **Cloudflare**: subdominio `creativebycode` → demo en `senda.creativebycode.workers.dev`. **Sin medio de pago hasta después de la presentación (20 de noviembre)**: todo debe funcionar en el plan Free sin tarjeta. Producción irá en un dominio propio de la Fundación.
@@ -125,12 +125,17 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 - TypeScript con referencias: `tsconfig.app.json` (web), `tsconfig.worker.json` (api, tipos del runtime de Workers, sin DOM), `tsconfig.node.json` (configuración).
 - Identificadores del dominio en español, como en los specs (`calcularEstadoMora`, `AlmacenArchivos`); comentarios en español.
 
-## Dependencias (reglas aprendidas en la tarea 1.1)
+## Dependencias (reglas aprendidas en las tareas 1.1 y 1.5)
 
-- **Wrangler fijo en la versión exacta que trae `@cloudflare/vite-plugin`** (hoy 4.160.0) para tener un solo `workerd`; al actualizar el plugin, actualizar Wrangler a la par.
-- **TypeScript `~6.0`**: `typescript-eslint` no soporta TypeScript 7 todavía. **Vitest `^4.1`** (lo exige pool-workers).
+- **Los tres paquetes de Cloudflare se actualizan juntos**: `wrangler` (versión exacta), `@cloudflare/vite-plugin` y `@cloudflare/vitest-plugin` (versión exacta) deben depender del mismo Wrangler para tener un solo `workerd` y que las pruebas corran en el mismo runtime que `npm run dev`. Hoy: Wrangler 4.160.0, vite-plugin 1.69.1 y vitest-plugin 1.7.0. Verificar con `npm ls wrangler miniflare workerd` que todo sale `deduped`.
+- **Antes de instalar un paquete que nombra el kit, revisar `npm view <paquete> deprecated`**: `@cloudflare/vitest-pool-workers` estaba obsoleto y renombrado.
+- **TypeScript `~6.0`**: `typescript-eslint` no soporta TypeScript 7 todavía. **Vitest `^4.1`** por la tarea 1.5; vitest-plugin 1.7 ya acepta Vitest 5, pero no se cambia de versión mayor antes de la presentación.
 - **npm 11 no ejecuta scripts de instalación sin aprobación** (`allowScripts` en `package.json`). Aprobados: `workerd` y `esbuild`. Ante un paquete nuevo con scripts: revisar quién lo publica y qué hace su script antes de `npm install-scripts approve`.
-- **`npm audit`**: 7 alertas moderadas con un solo origen (`minimatch` dentro de `typescript-eslint`, solo herramientas de desarrollo, no viaja a producción). Aceptadas; revisar cuando salga una versión nueva de `typescript-eslint`. **Nunca** `npm audit fix --force` sin leer qué cambia.
+- **`npm audit`**: 12 alertas (2 bajas, 10 moderadas) con dos orígenes, ninguno en el código que se despliega:
+  - `minimatch` dentro de `typescript-eslint`, la herramienta de lint.
+  - El CLI de `shadcn` (`deepmerge`, `ts-morph`). Está en `dependencies` porque el CSS importa `shadcn/tailwind.css`, pero el código vulnerable es el del CLI y no llega al navegador ni al Worker.
+
+  Aceptadas. `npm audit fix --force` las "arreglaría" bajando `shadcn` a 1.0.0 y `typescript-eslint` a 8.36: **nunca** ejecutarlo sin leer qué cambia.
 
 ## Comandos
 
@@ -141,7 +146,7 @@ npm run lint           # ESLint
 npm run typecheck      # tsc -b (web, api y configuración)
 npm run cf-typegen     # regenera api/worker-configuration.d.ts tras cambiar wrangler.jsonc
 npm run deploy         # build + wrangler deploy
-npm test               # Vitest (se agrega en la tarea 1.5)
+npm test               # Vitest: pruebas de la API en workerd (npm run test:watch para modo interactivo)
 npm run test:e2e       # Playwright (se agrega en la tarea 6.1)
 npm run db:migrate     # wrangler d1 migrations apply DB --local (tarea 1.3)
 npm run db:seed        # genera y carga el seed local (tarea 1.4)

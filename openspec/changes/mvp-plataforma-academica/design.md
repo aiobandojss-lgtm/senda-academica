@@ -50,7 +50,7 @@ Fechas de negocio como texto ISO `YYYY-MM-DD`; fechas-hora en UTC ISO 8601 con f
 `db/seed/generar-seed.mjs` crea datos realistas y deterministas a partir de una fecha de referencia (por defecto el día de la presentación), con perfiles de cartera predefinidos para la demo y una cuenta de primer ingreso. Para pasar a producción se borra la base y se cargan los datos reales con el mismo esquema.
 
 ### D11. Pruebas
-- Unitarias e integración de la API con Vitest y `@cloudflare/vitest-pool-workers` (D1, KV y R2 locales emulados por Miniflare). La versión 0.23 de pool-workers exige vitest `^4.1`: no usar vitest 5 hasta que pool-workers lo soporte.
+- Unitarias e integración de la API con Vitest `^4.1` y `@cloudflare/vitest-plugin` (D1, KV y R2 locales emulados por Miniflare, sin acceso a los recursos remotos: `remoteBindings: false`). El kit nombraba `@cloudflare/vitest-pool-workers`, que Cloudflare renombró a `@cloudflare/vitest-plugin` y dejó sin actualizaciones en octubre de 2026.
 - E2E con Playwright contra el servidor local.
 - CI: GitHub Actions corre lint, typecheck, unitarias y E2E; si pasan y la rama es `main`, aplica las migraciones remotas y despliega con Wrangler.
 
