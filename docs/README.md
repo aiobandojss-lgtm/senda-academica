@@ -18,3 +18,4 @@ Las especificaciones funcionales no viven aquí sino en `openspec/` (fuente de v
 |---|---|---|
 | [001](decisiones/ADR-001-hosting-cloudflare.md) | Hosting en Cloudflare en lugar de Supabase + Vercel | Aceptada |
 | [002](decisiones/ADR-002-archivos-kv-demo-r2-produccion.md) | Archivos en Workers KV durante la demo y en R2 en producción | Aceptada |
+| [003](decisiones/ADR-003-iteraciones-pbkdf2-plan-free.md) | Iteraciones de PBKDF2 según el plan de Workers (10.000 en Free, 100.000 en Paid) | Propuesta |
