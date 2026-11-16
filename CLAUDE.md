@@ -81,7 +81,7 @@ La interfaz debe verse profesional y con identidad propia (criterio 6), no como 
 |---|---|---|
 | Plugin `frontend-design` (oficial de Anthropic) | Usuario (global) | Instalado; se verifica en la tarea 1.0 |
 | MCP de Playwright | Usuario (global) | Instalado; se verifica en la tarea 1.0 |
-| MCP de shadcn/ui | Proyecto (`.mcp.json`) | Configurado en la tarea 1.7: `npx shadcn mcp` usa la versión del `package-lock.json`, no `@latest` |
+| MCP de shadcn/ui | Proyecto (`.mcp.json`) | Configurado y verificado en la tarea 1.7: `npx shadcn mcp` usa la versión del `package-lock.json`, no `@latest` |
 
 Después de instalar algo, Claude Code no ve las herramientas nuevas hasta reiniciar la sesión: pide a Aymer que la reinicie y verifica con `/plugin` y `/mcp`.
 
@@ -89,6 +89,7 @@ Reglas de diseño:
 
 - La guía visual vive en `docs/identidad-visual.md` (se crea en la tarea 2.0) y todas las pantallas la siguen.
 - Usa componentes de shadcn/ui antes de crear uno propio. Para buscarlos y ver ejemplos, usa el MCP de shadcn. Para instalarlos, usa `npx shadcn add <componente>`, con la versión del proyecto, aunque el MCP sugiera `shadcn@latest`.
+- Al buscar o listar con el MCP de shadcn, pasa siempre `registries: ["@shadcn"]`. Sin ese parámetro responde "No registries are configured", aunque `get_project_registries` sí encuentra el registro (comprobado en la tarea 1.7).
 - No vuelvas a ejecutar `shadcn mcp init`: además de escribir `.mcp.json`, mueve `shadcn` a `devDependencies` (en la tarea 1.7 se revirtió; va en `dependencies` por el CSS).
 - Ninguna pantalla se da por terminada sin revisar sus capturas en 375 px y 1280 px.
 - Contraste accesible (WCAG AA) y textos en español claro, pensados para estudiantes que entran desde el celular.
