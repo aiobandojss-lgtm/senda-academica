@@ -7,7 +7,7 @@
 | [decisiones/](decisiones/) | Registros de decisiones de arquitectura (ADR) |
 | [bitacora/](bitacora/) | Diario de desarrollo: qué se hizo cada día, qué se aprendió y qué problemas hubo |
 | [operacion/](operacion/) | [Despliegue y credenciales del CI](operacion/despliegue.md); después: paso a producción, respaldos y Habeas Data |
-| [presentacion/](presentacion/) | Guion, checklist de la demo y preguntas esperadas (día 7) |
+| [presentacion/](presentacion/) | [Metodología del curso aplicada](presentacion/metodologia-aplicada.md) (se actualiza con el avance), guion, checklist de la demo y preguntas esperadas |
 | [rag/](rag/) | Corpus del asistente: documentos ficticios de la Fundación |
 
 Las especificaciones funcionales no viven aquí sino en `openspec/` (fuente de verdad del comportamiento). Las decisiones de cada cambio están en su `design.md`; aquí van las decisiones transversales al proyecto.
