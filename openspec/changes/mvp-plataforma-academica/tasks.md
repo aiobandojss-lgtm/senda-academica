@@ -24,7 +24,7 @@
 
 ## 3. Carreras, cursos y estudiantes (día 2)
 
-- [ ] 3.1 Implementar la API de carreras, cursos y docentes (crear, editar, desactivar y reactivar, asignar docente) con inscripción automática de los estudiantes activos al crear o reactivar un curso (D15); verificar con pruebas los escenarios de código repetido, desactivación, curso creado después de registrar a los estudiantes, semestre fuera de la carrera, docente desactivado y curso reactivado
+- [x] 3.1 Implementar la API de carreras, cursos y docentes (crear, editar, desactivar y reactivar, asignar docente) con inscripción automática de los estudiantes activos al crear o reactivar un curso (D15); verificar con pruebas los escenarios de código repetido, desactivación, curso creado después de registrar a los estudiantes, semestre fuera de la carrera, docente desactivado y curso reactivado
 - [ ] 3.2 Implementar la API de estudiantes (registrar, editar, cambiar semestre, listar con búsqueda y filtros por carrera y estado de cartera, desactivar y reactivar con invalidación de sesiones) con inscripción automática (D15) y proyecciones por rol (D18); verificar con pruebas el documento duplicado, la inscripción al registrar y al cambiar de semestre, la desactivación y que el docente no recibe documento ni correo
 - [ ] 3.3 Implementar la carga masiva por CSV (separador `,` o `;`, todo o nada) con la plantilla descargable y la respuesta de credenciales iniciales (D8, D17); verificar con pruebas un archivo válido, uno con errores por fila y que la base no guarda contraseñas en texto plano
 - [ ] 3.4 Construir las pantallas de administración de carreras, cursos, estudiantes y docentes (incluida la descarga del CSV de credenciales y la desactivación); verificar que listan los datos del seed

@@ -65,3 +65,47 @@ export function tokenDe(respuesta: Response): string {
 export async function sesionDe(documento: string, contrasena: string): Promise<string> {
   return tokenDe(await ingresar(documento, contrasena));
 }
+
+// Petición con sesión y cuerpo JSON, como la haría el frontend
+export const llamar = (token: string, metodo: "GET" | "POST" | "PATCH", ruta: string, cuerpo?: unknown) =>
+  pedir(
+    ruta,
+    conCookie(token, {
+      method: metodo,
+      headers: cuerpo === undefined ? {} : JSON_HEADERS,
+      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+    }),
+  );
+
+// Inserta una carrera directamente en la D1 de pruebas y devuelve su id
+export async function crearCarrera(codigo: string, opciones: { duracion?: number; activa?: 0 | 1 } = {}): Promise<number> {
+  const resultado = await env.DB.prepare(
+    "INSERT INTO carreras (codigo, nombre, duracion_semestres, activa) VALUES (?, ?, ?, ?)",
+  )
+    .bind(codigo, `Carrera ${codigo}`, opciones.duracion ?? 4, opciones.activa ?? 1)
+    .run();
+  return resultado.meta.last_row_id;
+}
+
+// Inserta un estudiante (usuario y fila de estudiantes) sin inscribirlo en ningún curso, como si
+// existiera antes de los cursos. La API de registro, con su inscripción automática, es la tarea 3.2.
+export async function crearEstudiante(
+  e: { documento: string; carreraId: number; semestre: number; activo?: 0 | 1 },
+  passwordHash: string,
+): Promise<number> {
+  const id = await crearUsuario({ documento: e.documento, activo: e.activo, avisoVersion: env.AVISO_PRIVACIDAD_VERSION }, passwordHash);
+  await env.DB.prepare(
+    "INSERT INTO estudiantes (usuario_id, carrera_id, semestre_actual, cohorte, fecha_ingreso) VALUES (?, ?, ?, '2026-2', '2026-08-01')",
+  )
+    .bind(id, e.carreraId, e.semestre)
+    .run();
+  return id;
+}
+
+// Ids de los estudiantes inscritos en un curso, en orden
+export async function inscritosEn(cursoId: number): Promise<number[]> {
+  const { results } = await env.DB.prepare("SELECT estudiante_id FROM inscripciones WHERE curso_id = ? ORDER BY estudiante_id")
+    .bind(cursoId)
+    .all<{ estudiante_id: number }>();
+  return results.map((r) => r.estudiante_id);
+}

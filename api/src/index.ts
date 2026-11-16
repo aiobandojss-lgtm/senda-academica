@@ -2,7 +2,10 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { auth } from "./rutas/auth";
+import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
+import { cursos } from "./rutas/cursos";
+import { docentes } from "./rutas/docentes";
 import { usuarios } from "./rutas/usuarios";
 import { requiereSesion } from "./seguridad/permisos";
 import type { AppEnv } from "./tipos";
@@ -32,7 +35,10 @@ app.use("*", requiereSesion({ publicas: RUTAS_PUBLICAS, sinCompuertas: RUTAS_SIN
 app.get("/salud", (c) => c.json({ ok: true }));
 
 app.route("/auth", auth);
+app.route("/carreras", carreras);
 app.route("/config", config);
+app.route("/cursos", cursos);
+app.route("/docentes", docentes);
 app.route("/usuarios", usuarios);
 
 app.onError((error, c) => {
