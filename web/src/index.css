@@ -1,13 +1,27 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+/* Tipografías de Senda (docs/identidad-visual.md). Se sirven desde el propio Worker, sin pedirlas a Google */
+@import "@fontsource-variable/fraunces/opsz.css";
+@import "@fontsource-variable/atkinson-hyperlegible-next";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    /* Títulos: Fraunces, serif cálida con tamaño óptico. Texto: Atkinson Hyperlegible Next, hecha para baja visión */
+    --font-heading: 'Fraunces Variable', ui-serif, Georgia, serif;
+    --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+
+    /* Colores propios de Senda: estados de cartera (D6) y acento de marca */
+    --color-exito: var(--exito);
+    --color-exito-suave: var(--exito-suave);
+    --color-alerta: var(--alerta);
+    --color-alerta-suave: var(--alerta-suave);
+    --color-info: var(--info);
+    --color-info-suave: var(--info-suave);
+    --color-peligro-suave: var(--peligro-suave);
+    --color-terracota: var(--terracota);
+
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,41 +62,57 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Paleta "Senda, paso a paso" (docs/identidad-visual.md). Cada par texto/fondo se verificó con WCAG 2.2 AA:
+ * 4,5:1 para texto y 3:1 para bordes de campos y foco. Si cambias un color, vuelve a medir el contraste.
+ */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --background: oklch(0.982 0.008 85);          /* papel crema   #FCF9F3 */
+    --foreground: oklch(0.24 0.035 165);          /* tinta de selva #0D251B (15,4:1) */
+    --card: oklch(0.997 0.004 85);                /* #FFFEFB */
+    --card-foreground: oklch(0.24 0.035 165);
+    --popover: oklch(0.997 0.004 85);
+    --popover-foreground: oklch(0.24 0.035 165);
+    --primary: oklch(0.44 0.085 162);             /* verde selva   #196144 (7,1:1 con texto crema) */
+    --primary-foreground: oklch(0.985 0.01 85);
+    --secondary: oklch(0.935 0.03 150);           /* salvia        #DCF0DF */
+    --secondary-foreground: oklch(0.32 0.065 162);
+    --muted: oklch(0.955 0.012 85);               /* #F4F0E7 */
+    --muted-foreground: oklch(0.48 0.025 165);    /* #51625A (6,1:1) */
+    --accent: oklch(0.935 0.04 65);               /* barro claro   #FDE5CE */
+    --accent-foreground: oklch(0.4 0.1 45);
+    --destructive: oklch(0.52 0.17 30);           /* arcilla roja  #B63325 (5,7:1) */
+    --border: oklch(0.885 0.015 85);              /* separadores decorativos */
+    --input: oklch(0.64 0.02 165);                /* borde de campos #819089 (3,2:1, WCAG 1.4.11) */
+    --ring: oklch(0.55 0.11 162);                 /* foco          #1F855D (4,4:1) */
+    --radius: 0.75rem;
+
+    --terracota: oklch(0.62 0.15 45);             /* la meta del símbolo #CD632D, solo decorativo */
+    --exito: oklch(0.44 0.1 152);                 /* al día        #1B6236 */
+    --exito-suave: oklch(0.94 0.045 152);
+    --alerta: oklch(0.46 0.1 65);                 /* en riesgo     #7D4A07 */
+    --alerta-suave: oklch(0.95 0.055 85);
+    --peligro-suave: oklch(0.945 0.035 30);       /* bloqueado: texto en --destructive */
+    --info: oklch(0.46 0.09 240);                 /* con excepción #1D5E85 (azul río) */
+    --info-suave: oklch(0.945 0.03 240);
+
+    --chart-1: oklch(0.44 0.085 162);
+    --chart-2: oklch(0.62 0.15 45);
+    --chart-3: oklch(0.46 0.09 240);
+    --chart-4: oklch(0.7 0.12 85);
+    --chart-5: oklch(0.52 0.17 30);
+
+    --sidebar: oklch(0.965 0.012 85);
+    --sidebar-foreground: oklch(0.24 0.035 165);
+    --sidebar-primary: oklch(0.44 0.085 162);
+    --sidebar-primary-foreground: oklch(0.985 0.01 85);
+    --sidebar-accent: oklch(0.935 0.03 150);
+    --sidebar-accent-foreground: oklch(0.32 0.065 162);
+    --sidebar-border: oklch(0.885 0.015 85);
+    --sidebar-ring: oklch(0.55 0.11 162);
 }
 
+/* Modo oscuro: fuera del MVP. Nada agrega la clase .dark; se conserva el bloque que genera shadcn */
 .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
@@ -120,11 +150,40 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
-    @apply bg-background text-foreground;
-    }
+    @apply bg-background text-foreground antialiased;
+  }
   html {
     @apply font-sans;
-    }
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading text-balance;
+    /* Tamaño óptico automático: Fraunces ajusta su trazo según el tamaño del título */
+    font-optical-sizing: auto;
+  }
+}
+
+@layer components {
+  /*
+   * Curvas de nivel: el motivo de la marca (un mapa del camino). Se pinta con una máscara, así toma el color
+   * de --tinta-curvas y funciona sobre fondo claro o sobre verde selva. Va detrás del contenido y es decorativo.
+   */
+  .fondo-curvas {
+    position: relative;
+    isolation: isolate;
+  }
+  .fondo-curvas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--tinta-curvas, var(--primary));
+    opacity: var(--opacidad-curvas, 0.09);
+    mask-image: url("./assets/curvas-de-nivel.svg");
+    mask-size: cover;
+    mask-position: center;
+    mask-repeat: no-repeat;
+  }
 }

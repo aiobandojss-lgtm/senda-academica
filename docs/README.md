@@ -3,7 +3,7 @@
 | Documento | Qué contiene |
 |---|---|
 | [rubrica.md](rubrica.md) | Rúbrica del proyecto final del curso |
-| [identidad-visual.md](identidad-visual.md) | Guía visual de Senda (se crea en la tarea 2.0 del MVP) |
+| [identidad-visual.md](identidad-visual.md) | Guía visual de Senda: concepto, paleta con contrastes medidos, tipografías, símbolo, componentes y tono. La guía viva está en `/guia` (solo en desarrollo) |
 | [decisiones/](decisiones/) | Registros de decisiones de arquitectura (ADR) |
 | [bitacora/](bitacora/) | Diario de desarrollo: qué se hizo cada día, qué se aprendió y qué problemas hubo |
 | [operacion/](operacion/) | [Despliegue y credenciales del CI](operacion/despliegue.md); después: paso a producción, respaldos y Habeas Data |

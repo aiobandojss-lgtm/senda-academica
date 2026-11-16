@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SimboloSenda } from "@/components/marca/SimboloSenda";
 import { Button } from "@/components/ui/button";
 
 type EstadoApi = "verificando" | "en_linea" | "sin_conexion";
@@ -17,7 +18,7 @@ async function consultarSalud(senal: AbortSignal): Promise<boolean> {
   return datos.ok === true;
 }
 
-// Página inicial provisional: la identidad visual de Senda llega en la tarea 2.0
+// Página inicial provisional con la identidad de Senda (tarea 2.0); la pantalla de ingreso llega en la tarea 2.6
 export default function App() {
   const [estadoApi, setEstadoApi] = useState<EstadoApi>("verificando");
   const [intento, setIntento] = useState(0);
@@ -39,11 +40,12 @@ export default function App() {
   }, []);
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-6">
-      <section className="w-full max-w-md space-y-6 rounded-xl border bg-card p-8 text-card-foreground shadow-sm">
-        <header className="space-y-2">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Plataforma académica</h1>
-          <p className="text-sm text-muted-foreground">En construcción.</p>
+    <main className="fondo-curvas flex min-h-svh items-center justify-center p-5">
+      <section className="w-full max-w-md space-y-6 rounded-2xl bg-card p-8 text-card-foreground shadow-xl ring-1 shadow-primary/10 ring-foreground/10">
+        <header className="space-y-3">
+          <SimboloSenda className="size-12" />
+          <h1 className="text-3xl font-semibold tracking-tight">Plataforma académica</h1>
+          <p className="text-muted-foreground">En construcción.</p>
         </header>
 
         <p role="status" aria-live="polite" className="flex items-center gap-2 text-sm">
@@ -51,7 +53,7 @@ export default function App() {
             aria-hidden="true"
             className={
               estadoApi === "en_linea"
-                ? "size-2.5 rounded-full bg-emerald-600"
+                ? "size-2.5 rounded-full bg-exito"
                 : estadoApi === "sin_conexion"
                   ? "size-2.5 rounded-full bg-destructive"
                   : "size-2.5 animate-pulse rounded-full bg-muted-foreground"

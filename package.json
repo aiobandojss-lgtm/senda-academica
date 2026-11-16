@@ -21,7 +21,8 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
     "@hono/zod-validator": "^0.9.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
