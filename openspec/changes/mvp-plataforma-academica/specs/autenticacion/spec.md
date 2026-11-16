@@ -26,7 +26,7 @@ El sistema SHALL autenticar a cada usuario con su número de documento como usua
 - **THEN** el sistema no inicia sesión y le indica que su cuenta está inactiva
 
 ### Requirement: Límite de intentos de ingreso
-El sistema MUST rechazar los intentos de ingreso de un documento durante 15 minutos después de 5 intentos fallidos con ese documento en los últimos 15 minutos, aunque la contraseña del siguiente intento sea correcta, y MUST NOT revelar con ese mensaje si el documento existe. Un ingreso exitoso SHALL reiniciar el conteo.
+El sistema MUST rechazar los intentos de ingreso de un documento durante 15 minutos después de 5 intentos fallidos con ese documento en los últimos 15 minutos, aunque la contraseña del siguiente intento sea correcta, y MUST NOT revelar con ese mensaje si el documento existe. Un ingreso exitoso y el restablecimiento de la contraseña por el administrador SHALL reiniciar el conteo.
 
 #### Scenario: Sexto intento después de cinco fallos
 - **WHEN** alguien falla 5 veces seguidas la contraseña de un documento y lo intenta una sexta vez con la contraseña correcta antes de 15 minutos
@@ -48,7 +48,7 @@ El sistema MUST guardar las contraseñas solo como hash con sal y MUST NOT guard
 - **THEN** ninguna columna contiene la contraseña en texto plano
 
 ### Requirement: Cambio de contraseña en el primer ingreso
-El sistema SHALL obligar a cambiar la contraseña inicial antes de usar la plataforma cuando el usuario fue creado o restablecido con una contraseña temporal, y MUST rechazar en el servidor cualquier otra operación mientras no la cambie. La nueva contraseña MUST tener al menos 8 caracteres y MUST NOT ser igual al número de documento.
+El sistema SHALL obligar a cambiar la contraseña inicial antes de usar la plataforma cuando el usuario fue creado o restablecido con una contraseña temporal, y MUST rechazar en el servidor cualquier otra operación mientras no la cambie. Como en el cambio voluntario, el sistema MUST pedir la contraseña actual (la temporal). La nueva contraseña MUST tener al menos 8 caracteres, MUST NOT ser igual al número de documento y MUST NOT ser igual a la contraseña actual.
 
 #### Scenario: Primer ingreso con contraseña temporal
 - **WHEN** un usuario con contraseña temporal inicia sesión
@@ -66,8 +66,12 @@ El sistema SHALL obligar a cambiar la contraseña inicial antes de usar la plata
 - **WHEN** el usuario intenta poner como contraseña su número de documento
 - **THEN** el sistema rechaza el cambio e indica que no puede ser igual al documento
 
+#### Scenario: Contraseña nueva igual a la temporal
+- **WHEN** el usuario intenta poner como nueva la misma contraseña temporal que le entregaron
+- **THEN** el sistema rechaza el cambio e indica que debe ser distinta de la actual
+
 ### Requirement: Cambio voluntario de contraseña
-El sistema SHALL permitir a cualquier usuario con sesión cambiar su contraseña indicando la contraseña actual, con las mismas reglas de longitud y de diferencia con el documento.
+El sistema SHALL permitir a cualquier usuario con sesión cambiar su contraseña indicando la contraseña actual, con las mismas reglas del primer ingreso: longitud mínima, distinta del documento y distinta de la actual.
 
 #### Scenario: Cambio con la contraseña actual correcta
 - **WHEN** un usuario indica su contraseña actual correcta y una nueva válida
@@ -78,11 +82,15 @@ El sistema SHALL permitir a cualquier usuario con sesión cambiar su contraseña
 - **THEN** el sistema rechaza el cambio
 
 ### Requirement: Restablecimiento por el administrador
-El sistema SHALL permitir al administrador asignar una contraseña temporal a cualquier usuario, lo que obliga a cambiarla en el siguiente ingreso.
+El sistema SHALL permitir al administrador asignar una contraseña temporal a cualquier usuario, lo que obliga a cambiarla en el siguiente ingreso, y SHALL borrar los intentos fallidos de ingreso de ese usuario.
 
 #### Scenario: Estudiante olvidó su contraseña
 - **WHEN** el administrador restablece la contraseña de un estudiante
 - **THEN** el sistema genera una contraseña temporal aleatoria, la muestra una sola vez al administrador y marca al usuario para cambiarla
+
+#### Scenario: Estudiante bloqueado por intentos fallidos
+- **WHEN** un estudiante llegó al límite de intentos fallidos y el administrador le restablece la contraseña
+- **THEN** el estudiante puede ingresar de inmediato con la contraseña temporal, sin esperar 15 minutos
 
 ### Requirement: Cierre y expiración de sesión
 El sistema SHALL permitir cerrar sesión y SHALL expirar cada sesión 8 horas después del ingreso.
