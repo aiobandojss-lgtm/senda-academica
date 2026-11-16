@@ -28,6 +28,11 @@ Liviano, nativo de Workers, con middlewares de JWT y validación (zod). Alternat
 ### D3. React + Vite + Tailwind + shadcn/ui para el frontend
 Rápido de construir y de desplegar como estático. Los componentes de interfaz (formularios, tablas, diálogos, menús) salen de **shadcn/ui**: son accesibles, responsivos y quedan como código propio dentro de `web/src/components/ui/`, así que se adaptan a la identidad del producto sin depender de una librería cerrada. Alternativa: componentes hechos desde cero, descartados por tiempo y por calidad de accesibilidad.
 
+Navegación (decidido en la tarea 2.6):
+- **React Router 8 en modo declarativo.** Es el estándar de la industria y da rutas hijas con `<Outlet>`, enlaces directos y el botón Atrás del celular. Se descartaron wouter, más liviano pero menos usado, y no usar enrutador, que obligaba a programar a mano la historia del navegador.
+- **El `Sidebar` de shadcn/ui para los tres roles.** Es un solo componente accesible: en el celular se abre como un `Sheet`, y el inicio de cada rol muestra sus secciones como tarjetas para no depender del menú escondido. Una barra inferior para el estudiante queda como mejora si sobra tiempo.
+- **Las redirecciones del frontend son solo comodidad.** Siguen el mismo orden que la API (sesión, contraseña temporal, aviso y rol), pero la seguridad sigue en el servidor (D4).
+
 ### D4. Sesión con JWT firmado en cookie HttpOnly, revocable
 JWT HS256 firmado con el secreto `JWT_SECRET`, en cookie `HttpOnly; Secure; SameSite=Lax`, expiración 8 horas desde el ingreso. Contiene `sub` (id de usuario), `rol`, `ver` (versión de sesión) y `exp`. En cada petición protegida el middleware lee al usuario por su llave primaria y verifica: que esté activo, que `ver` coincida con `usuarios.sesion_version`, y las compuertas de primer ingreso (D16). Restablecer la contraseña, desactivar al usuario o que él cambie su contraseña incrementa `sesion_version`, lo que invalida las sesiones abiertas; al cambiar su propia contraseña se le emite un token nuevo para que su sesión actual siga abierta. Alternativa: JWT puro sin consulta a la base; descartada porque un token robado o de un usuario desactivado seguiría valiendo hasta 8 horas. El costo es una lectura indexada a D1 por petición, que de todas formas se hace para estudiantes por la mora (D6).
 
