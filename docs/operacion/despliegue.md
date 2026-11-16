@@ -57,6 +57,14 @@ Síntoma si se olvida: el job "Migraciones y despliegue" falla con un error de a
 
 - Al cambiarlo se **cierran todas las sesiones abiertas**: los tokens firmados con la clave anterior dejan de validar. Es útil como medida de emergencia si se sospecha que la clave se filtró. Las sesiones de un solo usuario se cierran con `sesion_version` (D4).
 - `wrangler secret list` muestra solo los nombres.
+- **Aviso esperado en el CI:** el paso de build muestra `Missing required secrets: JWT_SECRET`. No es un error.
+  - `vite build` busca los secretos para preparar `vite preview`, y en el CI no hay `.dev.vars`.
+  - El deploy no lo necesita: usa el secreto guardado en Cloudflare.
+  - Si el secreto faltara de verdad, el que falla es el paso `wrangler deploy`, con el mensaje de arriba.
+- **En local**, `npm run build` copia tu `.dev.vars` a `dist/senda/.dev.vars` para `vite preview`.
+  - Esa carpeta no se publica: los archivos públicos son los de `dist/client`.
+  - Está en `.gitignore`.
+  - `wrangler deploy` no sube `.dev.vars`.
 
 ## Producción (después de la presentación)
 
