@@ -21,6 +21,11 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 
 - [x] Día 1: tareas 1.0 a 1.5 el sábado; 1.6 y 1.8 se cerraron el domingo. **Pendiente: 1.7** (MCP de shadcn, requiere reiniciar Claude Code). [Bitácora](docs/bitacora/2026-11-14-dia-1.md)
 - [ ] Día 2, parcial: revisión y aprobación del MVP, tareas 2.1 a 2.3 (11 de 31). Pasan al lunes 2.0, 2.4 a 2.6 y el grupo 3. [Bitácora](docs/bitacora/2026-11-15-dia-2.md)
+- [ ] Día 3 (lunes 16, festivo), en curso:
+  - Repaso de la metodología, con el mapa en [docs/presentacion/metodologia-aplicada.md](docs/presentacion/metodologia-aplicada.md).
+  - Tarea 1.7: `.mcp.json` configurado y el servidor probado por stdio, pero **falta verificarlo en Claude Code**. Hay que abrir la sesión en `proyecto/`, aprobar el servidor `shadcn`, revisar `/mcp` y pedir que liste componentes.
+  - Siguen 2.4, 2.5, 2.0 y 2.6.
+  - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 3
 - [ ] Día 4
 - [ ] Día 5
