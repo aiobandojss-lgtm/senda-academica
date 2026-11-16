@@ -8,6 +8,12 @@ const BYTES_SAL = 16;
 const BYTES_HASH = 32;
 const ERROR_FORMATO = "Formato de hash de contraseña no reconocido";
 
+// Hash con formato válido (sal y hash en ceros) que no corresponde a ninguna contraseña real.
+// El ingreso lo verifica cuando el documento no existe, para tardar lo mismo que con un documento real:
+// así el tiempo de respuesta no revela qué documentos están registrados. Usa ITERACIONES para seguir
+// costando lo mismo si algún día cambian (plan B del ADR-003).
+export const HASH_SIMULADO = `${ALGORITMO}$${ITERACIONES}$${"A".repeat(22)}==$${"A".repeat(43)}=`;
+
 // Sin caracteres ambiguos al leerlos o dictarlos: 0 O o 1 l I (56 símbolos, unos 58 bits en 10 caracteres)
 export const ALFABETO_TEMPORAL = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 const LONGITUD_TEMPORAL = 10;

@@ -1,0 +1,7 @@
+# Plantilla de secretos para desarrollo local. Copia este archivo como .dev.vars (git lo ignora)
+# y reemplaza cada valor. Los nombres requeridos están en "secrets.required" de wrangler.jsonc.
+#
+# JWT_SECRET firma las sesiones (design.md D4). Mínimo 32 caracteres. Genera uno con:
+#   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+# Nunca reutilices el de Cloudflare: cada entorno tiene el suyo.
+JWT_SECRET=reemplazar-por-una-clave-aleatoria

@@ -31,6 +31,13 @@
     // "kv" mientras la cuenta no tenga medio de pago; "r2" en producción (ADR-002)
     "ALMACEN_ARCHIVOS": "kv"
   },
+  // Secretos que el Worker necesita (solo los nombres; los valores nunca van en el repositorio).
+  // - `wrangler deploy` falla si alguno no está cargado en Cloudflare: mejor que publicar un login roto.
+  // - `wrangler types` los toma de aquí y no de .dev.vars, así los tipos son iguales en local y en el CI.
+  // - JWT_SECRET firma las sesiones (design.md D4). En local va en .dev.vars (ver .dev.vars.example).
+  "secrets": {
+    "required": ["JWT_SECRET"]
+  },
   // Los IDs no son secretos: sin la sesión de Wrangler o un API token no dan acceso.
   // En local, Wrangler usa una copia de cada recurso en .wrangler/state
   "d1_databases": [

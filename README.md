@@ -40,6 +40,9 @@ Plataforma web para que una fundación educativa gestione sus estudiantes, sus t
 
 ```bash
 npm ci            # instala exactamente lo del package-lock.json
+cp .dev.vars.example .dev.vars   # y pon en JWT_SECRET una clave aleatoria (el archivo explica cómo generarla)
+npm run db:migrate               # crea las tablas en la D1 local
+npm run db:seed                  # carga los datos ficticios (cuentas en db/seed/CUENTAS-DEMO.md)
 npm run dev       # http://localhost:5173 (frontend y API en el mismo puerto)
 ```
 

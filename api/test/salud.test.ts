@@ -1,10 +1,10 @@
-import { SELF } from "cloudflare:test";
+import { exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
-// SELF es el Worker completo (Hono con basePath "/api"): la petición recorre el mismo camino que en producción
+// exports.default es el Worker completo (Hono con basePath "/api"): la petición recorre el mismo camino que en producción
 describe("GET /api/salud", () => {
   it("responde 200 con {ok: true}", async () => {
-    const respuesta = await SELF.fetch("https://senda.test/api/salud");
+    const respuesta = await exports.default.fetch("https://senda.test/api/salud");
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.headers.get("content-type")).toContain("application/json");
@@ -12,7 +12,7 @@ describe("GET /api/salud", () => {
   });
 
   it("una ruta de la API que no existe responde 404, no la página de React", async () => {
-    const respuesta = await SELF.fetch("https://senda.test/api/no-existe");
+    const respuesta = await exports.default.fetch("https://senda.test/api/no-existe");
 
     expect(respuesta.status).toBe(404);
   });
