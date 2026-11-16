@@ -28,7 +28,9 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - Tarea 2.5 cerrada: cambio de contraseña (siempre con la actual), aceptación del aviso y restablecimiento por el administrador. Antes se actualizó la spec con dos reglas nuevas: la nueva distinta de la actual y el restablecimiento borra los intentos fallidos.
   - Tarea 2.0 cerrada: identidad visual "Senda, paso a paso" ([docs/identidad-visual.md](docs/identidad-visual.md)), aprobada por Aymer con un ajuste: la entrada de las pantallas bajó de 700 a 250 ms.
   - Tarea 2.6 cerrada: `GET /api/config/publica` (con prueba) y las pantallas de ingreso, cambio de contraseña, aviso de privacidad (borrador) y layout por rol. Se usó React Router 8 y el Sidebar de shadcn para los tres roles, por decisión de Aymer. Se verificó con Playwright en 375 y 1280 px, incluido el primer ingreso del seed. Grupo 2 completo (16 de 31).
-  - Sigue el grupo 3. Vamos más o menos un día atrás (el plan ponía hoy el grupo 4) y no hay colchón: si hace falta, se aplican las reglas de recorte.
+  - Tarea 3.1 cerrada: API de carreras, cursos y docentes. Antes se actualizó la spec con 4 reglas aprobadas por Aymer. Entre ellas, la carrera y el semestre de un curso no se editan, y reactivar un curso inscribe a sus estudiantes.
+  - Tarea 5.1 adelantada (decisión de Aymer): `calcularEstadoMora` y `hoyEnBogota`, con 15 pruebas unitarias. El filtro por estado de cartera de la 3.2 la necesita.
+  - Siguen 3.2, 3.3 y 3.4. Vamos más o menos un día atrás (el plan ponía hoy el grupo 4) y no hay colchón: si hace falta, se aplican las reglas de recorte.
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 4
 - [ ] Día 5
