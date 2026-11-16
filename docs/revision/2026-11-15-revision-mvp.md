@@ -1,6 +1,6 @@
 # Revisión y aprobación del cambio `mvp-plataforma-academica`
 
-**Revisor:** Aymer (dueño del producto) · **Fecha:** 15 de noviembre de 2026 · **Estado:** en revisión
+**Revisor:** Aymer (dueño del producto) · **Fecha:** 15 de noviembre de 2026 · **Estado:** ✅ aprobado con supuestos (ver "Decisiones registradas")
 
 Aquí se aprueba **qué** hace el producto antes de programar sus reglas de negocio. Cada requisito aprobado se convierte en código y en pruebas: lo que apruebes es lo que Senda hará, y lo que defenderás ante el jurado.
 
@@ -164,4 +164,29 @@ Los puntos que dependan de la Fundación pueden quedar **aprobados con valor pro
 
 ## Decisiones registradas
 
-_(Se completa con tus respuestas.)_
+**Aprobado por Aymer el 15 de noviembre de 2026.** El proposal y las 5 specs se aprueban con sus valores actuales. Los valores que dependen de la Fundación son **supuestos para la entrega del curso**: se validarán con sus usuarios después de la presentación, y lo que cambie entrará como un nuevo cambio de OpenSpec.
+
+| Punto | Decisión |
+|---|---|
+| P1 y 1 a 20 | Aprobados con los valores de las specs |
+| 8. Datos del estudiante | Se mantiene el conjunto actual, por minimización (Ley 1581). El celular ya está, como opcional. El tipo de sangre (dato sensible de salud), los contactos de emergencia y la dirección se validan con la Fundación. Si los necesita, entran en un cambio posterior con su finalidad, autorización y permisos de acceso (migración nueva) |
+| 9. Cursos sueltos | No se incluyen en el MVP |
+| 10. CSV | La demo usa un archivo de 2 o 3 filas (ADR-003) |
+| 15. Nequi y Daviplata | Se registran como "transferencia" |
+| 18. Aviso de "en riesgo" | No se agrega por ahora. Queda como mejora opcional si sobra tiempo antes de la presentación |
+
+## Agenda para validar con la Fundación (después de la presentación)
+
+Participan la coordinación o administración, un docente y un estudiante. Cada respuesta que cambie una regla se convierte en un nuevo cambio de OpenSpec (por ejemplo, `ajustes-validacion-fundacion`, creado con `/openspec-propose`).
+
+- [ ] ¿Hay estudiantes **menores de edad**? Si los hay: autorización del acudiente y sus datos.
+- [ ] **Datos adicionales** del estudiante (tipo de sangre, contacto de emergencia, dirección…): ¿cuáles se necesitan y **para qué**?
+- [ ] Ingreso: usuario = documento, contraseña de 8 caracteres, 5 intentos cada 15 minutos y sesión de 8 horas (¿hay computadores compartidos?).
+- [ ] Quién restablece las contraseñas olvidadas y por qué canal.
+- [ ] ¿Los docentes necesitan contactar a los estudiantes? ¿Por qué medio?
+- [ ] Inscripción en cursos sueltos (repitentes u homologaciones).
+- [ ] Entregas: formatos (¿Excel? ¿varios archivos?), tamaño máximo y si se aceptan tardías.
+- [ ] Nota definitiva del curso y nota mínima para aprobar.
+- [ ] Medios de pago que usan los estudiantes.
+- [ ] Regla de mora (más de 30 días), aviso previo al bloqueo y política de excepciones.
+- [ ] Texto del aviso de privacidad (incluida la transferencia internacional de datos), canal de contacto del mensaje de bloqueo, y nombre, logo y colores autorizados.

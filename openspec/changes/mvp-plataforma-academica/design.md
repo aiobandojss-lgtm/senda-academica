@@ -116,3 +116,4 @@ Variables en `wrangler.jsonc`: `PRODUCTO_NOMBRE` ("Senda"), `FUNDACION_NOMBRE` (
 - Nombre y logo definitivos de la Fundación (variable `FUNDACION_NOMBRE`).
 - Texto definitivo del aviso de privacidad (lo aporta la Fundación como responsable del tratamiento). Debe informar la transferencia internacional de datos (Ley 1581): D1 está en el este de Norteamérica (`enam`, EE. UU., país que la SIC reconoce con nivel adecuado de protección) y KV distribuye copias de los archivos en la red global de Cloudflare.
 - Periodos académicos y recuperación de contraseña por correo: cambios posteriores al MVP.
+- Datos adicionales del estudiante (tipo de sangre, que es un dato sensible de salud según la Ley 1581; contactos de emergencia; dirección) y si hay estudiantes menores de edad: se validan con la Fundación. El MVP solo recoge los datos que usan sus funciones. Agenda completa de validación en `docs/revision/2026-11-15-revision-mvp.md`.
