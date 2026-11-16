@@ -2,11 +2,24 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { auth } from "./rutas/auth";
+import { requiereSesion } from "./seguridad/permisos";
 import type { AppEnv } from "./tipos";
 
 // API de Senda. Todas las rutas cuelgan de /api: en wrangler.jsonc, run_worker_first
 // envía solo /api/* al Worker; el resto lo sirven los archivos estáticos de React.
 const app = new Hono<AppEnv>().basePath("/api");
+
+// Negar por defecto: toda ruta de /api exige sesión, salvo las que se declaran aquí como públicas.
+// Una ruta nueva que nadie agregue a esta lista queda cerrada, nunca abierta.
+const RUTAS_PUBLICAS = ["GET /api/salud", "POST /api/auth/ingresar", "POST /api/auth/salir"];
+
+// D16: lo único permitido mientras falte cambiar la contraseña temporal o aceptar el aviso de privacidad
+// (salir ya es pública). La tarea 2.5 agrega el cambio de contraseña y la aceptación del aviso.
+const RUTAS_SIN_COMPUERTAS = ["GET /api/auth/yo"];
+
+// Va antes de las rutas: Hono ejecuta middlewares y rutas en el orden en que se registran.
+// Los permisos por rol se declaran en cada ruta con requiereRol (seguridad/permisos.ts).
+app.use("*", requiereSesion({ publicas: RUTAS_PUBLICAS, sinCompuertas: RUTAS_SIN_COMPUERTAS }));
 
 // Verificación de vida: la usan el CI, el monitoreo y la página inicial
 app.get("/salud", (c) => c.json({ ok: true }));

@@ -11,9 +11,12 @@ describe("GET /api/salud", () => {
     expect(await respuesta.json()).toEqual({ ok: true });
   });
 
-  it("una ruta de la API que no existe responde 404, no la página de React", async () => {
+  // La API niega por defecto (tarea 2.4): sin sesión responde 401 antes de saber si la ruta existe, así nadie
+  // puede averiguar qué rutas hay probando. Con sesión, una ruta inexistente responde 404 (permisos.test.ts).
+  it("una ruta de la API que no existe responde con un error JSON de la API, no con la página de React", async () => {
     const respuesta = await exports.default.fetch("https://senda.test/api/no-existe");
 
-    expect(respuesta.status).toBe(404);
+    expect(respuesta.status).toBe(401);
+    expect(respuesta.headers.get("content-type")).toContain("application/json");
   });
 });

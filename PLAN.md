@@ -24,7 +24,8 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 - [ ] Día 3 (lunes 16, festivo), en curso:
   - Repaso de la metodología, con el mapa en [docs/presentacion/metodologia-aplicada.md](docs/presentacion/metodologia-aplicada.md).
   - Tarea 1.7 cerrada: con la sesión abierta en `proyecto/`, el servidor `shadcn` conecta, lee el `components.json` (registro `@shadcn`) y lista los 61 componentes `ui`.
-  - Siguen 2.4, 2.5, 2.0 y 2.6.
+  - Tarea 2.4 cerrada: middleware de sesión y permisos por rol con "negar por defecto" (toda ruta de `/api` exige sesión salvo la lista de públicas en `api/src/index.ts`).
+  - Siguen 2.5, 2.0 y 2.6.
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 4
 - [ ] Día 5

@@ -3,7 +3,7 @@ import { decode, sign } from "hono/jwt";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import app from "../src/index";
 import { hashContrasena } from "../src/seguridad/contrasenas";
-import { crearUsuario, ingresar, JSON_HEADERS, pedir } from "./utilidades";
+import { conCookie, crearUsuario, ingresar, JSON_HEADERS, pedir, tokenDe } from "./utilidades";
 
 // Escenarios de la spec `autenticacion` (inicio, cierre y expiración de sesión) con usuarios propios
 // de la prueba: el código no debe depender de los datos del seed.
@@ -18,14 +18,6 @@ const AVISO_VIEJO = { documento: "7000000004" };
 const INEXISTENTE = "7000000999";
 
 let idActivo: number;
-
-const conCookie = (token: string) => ({ headers: { Cookie: `__Host-sesion=${token}` } });
-
-function tokenDe(respuesta: Response): string {
-  const token = respuesta.headers.get("Set-Cookie")?.match(/__Host-sesion=([^;]+)/)?.[1];
-  if (!token) throw new Error("La respuesta no trae la cookie de sesión");
-  return token;
-}
 
 const ahora = () => Math.floor(Date.now() / 1000);
 

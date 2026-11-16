@@ -45,7 +45,7 @@ export async function abrirSesion(c: Context<AppEnv>, datos: DatosSesion): Promi
 }
 
 // Devuelve los datos del token si la firma y el vencimiento son válidos; si no, null.
-// Que el usuario siga activo y que la versión coincida con la base lo verifica el middleware (tarea 2.4).
+// Que el usuario siga activo y que la versión coincida con la base lo verifica requiereSesion (permisos.ts).
 export async function leerSesion(c: Context<AppEnv>): Promise<DatosSesion | null> {
   const token = getCookie(c, COOKIE, "host");
   if (!token) return null;

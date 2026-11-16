@@ -3,32 +3,24 @@ import { z } from "zod";
 import { responderError, validarJson } from "../errores";
 import { HASH_SIMULADO, verificarContrasena } from "../seguridad/contrasenas";
 import { limpiarIntentos, registrarIntento } from "../seguridad/intentos";
-import { abrirSesion, cerrarSesion, leerSesion } from "../seguridad/sesion";
-import type { AppEnv, Rol } from "../tipos";
+import { type FilaUsuarioSesion, usuarioSesion } from "../seguridad/permisos";
+import { abrirSesion, cerrarSesion } from "../seguridad/sesion";
+import type { AppEnv, UsuarioSesion } from "../tipos";
 
 // Ingreso, cierre de sesión y perfil de la sesión actual (spec `autenticacion`)
 export const auth = new Hono<AppEnv>();
 
-type FilaPerfil = {
-  id: number;
-  rol: Rol;
-  nombres: string;
-  apellidos: string;
-  debe_cambiar_password: number;
-  aviso_version_aceptada: string | null;
-};
+type FilaIngreso = FilaUsuarioSesion & { password_hash: string; sesion_version: number; activo: number };
 
-type FilaIngreso = FilaPerfil & { password_hash: string; sesion_version: number; activo: number };
-
-// Lo único que el frontend necesita para decidir qué pantalla mostrar (D18: nada de documento, correo ni hash).
-// Las dos banderas son las compuertas de primer ingreso (D16).
-const perfil = (u: FilaPerfil, avisoVigente: string) => ({
+// Lo único que el frontend necesita para decidir qué pantalla mostrar (D18: proyección explícita, así un
+// campo nuevo de la sesión no se filtra solo). Las dos banderas son las compuertas de primer ingreso (D16).
+const perfil = (u: UsuarioSesion) => ({
   id: u.id,
   rol: u.rol,
   nombres: u.nombres,
   apellidos: u.apellidos,
-  debeCambiarPassword: u.debe_cambiar_password === 1,
-  debeAceptarAviso: u.aviso_version_aceptada !== avisoVigente,
+  debeCambiarPassword: u.debeCambiarPassword,
+  debeAceptarAviso: u.debeAceptarAviso,
 });
 
 const esquemaIngreso = z.object({
@@ -71,7 +63,7 @@ auth.post("/ingresar", validarJson(esquemaIngreso, "Escribe tu documento y tu co
   }
 
   await abrirSesion(c, { usuarioId: usuario.id, rol: usuario.rol, version: usuario.sesion_version });
-  return c.json(perfil(usuario, c.env.AVISO_PRIVACIDAD_VERSION));
+  return c.json(perfil(usuarioSesion(usuario, c.env.AVISO_PRIVACIDAD_VERSION)));
 });
 
 // Siempre responde 204 y borra la cookie, haya o no sesión. Es POST para que un enlace o una imagen
@@ -81,18 +73,6 @@ auth.post("/salir", (c) => {
   return c.body(null, 204);
 });
 
-auth.get("/yo", async (c) => {
-  const sesion = await leerSesion(c);
-  if (!sesion) return responderError(c, 401, "NO_AUTENTICADO", "Tu sesión terminó. Ingresa de nuevo");
-
-  const usuario = await c.env.DB.prepare(
-    `SELECT id, rol, nombres, apellidos, debe_cambiar_password, aviso_version_aceptada
-       FROM usuarios
-      WHERE id = ?`,
-  )
-    .bind(sesion.usuarioId)
-    .first<FilaPerfil>();
-  if (!usuario) return responderError(c, 401, "NO_AUTENTICADO", "Tu sesión terminó. Ingresa de nuevo");
-
-  return c.json(perfil(usuario, c.env.AVISO_PRIVACIDAD_VERSION));
-});
+// La sesión ya la validó requiereSesion (index.ts), que deja pasar esta ruta aunque falten las
+// compuertas de D16: el frontend la usa para saber qué pantalla mostrar
+auth.get("/yo", (c) => c.json(perfil(c.var.usuario)));
