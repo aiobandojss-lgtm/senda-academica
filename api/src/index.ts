@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { auth } from "./rutas/auth";
+import { cargaEstudiantes } from "./rutas/carga";
 import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
 import { cursos } from "./rutas/cursos";
@@ -40,6 +41,8 @@ app.route("/carreras", carreras);
 app.route("/config", config);
 app.route("/cursos", cursos);
 app.route("/docentes", docentes);
+// Plantilla y carga masiva por CSV (tarea 3.3), bajo el mismo prefijo que el resto de estudiantes
+app.route("/estudiantes", cargaEstudiantes);
 app.route("/estudiantes", estudiantes);
 app.route("/usuarios", usuarios);
 

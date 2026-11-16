@@ -16,6 +16,21 @@ export function inscribirEnCurso(db: D1Database, cursoId: number | null): D1Prep
   return cursoId === null ? db.prepare(sql) : db.prepare(sql).bind(cursoId);
 }
 
+// Igual que inscribirEstudiante, para varios estudiantes a la vez (carga masiva). Hasta 100 documentos
+// por sentencia: es el máximo de parámetros de una consulta en D1.
+export function inscribirPorDocumentos(db: D1Database, documentos: string[]): D1PreparedStatement {
+  return db
+    .prepare(
+      `INSERT OR IGNORE INTO inscripciones (curso_id, estudiante_id)
+       SELECT c.id, e.usuario_id
+       FROM estudiantes e
+       JOIN usuarios u ON u.id = e.usuario_id AND u.activo = 1
+       JOIN cursos c ON c.carrera_id = e.carrera_id AND c.semestre = e.semestre_actual AND c.activo = 1
+       WHERE u.documento IN (${documentos.map(() => "?").join(", ")})`,
+    )
+    .bind(...documentos);
+}
+
 // Inscribe a un estudiante activo en los cursos activos de su carrera y semestre actual. Se usa al
 // registrarlo, al cambiar su semestre o su carrera y al reactivarlo. Se identifica por documento, que
 // es único: así sirve en el mismo batch que crea al usuario, antes de conocer su id. Si el usuario no es
