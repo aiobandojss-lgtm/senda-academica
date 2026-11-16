@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { responderError, validarJson } from "../errores";
-import { HASH_SIMULADO, verificarContrasena } from "../seguridad/contrasenas";
+import { HASH_SIMULADO, hashContrasena, validarContrasenaNueva, verificarContrasena } from "../seguridad/contrasenas";
 import { limpiarIntentos, registrarIntento } from "../seguridad/intentos";
-import { type FilaUsuarioSesion, usuarioSesion } from "../seguridad/permisos";
+import { type FilaUsuarioSesion, noAutenticado, usuarioSesion } from "../seguridad/permisos";
 import { abrirSesion, cerrarSesion } from "../seguridad/sesion";
 import type { AppEnv, UsuarioSesion } from "../tipos";
 
@@ -76,3 +76,58 @@ auth.post("/salir", (c) => {
 // La sesión ya la validó requiereSesion (index.ts), que deja pasar esta ruta aunque falten las
 // compuertas de D16: el frontend la usa para saber qué pantalla mostrar
 auth.get("/yo", (c) => c.json(perfil(c.var.usuario)));
+
+const esquemaCambio = z.object({
+  actual: z.string().min(1).max(128),
+  nueva: z.string().min(1).max(128),
+});
+
+// Cambio de contraseña, obligatorio (primer ingreso o tras un restablecimiento) o voluntario. Siempre pide
+// la actual (design.md D16). Permitida aunque falten las compuertas de D16 (index.ts).
+auth.post("/contrasena", validarJson(esquemaCambio, "Escribe tu contraseña actual y la nueva"), async (c) => {
+  const { actual, nueva } = c.req.valid("json");
+  const { id } = c.var.usuario;
+
+  const fila = await c.env.DB.prepare("SELECT documento, password_hash FROM usuarios WHERE id = ?")
+    .bind(id)
+    .first<{ documento: string; password_hash: string }>();
+  if (!fila) return noAutenticado(c);
+
+  // Primero las reglas, que no cuestan CPU; después la contraseña actual (PBKDF2)
+  const incumplida = validarContrasenaNueva(nueva, { documento: fila.documento, actual });
+  if (incumplida) return responderError(c, 400, incumplida.codigo, incumplida.mensaje);
+
+  if (!(await verificarContrasena(actual, fila.password_hash))) {
+    return responderError(c, 400, "CONTRASENA_ACTUAL_INCORRECTA", "La contraseña actual no es correcta");
+  }
+
+  // Subir sesion_version cierra las sesiones de los otros equipos (D4)
+  const actualizado = await c.env.DB.prepare(
+    `UPDATE usuarios
+        SET password_hash = ?, debe_cambiar_password = 0, sesion_version = sesion_version + 1
+      WHERE id = ?
+  RETURNING sesion_version`,
+  )
+    .bind(await hashContrasena(nueva), id)
+    .first<{ sesion_version: number }>();
+  if (!actualizado) return noAutenticado(c);
+
+  // Esta sesión sigue abierta con un token de la versión nueva. Sus 8 horas empiezan de nuevo:
+  // quien acaba de demostrar su contraseña se autenticó otra vez
+  await abrirSesion(c, { usuarioId: id, rol: c.var.usuario.rol, version: actualizado.sesion_version });
+  return c.json(perfil({ ...c.var.usuario, debeCambiarPassword: false }));
+});
+
+// Aceptación del aviso de privacidad (Ley 1581, design.md D16): guarda la versión vigente y la fecha (D9).
+// Permitida aunque falte cambiar la contraseña temporal. El texto del aviso vive en el frontend.
+auth.post("/aviso", async (c) => {
+  await c.env.DB.prepare(
+    `UPDATE usuarios
+        SET aviso_version_aceptada = ?, aviso_aceptado_en = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
+      WHERE id = ?`,
+  )
+    .bind(c.env.AVISO_PRIVACIDAD_VERSION, c.var.usuario.id)
+    .run();
+
+  return c.json(perfil({ ...c.var.usuario, debeAceptarAviso: false }));
+});

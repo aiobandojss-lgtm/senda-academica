@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { auth } from "./rutas/auth";
+import { usuarios } from "./rutas/usuarios";
 import { requiereSesion } from "./seguridad/permisos";
 import type { AppEnv } from "./tipos";
 
@@ -14,8 +15,8 @@ const app = new Hono<AppEnv>().basePath("/api");
 const RUTAS_PUBLICAS = ["GET /api/salud", "POST /api/auth/ingresar", "POST /api/auth/salir"];
 
 // D16: lo único permitido mientras falte cambiar la contraseña temporal o aceptar el aviso de privacidad
-// (salir ya es pública). La tarea 2.5 agrega el cambio de contraseña y la aceptación del aviso.
-const RUTAS_SIN_COMPUERTAS = ["GET /api/auth/yo"];
+// (salir ya es pública)
+const RUTAS_SIN_COMPUERTAS = ["GET /api/auth/yo", "POST /api/auth/contrasena", "POST /api/auth/aviso"];
 
 // Va antes de las rutas: Hono ejecuta middlewares y rutas en el orden en que se registran.
 // Los permisos por rol se declaran en cada ruta con requiereRol (seguridad/permisos.ts).
@@ -25,6 +26,7 @@ app.use("*", requiereSesion({ publicas: RUTAS_PUBLICAS, sinCompuertas: RUTAS_SIN
 app.get("/salud", (c) => c.json({ ok: true }));
 
 app.route("/auth", auth);
+app.route("/usuarios", usuarios);
 
 app.onError((error, c) => {
   // Errores de la solicitud que detecta Hono, como un JSON mal formado

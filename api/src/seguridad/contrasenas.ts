@@ -1,3 +1,5 @@
+import type { ErrorApi } from "../errores";
+
 // Contraseñas: hash PBKDF2-SHA256 (design.md D5, ADR-003) y contraseñas temporales (D17).
 // Formato guardado: pbkdf2_sha256$<iteraciones>$<sal_base64>$<hash_base64>
 
@@ -59,6 +61,31 @@ export async function verificarContrasena(contrasena: string, hashGuardado: stri
   const calculado = await derivar(contrasena, sal, iteraciones);
   // Comparación en tiempo constante: no revela cuántos bytes coinciden
   return crypto.subtle.timingSafeEqual(calculado, esperado);
+}
+
+const MINIMO_CARACTERES = 8;
+
+// Reglas de la contraseña nueva (spec `autenticacion`): devuelve el error que se le muestra a la persona, o null.
+// Es una función pura, sin base de datos ni hash: por eso se revisa antes de gastar CPU en PBKDF2.
+// Compara en NFKC, igual que el hash: dos formas de escribir la misma contraseña cuentan como la misma.
+export function validarContrasenaNueva(
+  nueva: string,
+  { documento, actual }: { documento: string; actual: string },
+): ErrorApi | null {
+  const normalizada = nueva.normalize("NFKC");
+
+  // Se cuentan caracteres y no unidades de UTF-16 (.length): un emoji es un solo carácter
+  if ([...normalizada].length < MINIMO_CARACTERES) {
+    return { codigo: "CONTRASENA_CORTA", mensaje: `La contraseña nueva debe tener al menos ${MINIMO_CARACTERES} caracteres` };
+  }
+  if (normalizada.trim() === documento) {
+    return { codigo: "CONTRASENA_IGUAL_DOCUMENTO", mensaje: "La contraseña nueva no puede ser igual a tu número de documento" };
+  }
+  // Impide quedarse con la temporal, que el administrador ya vio
+  if (normalizada === actual.normalize("NFKC")) {
+    return { codigo: "CONTRASENA_IGUAL_ACTUAL", mensaje: "La contraseña nueva debe ser distinta de la actual" };
+  }
+  return null;
 }
 
 // Muestreo con rechazo: solo se aceptan bytes menores que el mayor múltiplo de 56 que cabe en 256 (224),

@@ -35,7 +35,7 @@ export async function registrarIntento(db: D1Database, documento: string): Promi
   return false;
 }
 
-// Contraseña correcta: el conteo del documento vuelve a cero
+// Contraseña correcta o restablecimiento por el administrador: el conteo del documento vuelve a cero
 export async function limpiarIntentos(db: D1Database, documento: string): Promise<void> {
   await db.prepare("DELETE FROM intentos_fallidos WHERE documento = ?").bind(documento).run();
 }

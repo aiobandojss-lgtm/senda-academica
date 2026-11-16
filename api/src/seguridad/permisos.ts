@@ -36,7 +36,7 @@ export const usuarioSesion = (fila: FilaUsuarioSesion, avisoVigente: string): Us
   debeAceptarAviso: fila.aviso_version_aceptada !== avisoVigente,
 });
 
-const noAutenticado = (c: Context) => responderError(c, 401, "NO_AUTENTICADO", "Tu sesión terminó. Ingresa de nuevo");
+export const noAutenticado = (c: Context) => responderError(c, 401, "NO_AUTENTICADO", "Tu sesión terminó. Ingresa de nuevo");
 
 export const requiereSesion = ({ publicas, sinCompuertas }: ReglasSesion) =>
   createMiddleware<AppEnv>(async (c, next) => {

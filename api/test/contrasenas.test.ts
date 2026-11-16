@@ -3,6 +3,7 @@ import {
   ALFABETO_TEMPORAL,
   generarContrasenaTemporal,
   hashContrasena,
+  validarContrasenaNueva,
   verificarContrasena,
 } from "../src/seguridad/contrasenas";
 
@@ -64,6 +65,51 @@ describe("hashContrasena", () => {
 
     expect(precompuesta).not.toBe(descompuesta);
     expect(await verificarContrasena(descompuesta, await hashContrasena(precompuesta))).toBe(true);
+  });
+});
+
+describe("validarContrasenaNueva (spec `autenticacion`, tarea 2.5)", () => {
+  const datos = { documento: "1000123456", actual: "Kp7mRt2xQa" };
+
+  it("acepta una contraseña de 8 caracteres o más, distinta del documento y de la actual", () => {
+    expect(validarContrasenaNueva("Montaña2026", datos)).toBeNull();
+    expect(validarContrasenaNueva("12345678", datos)).toBeNull();
+  });
+
+  it("rechaza menos de 8 caracteres e indica el mínimo", () => {
+    expect(validarContrasenaNueva("Corta12", datos)).toEqual({
+      codigo: "CONTRASENA_CORTA",
+      mensaje: "La contraseña nueva debe tener al menos 8 caracteres",
+    });
+  });
+
+  it("cuenta caracteres, no unidades de UTF-16: 7 caracteres con un emoji siguen siendo 7", () => {
+    // "🌱" ocupa 2 unidades de UTF-16: con .length este texto mediría 8
+    expect(validarContrasenaNueva("Senda🌱1", datos)?.codigo).toBe("CONTRASENA_CORTA");
+  });
+
+  it("rechaza el número de documento, también con espacios alrededor", () => {
+    for (const nueva of ["1000123456", " 1000123456 "]) {
+      expect(validarContrasenaNueva(nueva, datos)).toEqual({
+        codigo: "CONTRASENA_IGUAL_DOCUMENTO",
+        mensaje: "La contraseña nueva no puede ser igual a tu número de documento",
+      });
+    }
+  });
+
+  it("rechaza la misma contraseña actual (por ejemplo, la temporal que entregó el administrador)", () => {
+    expect(validarContrasenaNueva("Kp7mRt2xQa", datos)).toEqual({
+      codigo: "CONTRASENA_IGUAL_ACTUAL",
+      mensaje: "La contraseña nueva debe ser distinta de la actual",
+    });
+  });
+
+  it("compara con la actual como lo hace el hash (NFKC): la ñ compuesta o precompuesta es la misma contraseña", () => {
+    const precompuesta = "Montaña2026"; // ñ = U+00F1
+    const descompuesta = "Montaña2026"; // n + virgulilla U+0303
+
+    expect(precompuesta).not.toBe(descompuesta);
+    expect(validarContrasenaNueva(precompuesta, { ...datos, actual: descompuesta })?.codigo).toBe("CONTRASENA_IGUAL_ACTUAL");
   });
 });
 
