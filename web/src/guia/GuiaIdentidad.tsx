@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 // main.tsx la carga en /guia y el build de producción la descarta. Los datos de la composición de
 // ejemplo son FICTICIOS y nunca llegan a producción; las pantallas reales leen todo de la API.
 
-// Entrada escalonada al cargar; se desactiva si la persona pidió menos movimiento
-const entrada = "animate-in fade-in slide-in-from-bottom-3 duration-700 [animation-fill-mode:both] motion-reduce:animate-none";
+// Entrada escalonada al cargar (250 ms, docs/identidad-visual.md); se desactiva si la persona pidió menos movimiento
+const entrada = "animate-in fade-in slide-in-from-bottom-2 duration-250 [animation-fill-mode:both] motion-reduce:animate-none";
 const retraso = (ms: number): CSSProperties => ({ animationDelay: `${ms}ms` });
 
 const PALETA = [
@@ -140,13 +140,13 @@ export default function GuiaIdentidad() {
       </header>
 
       <main className="mx-auto grid max-w-6xl gap-12 px-5 py-10 lg:grid-cols-[380px_1fr] lg:gap-16">
-        <aside className={`lg:sticky lg:top-8 lg:self-start ${entrada}`} style={retraso(120)}>
+        <aside className={`lg:sticky lg:top-8 lg:self-start ${entrada}`} style={retraso(60)}>
           <p className="mb-3 text-sm text-muted-foreground">Composición de ejemplo · datos ficticios</p>
           <InicioEstudianteEjemplo />
         </aside>
 
         <div className="space-y-14">
-          <Seccion titulo="Paleta" descripcion="Colores de la tierra y de la selva. Todos los textos cumplen WCAG 2.2 AA." demora={200}>
+          <Seccion titulo="Paleta" descripcion="Colores de la tierra y de la selva. Todos los textos cumplen WCAG 2.2 AA." demora={100}>
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {PALETA.map((c) => (
                 <li key={c.token} className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
@@ -162,7 +162,7 @@ export default function GuiaIdentidad() {
             </ul>
           </Seccion>
 
-          <Seccion titulo="Tipografía" descripcion="Fraunces para los títulos; Atkinson Hyperlegible Next para leer." demora={280}>
+          <Seccion titulo="Tipografía" descripcion="Fraunces para los títulos; Atkinson Hyperlegible Next para leer." demora={140}>
             <div className="space-y-4 rounded-xl bg-card p-5 ring-1 ring-foreground/10">
               <p className="font-heading text-5xl font-semibold tracking-tight">Aprender es un camino</p>
               <p className="font-heading text-2xl">Títulos en Fraunces, con tamaño óptico</p>
@@ -174,7 +174,7 @@ export default function GuiaIdentidad() {
             </div>
           </Seccion>
 
-          <Seccion titulo="Componentes" descripcion="Botones y campos de 44 px para el celular; foco siempre visible." demora={360}>
+          <Seccion titulo="Componentes" descripcion="Botones y campos de 44 px para el celular; foco siempre visible." demora={180}>
             <div className="space-y-6 rounded-xl bg-card p-5 ring-1 ring-foreground/10">
               <div className="flex flex-wrap gap-3">
                 <Button size="lg">Ingresar</Button>
@@ -226,7 +226,7 @@ export default function GuiaIdentidad() {
             </div>
           </Seccion>
 
-          <Seccion titulo="Símbolo" descripcion="Un sendero que sube por la ladera; cada punto es un paso y la meta es terracota." demora={440}>
+          <Seccion titulo="Símbolo" descripcion="Un sendero que sube por la ladera; cada punto es un paso y la meta es terracota." demora={220}>
             <div className="flex flex-wrap items-end gap-6 rounded-xl bg-card p-5 ring-1 ring-foreground/10">
               <SimboloSenda className="size-24" titulo="Símbolo de Senda" />
               <SimboloSenda className="size-12" />

@@ -26,7 +26,8 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - Tarea 1.7 cerrada: con la sesión abierta en `proyecto/`, el servidor `shadcn` conecta, lee el `components.json` (registro `@shadcn`) y lista los 61 componentes `ui`.
   - Tarea 2.4 cerrada: middleware de sesión y permisos por rol con "negar por defecto" (toda ruta de `/api` exige sesión salvo la lista de públicas en `api/src/index.ts`).
   - Tarea 2.5 cerrada: cambio de contraseña (siempre con la actual), aceptación del aviso y restablecimiento por el administrador. Antes se actualizó la spec con dos reglas nuevas: la nueva distinta de la actual y el restablecimiento borra los intentos fallidos.
-  - Siguen 2.0 y 2.6.
+  - Tarea 2.0 cerrada: identidad visual "Senda, paso a paso" ([docs/identidad-visual.md](docs/identidad-visual.md)), aprobada por Aymer con un ajuste: la entrada de las pantallas bajó de 700 a 250 ms.
+  - Siguen 2.6 y el grupo 3. Vamos más o menos un día atrás (el plan ponía hoy el grupo 4) y no hay colchón: si hace falta, se aplican las reglas de recorte.
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 4
 - [ ] Día 5
@@ -53,3 +54,7 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 - [ ] `npm run eval:rag` con al menos 90 % de aciertos.
 - [ ] La mañana del 20: seed recargado en la base remota (`npx wrangler d1 execute DB --remote --file db/seed/seed.sql`) para deshacer los cambios de los ensayos. El seed ya está generado con la fecha de la presentación (2026-11-20).
 - [ ] Confirmar con el profesor que el seed ficticio en la base real cumple el criterio 2.
+
+## Después de la presentación
+
+- [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).

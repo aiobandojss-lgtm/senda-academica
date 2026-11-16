@@ -1,6 +1,6 @@
 # Identidad visual de Senda
 
-- **Estado:** propuesta, pendiente de la aprobación de Aymer (tarea 2.0)
+- **Estado:** aprobada por Aymer el 2026-11-16 (tarea 2.0)
 - **Fecha:** 2026-11-16
 - **Dónde se ve:** `npm run dev` y abrir `http://localhost:5173/guia`. La guía viva existe solo en desarrollo; el build de producción la descarta.
 
@@ -88,7 +88,8 @@ Los tokens viven en `web/src/index.css` (formato OKLCH, el de Tailwind 4 y shadc
 
 ## Movimiento
 
-- Una sola entrada escalonada al cargar cada pantalla, de 700 ms (`animate-in fade-in slide-in-from-bottom-3`), sin animaciones decorativas que se repitan.
+- Una sola entrada al cargar cada pantalla, de **250 ms** (`animate-in fade-in slide-in-from-bottom-2 duration-250`), escalonada de 40 en 40 ms y sin animaciones decorativas que se repitan. Todo queda visible en menos de medio segundo.
+- Es corta a propósito: las pantallas se recorren muchas veces al día (un docente revisa decenas de entregas) y una entrada larga se siente lenta. Para transiciones de interfaz se recomiendan de 200 a 300 ms.
 - Siempre con `motion-reduce:animate-none`: si la persona pidió "reducir movimiento" en su sistema, no hay animación. Las capturas de esta guía se tomaron así.
 
 ## Accesibilidad (WCAG 2.2 AA)

@@ -14,7 +14,7 @@
 
 ## 2. Autenticación y roles (día 2)
 
-- [ ] 2.0 Escribir `docs/identidad-visual.md` para Senda (paleta con contraste accesible, tipografías, tono, logotipo provisional) usando el plugin `frontend-design`, y aplicarla al tema de Tailwind/shadcn; verificar con capturas de Playwright de una pantalla de ejemplo en 375 px y 1280 px y la aprobación de Aymer
+- [x] 2.0 Escribir `docs/identidad-visual.md` para Senda (paleta con contraste accesible, tipografías, tono, logotipo provisional) usando el plugin `frontend-design`, y aplicarla al tema de Tailwind/shadcn; verificar con capturas de Playwright de una pantalla de ejemplo en 375 px y 1280 px y la aprobación de Aymer
 - [x] 2.1 Implementar hash y verificación PBKDF2 con el formato de `design.md` (D5) y la generación de contraseñas temporales (D17); verificar con unit tests que una contraseña del seed (`Demo2026*`) valida y otra no, y que las temporales tienen 10 caracteres sin ambiguos
 - [x] 2.2 Implementar `POST /api/auth/ingresar`, `POST /api/auth/salir` y `GET /api/auth/yo` con JWT en cookie HttpOnly que incluye la versión de sesión (D4); verificar con pruebas de integración los escenarios de credenciales correctas, incorrectas, documento inexistente e inactivo
 - [x] 2.3 Implementar el límite de intentos de ingreso (D14) con la tabla `intentos_fallidos`; verificar con pruebas los tres escenarios de la spec `autenticacion` (sexto intento bloqueado aunque la contraseña sea correcta, documento inexistente con el mismo mensaje, ingreso exitoso reinicia el conteo)
