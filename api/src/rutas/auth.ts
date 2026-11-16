@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { responderError, validarJson } from "../errores";
 import { HASH_SIMULADO, verificarContrasena } from "../seguridad/contrasenas";
+import { limpiarIntentos, registrarIntento } from "../seguridad/intentos";
 import { abrirSesion, cerrarSesion, leerSesion } from "../seguridad/sesion";
 import type { AppEnv, Rol } from "../tipos";
 
@@ -39,6 +40,12 @@ const esquemaIngreso = z.object({
 auth.post("/ingresar", validarJson(esquemaIngreso, "Escribe tu documento y tu contraseña"), async (c) => {
   const { documento, contrasena } = c.req.valid("json");
 
+  // D14: el intento se registra antes de verificar; del sexto en adelante se rechaza sin calcular el hash.
+  // El mensaje es el mismo exista o no el documento.
+  if (!(await registrarIntento(c.env.DB, documento))) {
+    return responderError(c, 429, "DEMASIADOS_INTENTOS", "Demasiados intentos. Intenta de nuevo en 15 minutos");
+  }
+
   const usuario = await c.env.DB.prepare(
     `SELECT id, rol, nombres, apellidos, password_hash, debe_cambiar_password, sesion_version,
             aviso_version_aceptada, activo
@@ -51,8 +58,12 @@ auth.post("/ingresar", validarJson(esquemaIngreso, "Escribe tu documento y tu co
   // Siempre se calcula un hash, exista o no el documento: el tiempo de respuesta tampoco debe revelarlo
   const contrasenaValida = await verificarContrasena(contrasena, usuario?.password_hash ?? HASH_SIMULADO);
   if (!usuario || !contrasenaValida) {
+    // La fila del intento queda registrada como fallo
     return responderError(c, 401, "CREDENCIALES_INVALIDAS", "Documento o contraseña incorrectos");
   }
+
+  // Contraseña correcta, aunque la cuenta esté inactiva: el conteo de fallos vuelve a cero
+  await limpiarIntentos(c.env.DB, documento);
 
   // Solo con la contraseña correcta se dice que la cuenta está inactiva; antes revelaría que el documento existe
   if (usuario.activo !== 1) {

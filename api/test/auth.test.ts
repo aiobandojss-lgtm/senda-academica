@@ -1,15 +1,15 @@
-import { env, exports } from "cloudflare:workers";
+import { env } from "cloudflare:workers";
 import { decode, sign } from "hono/jwt";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import app from "../src/index";
 import { hashContrasena } from "../src/seguridad/contrasenas";
+import { crearUsuario, ingresar, JSON_HEADERS, pedir } from "./utilidades";
 
 // Escenarios de la spec `autenticacion` (inicio, cierre y expiración de sesión) con usuarios propios
 // de la prueba: el código no debe depender de los datos del seed.
 
 const CONTRASENA = "Prueba2026*";
 const OCHO_HORAS = 8 * 60 * 60;
-const JSON_HEADERS = { "Content-Type": "application/json" };
 
 const ACTIVO = { documento: "7000000001", nombres: "Ana María", apellidos: "Rentería Mosquera" };
 const INACTIVO = { documento: "7000000002" };
@@ -18,44 +18,6 @@ const AVISO_VIEJO = { documento: "7000000004" };
 const INEXISTENTE = "7000000999";
 
 let idActivo: number;
-
-type NuevoUsuario = {
-  documento: string;
-  nombres?: string;
-  apellidos?: string;
-  activo?: 0 | 1;
-  debeCambiarPassword?: 0 | 1;
-  sesionVersion?: number;
-  // undefined = nunca aceptó el aviso
-  avisoVersion?: string;
-};
-
-async function crearUsuario(u: NuevoUsuario, passwordHash: string): Promise<number> {
-  const resultado = await env.DB.prepare(
-    `INSERT INTO usuarios (rol, tipo_documento, documento, nombres, apellidos, correo, password_hash,
-       debe_cambiar_password, sesion_version, aviso_version_aceptada, aviso_aceptado_en, activo)
-     VALUES ('estudiante', 'CC', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(
-      u.documento,
-      u.nombres ?? "Prueba",
-      u.apellidos ?? "Usuario",
-      `${u.documento}@correo.test`,
-      passwordHash,
-      u.debeCambiarPassword ?? 0,
-      u.sesionVersion ?? 0,
-      u.avisoVersion ?? null,
-      u.avisoVersion ? "2026-11-01T12:00:00Z" : null,
-      u.activo ?? 1,
-    )
-    .run();
-  return resultado.meta.last_row_id;
-}
-
-const pedir = (ruta: string, init?: RequestInit) => exports.default.fetch(`https://senda.test/api${ruta}`, init);
-
-const ingresar = (documento: string, contrasena: string) =>
-  pedir("/auth/ingresar", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ documento, contrasena }) });
 
 const conCookie = (token: string) => ({ headers: { Cookie: `__Host-sesion=${token}` } });
 
