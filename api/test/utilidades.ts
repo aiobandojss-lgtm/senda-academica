@@ -1,4 +1,5 @@
 import { env, exports } from "cloudflare:workers";
+import { hoyEnBogota } from "../src/dominio/mora";
 import type { Rol } from "../src/tipos";
 
 // Ayudas compartidas por las pruebas de la API. No es un archivo de pruebas: Vitest solo corre *.test.ts.
@@ -100,6 +101,25 @@ export async function crearEstudiante(
     .bind(id, e.carreraId, e.semestre)
     .run();
   return id;
+}
+
+// Fecha YYYY-MM-DD a `dias` de hoy en Colombia (negativo = en el pasado). Las pruebas de cartera usan
+// fechas relativas para dar el mismo resultado cualquier día que se corran.
+export function fechaDesdeHoy(dias: number): string {
+  const [anio, mes, dia] = hoyEnBogota().split("-").map(Number);
+  return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
+}
+
+// Cuota sin pagos (todo su valor es saldo) y excepción de mora, directamente en la D1 de pruebas
+export async function crearCuota(estudianteId: number, fechaVencimiento: string, valor = 250_000) {
+  await env.DB.prepare("INSERT INTO cuotas (estudiante_id, concepto, valor, fecha_vencimiento) VALUES (?, 'Mensualidad', ?, ?)")
+    .bind(estudianteId, valor, fechaVencimiento)
+    .run();
+}
+export async function crearExcepcion(estudianteId: number, hasta: string, creadoPor: number) {
+  await env.DB.prepare("INSERT INTO excepciones_mora (estudiante_id, motivo, hasta, creado_por) VALUES (?, 'Acuerdo de pago', ?, ?)")
+    .bind(estudianteId, hasta, creadoPor)
+    .run();
 }
 
 // Ids de los estudiantes inscritos en un curso, en orden

@@ -6,6 +6,7 @@ import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
 import { cursos } from "./rutas/cursos";
 import { docentes } from "./rutas/docentes";
+import { estudiantes } from "./rutas/estudiantes";
 import { usuarios } from "./rutas/usuarios";
 import { requiereSesion } from "./seguridad/permisos";
 import type { AppEnv } from "./tipos";
@@ -39,6 +40,7 @@ app.route("/carreras", carreras);
 app.route("/config", config);
 app.route("/cursos", cursos);
 app.route("/docentes", docentes);
+app.route("/estudiantes", estudiantes);
 app.route("/usuarios", usuarios);
 
 app.onError((error, c) => {

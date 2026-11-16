@@ -1,6 +1,8 @@
 // Ayudas de acceso a D1 compartidas por las rutas
 
-type Tabla = "carreras" | "cursos" | "usuarios";
+// Columna de la llave primaria de cada tabla que se actualiza con `actualizar`
+const LLAVE = { carreras: "id", cursos: "id", usuarios: "id", estudiantes: "usuario_id" } as const;
+type Tabla = keyof typeof LLAVE;
 
 // UPDATE solo con las columnas que llegaron (las undefined se ignoran). Los nombres de columna salen de
 // un mapa fijo escrito en cada ruta, nunca del cliente, así que no hay inyección SQL; los valores van
@@ -10,5 +12,5 @@ export function actualizar(db: D1Database, tabla: Tabla, id: number, columnas: R
   if (pares.length === 0) return null;
   const asignaciones = pares.map(([columna]) => `${columna} = ?`).join(", ");
   const valores = pares.map(([, valor]) => (typeof valor === "boolean" ? Number(valor) : valor));
-  return db.prepare(`UPDATE ${tabla} SET ${asignaciones} WHERE id = ?`).bind(...valores, id);
+  return db.prepare(`UPDATE ${tabla} SET ${asignaciones} WHERE ${LLAVE[tabla]} = ?`).bind(...valores, id);
 }

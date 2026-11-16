@@ -3,7 +3,8 @@ import { z } from "zod";
 import { actualizar } from "../datos";
 import { inscribirEnCurso } from "../dominio/inscripciones";
 import { idDeRuta, responderError, validarJson } from "../errores";
-import { requiereRol } from "../seguridad/permisos";
+import { accesoDenegado, requiereRol } from "../seguridad/permisos";
+import { errorDeCarrera, errorDeDocente } from "./reglas";
 import type { AppEnv } from "../tipos";
 import { conCambios, MENSAJE_SIN_CAMBIOS, texto } from "../validacion";
 
@@ -87,18 +88,6 @@ const aCursoDocente = (f: FilaCurso) => ({
 
 const buscarCurso = (db: D1Database, id: number) => db.prepare(`${SELECT_CURSO} WHERE k.id = ?`).bind(id).first<FilaCurso>();
 
-// Solo un docente activo puede asignarse a un curso (spec "Cursos por carrera")
-async function errorDeDocente(c: Context<AppEnv>, docenteId: number) {
-  const docente = await c.env.DB.prepare("SELECT activo FROM usuarios WHERE id = ? AND rol = 'docente'")
-    .bind(docenteId)
-    .first<{ activo: number }>();
-  if (!docente) return responderError(c, 404, "DOCENTE_NO_ENCONTRADO", "El docente no existe");
-  if (docente.activo !== 1) {
-    return responderError(c, 409, "DOCENTE_INACTIVO", "El docente no está activo: reactívalo o elige otro");
-  }
-  return null;
-}
-
 const carreraInactiva = (c: Context<AppEnv>, codigo: string) =>
   responderError(c, 409, "CARRERA_INACTIVA", `La carrera ${codigo} no está activa`);
 
@@ -127,21 +116,8 @@ cursos.get("/", requiereRol("admin", "docente"), async (c) => {
 cursos.post("/", requiereRol("admin"), validarJson(esquemaCrear), async (c) => {
   const datos = c.req.valid("json");
 
-  const carrera = await c.env.DB.prepare("SELECT codigo, duracion_semestres, activa FROM carreras WHERE id = ?")
-    .bind(datos.carreraId)
-    .first<{ codigo: string; duracion_semestres: number; activa: number }>();
-  if (!carrera) return responderError(c, 404, "CARRERA_NO_ENCONTRADA", "La carrera no existe");
-  if (carrera.activa !== 1) return carreraInactiva(c, carrera.codigo);
-  if (datos.semestre > carrera.duracion_semestres) {
-    return responderError(
-      c,
-      400,
-      "SEMESTRE_FUERA_DE_CARRERA",
-      `La carrera ${carrera.codigo} tiene semestres del 1 al ${carrera.duracion_semestres}`,
-    );
-  }
-  const errorDocente = await errorDeDocente(c, datos.docenteId);
-  if (errorDocente) return errorDocente;
+  const error = (await errorDeCarrera(c, datos.carreraId, datos.semestre, { exigirActiva: true })) ?? (await errorDeDocente(c, datos.docenteId));
+  if (error) return error;
 
   // D15: el curso y sus inscripciones en un solo batch (una transacción): o se guardan ambos o ninguno
   const [creado] = await c.env.DB.batch<{ id: number }>([
@@ -182,4 +158,27 @@ cursos.patch("/:id", requiereRol("admin"), validarJson(esquemaEditar), async (c)
   await c.env.DB.batch(sentencias);
 
   return c.json(aCursoAdmin((await buscarCurso(c.env.DB, id))!));
+});
+
+// Estudiantes del curso (spec `autenticacion`, "Docente consulta sus estudiantes"; D18): solo el docente
+// asignado o el administrador. El docente NUNCA recibe documento, correo ni celular. Son los activos: un
+// retirado conserva su inscripción como historial, pero ya no es parte del grupo. La tarea 4.3 le suma el
+// estado de las entregas.
+cursos.get("/:id/estudiantes", requiereRol("admin", "docente"), async (c) => {
+  const id = idDeRuta(c);
+  const curso = id ? await c.env.DB.prepare("SELECT docente_id FROM cursos WHERE id = ?").bind(id).first<{ docente_id: number | null }>() : null;
+  if (!id || !curso) return responderError(c, 404, "CURSO_NO_ENCONTRADO", "El curso no existe");
+  const usuario = c.var.usuario;
+  if (usuario.rol === "docente" && curso.docente_id !== usuario.id) return accesoDenegado(c);
+
+  const { results } = await c.env.DB.prepare(
+    `SELECT u.id, u.nombres, u.apellidos
+       FROM inscripciones i
+       JOIN usuarios u ON u.id = i.estudiante_id AND u.activo = 1
+      WHERE i.curso_id = ?
+      ORDER BY u.apellidos, u.nombres`,
+  )
+    .bind(id)
+    .all<{ id: number; nombres: string; apellidos: string }>();
+  return c.json(results.map((f) => ({ id: f.id, nombres: f.nombres, apellidos: f.apellidos })));
 });

@@ -50,3 +50,27 @@ const FORMATO_BOGOTA = new Intl.DateTimeFormat("en-CA", {
 export function hoyEnBogota(ahora: Date = new Date()): string {
   return FORMATO_BOGOTA.format(ahora);
 }
+
+// Estados de cartera de todos los estudiantes, o de uno, con dos consultas: solo trae lo que puede
+// cambiar el estado (cuotas vencidas con saldo y excepciones vigentes). Quien no aparece está al día.
+// Lo usan la lista de estudiantes del administrador y, en la tarea 5.3, el bloqueo al ingresar.
+export async function estadosDeCartera(db: D1Database, hoy: string, estudianteId?: number): Promise<(id: number) => EstadoMora> {
+  const filtro = estudianteId === undefined ? "" : "AND estudiante_id = ?";
+  const parametros = estudianteId === undefined ? [hoy] : [hoy, estudianteId];
+  const [cuotas, excepciones] = await db.batch<{ estudiante_id: number; fecha_vencimiento?: string; saldo?: number; hasta?: string }>([
+    db
+      .prepare(`SELECT estudiante_id, fecha_vencimiento, saldo FROM v_saldo_cuotas WHERE saldo > 0 AND fecha_vencimiento < ? ${filtro}`)
+      .bind(...parametros),
+    db.prepare(`SELECT estudiante_id, hasta FROM excepciones_mora WHERE hasta >= ? ${filtro}`).bind(...parametros),
+  ]);
+
+  const cuotasPor = new Map<number, CuotaMora[]>();
+  for (const f of cuotas.results) {
+    cuotasPor.set(f.estudiante_id, [...(cuotasPor.get(f.estudiante_id) ?? []), { fechaVencimiento: f.fecha_vencimiento!, saldo: f.saldo! }]);
+  }
+  const excepcionesPor = new Map<number, ExcepcionMora[]>();
+  for (const f of excepciones.results) {
+    excepcionesPor.set(f.estudiante_id, [...(excepcionesPor.get(f.estudiante_id) ?? []), { hasta: f.hasta! }]);
+  }
+  return (id) => calcularEstadoMora(cuotasPor.get(id) ?? [], excepcionesPor.get(id) ?? [], hoy);
+}

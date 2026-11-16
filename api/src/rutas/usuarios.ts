@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { inscribirEstudiante } from "../dominio/inscripciones";
 import { idDeRuta, responderError } from "../errores";
 import { generarContrasenaTemporal, hashContrasena } from "../seguridad/contrasenas";
 import { limpiarIntentos } from "../seguridad/intentos";
@@ -58,14 +59,15 @@ usuarios.post("/:id/desactivar", async (c) => {
   return c.json({ id: fila.id, activo: false });
 });
 
-// Vuelve a ingresar con su contraseña de siempre
+// Vuelve a ingresar con su contraseña de siempre. Si es estudiante, queda inscrito en los cursos de su
+// semestre que se crearon mientras estaba inactivo (D15); para un docente esa sentencia no inscribe nada.
 usuarios.post("/:id/reactivar", async (c) => {
   const id = idDeRuta(c);
-  const fila = id
-    ? await c.env.DB.prepare("UPDATE usuarios SET activo = 1 WHERE id = ? AND rol IN ('docente', 'estudiante') RETURNING id")
-        .bind(id)
-        .first<{ id: number }>()
-    : null;
-  if (!fila) return noEncontrado(c);
-  return c.json({ id: fila.id, activo: true });
+  if (!id) return noEncontrado(c);
+  const [reactivado] = await c.env.DB.batch<{ id: number }>([
+    c.env.DB.prepare("UPDATE usuarios SET activo = 1 WHERE id = ? AND rol IN ('docente', 'estudiante') RETURNING id").bind(id),
+    inscribirEstudiante(c.env.DB, { id }),
+  ]);
+  if (reactivado.results.length === 0) return noEncontrado(c);
+  return c.json({ id, activo: true });
 });

@@ -38,6 +38,9 @@ export const usuarioSesion = (fila: FilaUsuarioSesion, avisoVigente: string): Us
 
 export const noAutenticado = (c: Context) => responderError(c, 401, "NO_AUTENTICADO", "Tu sesión terminó. Ingresa de nuevo");
 
+// También para reglas sobre un recurso concreto, como el docente que pide un curso que no es suyo
+export const accesoDenegado = (c: Context) => responderError(c, 403, "ACCESO_DENEGADO", "No tienes permiso para esta operación");
+
 export const requiereSesion = ({ publicas, sinCompuertas }: ReglasSesion) =>
   createMiddleware<AppEnv>(async (c, next) => {
     // Se compara la ruta exacta. Una variante (por ejemplo, con "/" al final) no coincide con la lista
@@ -80,8 +83,6 @@ export const requiereSesion = ({ publicas, sinCompuertas }: ReglasSesion) =>
 // Va después de requiereSesion, en la ruta o en el grupo de rutas: requiereRol("admin")
 export const requiereRol = (...roles: Rol[]) =>
   createMiddleware<AppEnv>(async (c, next) => {
-    if (!roles.includes(c.var.usuario.rol)) {
-      return responderError(c, 403, "ACCESO_DENEGADO", "No tienes permiso para esta operación");
-    }
+    if (!roles.includes(c.var.usuario.rol)) return accesoDenegado(c);
     await next();
   });

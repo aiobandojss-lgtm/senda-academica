@@ -1,9 +1,10 @@
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { z } from "zod";
 import { actualizar } from "../datos";
 import { esUnicoRepetido, idDeRuta, responderError, validarJson } from "../errores";
 import { generarContrasenaTemporal, hashContrasena } from "../seguridad/contrasenas";
 import { requiereRol } from "../seguridad/permisos";
+import { documentoRepetido } from "./reglas";
 import type { AppEnv } from "../tipos";
 import {
   campoApellidos,
@@ -73,10 +74,6 @@ const aDocente = (f: FilaDocente) => ({
 });
 
 const buscarDocente = (db: D1Database, id: number) => db.prepare(`${SELECT_DOCENTE} AND u.id = ?`).bind(id).first<FilaDocente>();
-
-// El documento es único entre TODOS los usuarios: es el usuario para ingresar
-export const documentoRepetido = (c: Context<AppEnv>, documento: string) =>
-  responderError(c, 409, "DOCUMENTO_REPETIDO", `Ya existe un usuario con el documento ${documento}`);
 
 docentes.get("/", async (c) => {
   const { results } = await c.env.DB.prepare(`${SELECT_DOCENTE} ORDER BY u.activo DESC, u.apellidos, u.nombres`).all<FilaDocente>();
