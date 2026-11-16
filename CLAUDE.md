@@ -53,7 +53,7 @@ Flujo de trabajo (las skills se invocan como comandos):
 
 ## Stack y decisiones (detalle en los `design.md`)
 
-- **Cloudflare Workers** (Worker `senda`) con **Hono** para la API (`/api/*`) y **React + Vite + Tailwind + shadcn/ui** servido como static assets del mismo Worker. Un solo `wrangler deploy`.
+- **Cloudflare Workers** (Worker `senda`) con **Hono** para la API (`/api/*`) y **React + Vite + Tailwind + shadcn/ui** con **React Router 8** (modo declarativo) servido como static assets del mismo Worker. Un solo `wrangler deploy`.
 - **D1** (SQLite) para datos; migraciones en `migrations/` con `wrangler d1 migrations`. Las reglas críticas también viven en la base como triggers que abortan con códigos (`PAGO_SUPERA_SALDO`, `PAGO_INMUTABLE`, `CUOTA_CON_PAGOS`, `ENTREGA_CALIFICADA`); la API los traduce a mensajes en español (D13).
 - **Archivos** (entregas y soportes) detrás de la interfaz `AlmacenArchivos`: **Workers KV** hasta después de la presentación (20 de noviembre) (R2 exige medio de pago) y **R2** en producción; lo elige la variable `ALMACEN_ARCHIVOS` (D7, ADR-002). Nunca URLs públicas: la descarga pasa por la API con permisos.
 - **Sesión**: JWT HS256 en la cookie `__Host-sesion` (HttpOnly, Secure, SameSite=Lax), 8 horas desde el ingreso (`JWT_SECRET` como secreto de Wrangler), **revocable** con `usuarios.sesion_version` (D4). Compuertas de primer ingreso: contraseña temporal y aviso de privacidad (D16). Errores de la API siempre como `{ codigo, mensaje }` (`api/src/errores.ts`); validación de cuerpos con zod (`validarJson`).
@@ -91,7 +91,7 @@ Reglas de diseño:
 - Usa componentes de shadcn/ui antes de crear uno propio. Para buscarlos y ver ejemplos, usa el MCP de shadcn. Para instalarlos, usa `npx shadcn add <componente>`, con la versión del proyecto, aunque el MCP sugiera `shadcn@latest`.
 - Al buscar o listar con el MCP de shadcn, pasa siempre `registries: ["@shadcn"]`. Sin ese parámetro responde "No registries are configured", aunque `get_project_registries` sí encuentra el registro (comprobado en la tarea 1.7).
 - No vuelvas a ejecutar `shadcn mcp init`: además de escribir `.mcp.json`, mueve `shadcn` a `devDependencies` (en la tarea 1.7 se revirtió; va en `dependencies` por el CSS).
-- Ninguna pantalla se da por terminada sin revisar sus capturas en 375 px y 1280 px.
+- Ninguna pantalla se da por terminada sin revisar sus capturas en 375 px y 1280 px. Con el MCP de Playwright, emula `reducedMotion: 'reduce'` (el navegador en segundo plano pausa las animaciones) y abre `http://[::1]:5173`, no `localhost:5173`: Chrome recuerda el zoom por sitio y `localhost` quedó al 80 % (con eso, 375 px de pantalla miden 469 px de CSS). Confírmalo con `window.devicePixelRatio === 1`.
 - Contraste accesible (WCAG AA) y textos en español claro, pensados para estudiantes que entran desde el celular.
 
 ## Datos
@@ -126,6 +126,10 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 - Un solo `package.json` y un solo proyecto Vite en la raíz (`vite.config.ts`, `index.html`, `components.json`, `wrangler.jsonc`).
 - `api/src/` – Worker con Hono; todas las rutas bajo `/api` (`basePath`). `api/worker-configuration.d.ts` lo genera `npm run cf-typegen` (se versiona; regenerarlo al cambiar `wrangler.jsonc`). Usa `--strict-vars=false` para que las variables queden como `string` y no como su valor literal (si no, `env.ALMACEN_ARCHIVOS === "r2"` no compila); el valor se valida en tiempo de ejecución.
 - `web/src/` – React; alias `@/` → `web/src/`; componentes de shadcn/ui en `web/src/components/ui/` (style `radix-nova`, base Radix, utilidad `cn` del paquete `cn` de shadcn).
+  - `lib/api.ts`: único cliente de la API; convierte `{ codigo, mensaje }` en `ErrorApi` y avisa a la sesión de los 401 y de las compuertas.
+  - `sesion/`: `ProveedorSesion` carga la configuración pública y `/auth/yo`; `destino.ts` tiene la única regla de navegación (`destinoDe`). Las puertas de `App.tsx` solo redirigen: la seguridad está en la API.
+  - `layout/menus.ts`: el menú de cada rol. Cada sección nueva reemplaza su `SeccionPendiente` en `App.tsx`.
+  - Animación de entrada: la constante `ENTRADA` de `lib/movimiento.ts` (250 ms).
 - TypeScript con referencias: `tsconfig.app.json` (web), `tsconfig.worker.json` (api, tipos del runtime de Workers, sin DOM), `tsconfig.node.json` (configuración).
 - Identificadores del dominio en español, como en los specs (`calcularEstadoMora`, `AlmacenArchivos`); comentarios en español.
 
@@ -135,9 +139,9 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 - **Antes de instalar un paquete que nombra el kit, revisar `npm view <paquete> deprecated`**: `@cloudflare/vitest-pool-workers` estaba obsoleto y renombrado.
 - **TypeScript `~6.0`**: `typescript-eslint` no soporta TypeScript 7 todavía. **Vitest `^4.1`** por la tarea 1.5; vitest-plugin 1.7 ya acepta Vitest 5, pero no se cambia de versión mayor antes de la presentación.
 - **npm 11 no ejecuta scripts de instalación sin aprobación** (`allowScripts` en `package.json`). Aprobados: `workerd` y `esbuild`. Ante un paquete nuevo con scripts: revisar quién lo publica y qué hace su script antes de `npm install-scripts approve`.
-- **`npm audit`**: 12 alertas (2 bajas, 10 moderadas) con dos orígenes, ninguno en el código que se despliega:
+- **`npm audit`**: 10 alertas moderadas (revisado en la tarea 2.6) con dos orígenes, ninguno en el código que se despliega:
   - `minimatch` dentro de `typescript-eslint`, la herramienta de lint.
-  - El CLI de `shadcn` (`deepmerge`, `ts-morph`). Está en `dependencies` porque el CSS importa `shadcn/tailwind.css`, pero el código vulnerable es el del CLI y no llega al navegador ni al Worker.
+  - El CLI de `shadcn` (`ts-morph`). Está en `dependencies` porque el CSS importa `shadcn/tailwind.css`, pero el código vulnerable es el del CLI y no llega al navegador ni al Worker.
 
   Aceptadas. `npm audit fix --force` las "arreglaría" bajando `shadcn` a 1.0.0 y `typescript-eslint` a 8.36: **nunca** ejecutarlo sin leer qué cambia.
 

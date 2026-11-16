@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { auth } from "./rutas/auth";
+import { config } from "./rutas/config";
 import { usuarios } from "./rutas/usuarios";
 import { requiereSesion } from "./seguridad/permisos";
 import type { AppEnv } from "./tipos";
@@ -12,7 +13,12 @@ const app = new Hono<AppEnv>().basePath("/api");
 
 // Negar por defecto: toda ruta de /api exige sesión, salvo las que se declaran aquí como públicas.
 // Una ruta nueva que nadie agregue a esta lista queda cerrada, nunca abierta.
-const RUTAS_PUBLICAS = ["GET /api/salud", "POST /api/auth/ingresar", "POST /api/auth/salir"];
+const RUTAS_PUBLICAS = [
+  "GET /api/salud",
+  "GET /api/config/publica", // D19: la pantalla de ingreso necesita los nombres antes de que haya sesión
+  "POST /api/auth/ingresar",
+  "POST /api/auth/salir",
+];
 
 // D16: lo único permitido mientras falte cambiar la contraseña temporal o aceptar el aviso de privacidad
 // (salir ya es pública)
@@ -26,6 +32,7 @@ app.use("*", requiereSesion({ publicas: RUTAS_PUBLICAS, sinCompuertas: RUTAS_SIN
 app.get("/salud", (c) => c.json({ ok: true }));
 
 app.route("/auth", auth);
+app.route("/config", config);
 app.route("/usuarios", usuarios);
 
 app.onError((error, c) => {

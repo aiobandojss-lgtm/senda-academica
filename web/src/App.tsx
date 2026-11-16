@@ -1,71 +1,76 @@
-import { useCallback, useEffect, useState } from "react";
-import { SimboloSenda } from "@/components/marca/SimboloSenda";
-import { Button } from "@/components/ui/button";
+import type { ReactNode } from "react";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
+import { MENU_POR_ROL } from "@/layout/menus";
+import LayoutRol from "@/layout/LayoutRol";
+import type { Perfil, Rol } from "@/lib/api";
+import AceptarAviso from "@/pantallas/acceso/AceptarAviso";
+import CambiarContrasena from "@/pantallas/acceso/CambiarContrasena";
+import Ingresar from "@/pantallas/acceso/Ingresar";
+import { InicioRol, SeccionPendiente } from "@/pantallas/InicioRol";
+import { ProveedorSesion } from "@/sesion/ContextoSesion";
+import { destinoDe, INICIO_POR_ROL, RUTAS, sinCompuertas } from "@/sesion/destino";
+import { useSesion } from "@/sesion/useSesion";
 
-type EstadoApi = "verificando" | "en_linea" | "sin_conexion";
+const ROLES: Rol[] = ["admin", "docente", "estudiante"];
 
-const TEXTO_ESTADO: Record<EstadoApi, string> = {
-  verificando: "Verificando la conexión con la API…",
-  en_linea: "API en línea",
-  sin_conexion: "No hay conexión con la API",
-};
-
-// Consulta GET /api/salud; devuelve true solo si la API responde {"ok": true}
-async function consultarSalud(senal: AbortSignal): Promise<boolean> {
-  const respuesta = await fetch("/api/salud", { signal: senal });
-  if (!respuesta.ok) return false;
-  const datos = (await respuesta.json()) as { ok?: unknown };
-  return datos.ok === true;
+// Puerta de una ruta: si el estado de la sesión no le corresponde, lleva a la persona a su destino
+// (destino.ts). Es comodidad de navegación; la seguridad real está en la API, que niega por defecto (D4).
+function Puerta({ permite, children }: { permite: (perfil: Perfil | null) => boolean; children: ReactNode }) {
+  const { perfil } = useSesion();
+  return permite(perfil) ? children : <Navigate to={destinoDe(perfil)} replace />;
 }
 
-// Página inicial provisional con la identidad de Senda (tarea 2.0); la pantalla de ingreso llega en la tarea 2.6
+function IrAlDestino() {
+  const { perfil } = useSesion();
+  return <Navigate to={destinoDe(perfil)} replace />;
+}
+
+// La plataforma: enrutador del navegador y sesión cargada antes de la primera pantalla
 export default function App() {
-  const [estadoApi, setEstadoApi] = useState<EstadoApi>("verificando");
-  const [intento, setIntento] = useState(0);
-
-  useEffect(() => {
-    const controlador = new AbortController();
-    consultarSalud(controlador.signal)
-      .then((ok) => setEstadoApi(ok ? "en_linea" : "sin_conexion"))
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setEstadoApi("sin_conexion");
-      });
-    return () => controlador.abort();
-  }, [intento]);
-
-  const verificarDeNuevo = useCallback(() => {
-    setEstadoApi("verificando");
-    setIntento((n) => n + 1);
-  }, []);
-
   return (
-    <main className="fondo-curvas flex min-h-svh items-center justify-center p-5">
-      <section className="w-full max-w-md space-y-6 rounded-2xl bg-card p-8 text-card-foreground shadow-xl ring-1 shadow-primary/10 ring-foreground/10">
-        <header className="space-y-3">
-          <SimboloSenda className="size-12" />
-          <h1 className="text-3xl font-semibold tracking-tight">Plataforma académica</h1>
-          <p className="text-muted-foreground">En construcción.</p>
-        </header>
+    <BrowserRouter>
+      <ProveedorSesion>
+        <Rutas />
+      </ProveedorSesion>
+    </BrowserRouter>
+  );
+}
 
-        <p role="status" aria-live="polite" className="flex items-center gap-2 text-sm">
-          <span
-            aria-hidden="true"
-            className={
-              estadoApi === "en_linea"
-                ? "size-2.5 rounded-full bg-exito"
-                : estadoApi === "sin_conexion"
-                  ? "size-2.5 rounded-full bg-destructive"
-                  : "size-2.5 animate-pulse rounded-full bg-muted-foreground"
-            }
-          />
-          {TEXTO_ESTADO[estadoApi]}
-        </p>
+function Rutas() {
+  return (
+    <Routes>
+      <Route path={RUTAS.ingresar} element={<Puerta permite={(p) => !p}><Ingresar /></Puerta>} />
 
-        <Button variant="outline" onClick={verificarDeNuevo} disabled={estadoApi === "verificando"}>
-          Verificar de nuevo
-        </Button>
-      </section>
-    </main>
+      {/* Compuertas de primer ingreso (D16), en el mismo orden que las aplica la API */}
+      <Route
+        path={RUTAS.cambiarContrasenaObligatorio}
+        element={<Puerta permite={(p) => !!p?.debeCambiarPassword}><CambiarContrasena obligatorio /></Puerta>}
+      />
+      <Route
+        path={RUTAS.aceptarAviso}
+        element={<Puerta permite={(p) => !!p && !p.debeCambiarPassword && p.debeAceptarAviso}><AceptarAviso /></Puerta>}
+      />
+
+      {/* Con sesión y sin compuertas: layout con el menú del rol */}
+      <Route element={<Puerta permite={sinCompuertas}><LayoutRol /></Puerta>}>
+        <Route path={RUTAS.cambiarContrasena} element={<CambiarContrasena />} />
+        {ROLES.map((rol) => (
+          <Route
+            key={rol}
+            path={INICIO_POR_ROL[rol]}
+            element={<Puerta permite={(p) => p?.rol === rol}><Outlet /></Puerta>}
+          >
+            <Route index element={<InicioRol />} />
+            {MENU_POR_ROL[rol]
+              .filter((item) => item.ruta !== INICIO_POR_ROL[rol])
+              .map((item) => (
+                <Route key={item.ruta} path={item.ruta} element={<SeccionPendiente titulo={item.titulo} />} />
+              ))}
+          </Route>
+        ))}
+      </Route>
+
+      <Route path="*" element={<IrAlDestino />} />
+    </Routes>
   );
 }
