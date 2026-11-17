@@ -249,6 +249,23 @@ pagos.post("/:id/anular", validarJson(esquemaAnular), async (c) => {
   }
 });
 
+// Excepción de mora (spec "Excepciones autorizadas", tarea 5.4): mientras esté vigente (hasta inclusive), el
+// estudiante ingresa aunque cumpla la regla de bloqueo. La fecha final debe ser hoy o futura.
+const esquemaExcepcion = z.object({
+  motivo: texto("Escribe el motivo, por ejemplo acuerdo de pago", 200, "El motivo"),
+  hasta: fecha("Escribe la fecha final de la excepción").refine((f) => f >= hoyEnBogota(), "La fecha final debe ser hoy o una fecha posterior"),
+});
+
+carteraDeEstudiante.post("/:id/excepciones", validarJson(esquemaExcepcion), async (c) => {
+  const id = idDeRuta(c);
+  if (!(await estudianteExiste(c, id))) return estudianteNoEncontrado(c);
+  const datos = c.req.valid("json");
+  const creada = await c.env.DB.prepare("INSERT INTO excepciones_mora (estudiante_id, motivo, hasta, creado_por) VALUES (?, ?, ?, ?) RETURNING id, motivo, hasta")
+    .bind(id, datos.motivo, datos.hasta, c.var.usuario.id)
+    .first<{ id: number; motivo: string; hasta: string }>();
+  return c.json({ ...creada!, vigente: true }, 201);
+});
+
 // El estudiante consulta su propio estado de cuenta; nadie más usa esta ruta
 estadoCuentaPropio.get("/", async (c) => {
   const usuario = c.var.usuario;
