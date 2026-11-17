@@ -8,6 +8,7 @@ import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
 import { cursos } from "./rutas/cursos";
 import { docentes } from "./rutas/docentes";
+import { archivosDeActividad } from "./rutas/entregas";
 import { estudiantes } from "./rutas/estudiantes";
 import { usuarios } from "./rutas/usuarios";
 import { requiereSesion } from "./seguridad/permisos";
@@ -44,6 +45,8 @@ app.route("/cursos", cursos);
 // Actividades de un curso (/cursos/:id/actividades) y de una actividad (/actividades/:id), tarea 4.1
 app.route("/cursos", actividadesDeCurso);
 app.route("/actividades", actividades);
+// Entrega del estudiante y archivo de apoyo de una actividad, tarea 4.2
+app.route("/actividades", archivosDeActividad);
 app.route("/docentes", docentes);
 // Plantilla y carga masiva por CSV (tarea 3.3), bajo el mismo prefijo que el resto de estudiantes
 app.route("/estudiantes", cargaEstudiantes);

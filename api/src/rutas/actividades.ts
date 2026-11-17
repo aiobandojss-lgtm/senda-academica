@@ -102,7 +102,7 @@ async function vistaEstudiante(db: D1Database, estudianteId: number, filtro: { c
 }
 
 // Vista del docente y del administrador: todas, con cuántos entregaron y cuántas están calificadas
-async function vistaDocente(db: D1Database, filtro: { cursoId: number } | { actividadId: number }) {
+export async function vistaDocente(db: D1Database, filtro: { cursoId: number } | { actividadId: number }) {
   const { results } = await db
     .prepare(
       `SELECT ${COLUMNAS},

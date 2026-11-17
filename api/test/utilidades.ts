@@ -68,7 +68,7 @@ export async function sesionDe(documento: string, contrasena: string): Promise<s
 }
 
 // Petición con sesión y cuerpo JSON, como la haría el frontend
-export const llamar = (token: string, metodo: "GET" | "POST" | "PATCH", ruta: string, cuerpo?: unknown) =>
+export const llamar = (token: string, metodo: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", ruta: string, cuerpo?: unknown) =>
   pedir(
     ruta,
     conCookie(token, {
@@ -128,4 +128,27 @@ export async function inscritosEn(cursoId: number): Promise<number[]> {
     .bind(cursoId)
     .all<{ estudiante_id: number }>();
   return results.map((r) => r.estudiante_id);
+}
+
+// Primeros bytes de cada formato permitido, seguidos de relleno
+const con = (firma: number[], relleno = 32) => new Uint8Array([...firma, ...new Array(relleno).fill(0x20)]);
+export const BYTES = {
+  pdf: con([0x25, 0x50, 0x44, 0x46, 0x2d]), // %PDF-
+  png: con([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  jpg: con([0xff, 0xd8, 0xff, 0xe0]),
+  docx: con([0x50, 0x4b, 0x03, 0x04]), // ZIP: un .docx es un ZIP
+  exe: con([0x4d, 0x5a, 0x90, 0x00]), // MZ: ejecutable de Windows
+  texto: new TextEncoder().encode("hola, esto es texto plano"),
+};
+
+// Sube un archivo como lo hace el navegador: multipart/form-data con el campo "archivo"
+export function subirArchivo(token: string, ruta: string, nombre: string, bytes: Uint8Array, metodo: "POST" | "PUT" = "POST") {
+  const datos = new FormData();
+  datos.append("archivo", new File([bytes], nombre));
+  return pedir(ruta, conCookie(token, { method: metodo, body: datos }));
+}
+
+// Llaves guardadas en el KV de archivos bajo un prefijo (para comprobar que no quedan huérfanos)
+export async function llavesEnKV(prefijo: string): Promise<string[]> {
+  return (await env.ARCHIVOS_KV.list({ prefix: prefijo })).keys.map((k) => k.name);
 }

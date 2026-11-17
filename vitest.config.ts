@@ -30,6 +30,9 @@ export default defineConfig({
           // Se impone sobre el valor de .dev.vars
           JWT_SECRET: JWT_SECRET_PRUEBAS,
         },
+        // Bucket R2 local SOLO para pruebas: el almacén R2 (D7) pasa las mismas pruebas de contrato que KV.
+        // wrangler.jsonc no declara R2 porque la demo corre en KV hasta tener medio de pago (ADR-002).
+        r2Buckets: ["ARCHIVOS_R2"],
       },
     })),
   ],
