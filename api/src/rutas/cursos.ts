@@ -91,8 +91,48 @@ const buscarCurso = (db: D1Database, id: number) => db.prepare(`${SELECT_CURSO} 
 const carreraInactiva = (c: Context<AppEnv>, codigo: string) =>
   responderError(c, 409, "CARRERA_INACTIVA", `La carrera ${codigo} no está activa`);
 
-cursos.get("/", requiereRol("admin", "docente"), async (c) => {
+// Cursos del estudiante (tarea 4.1): todos en los que está inscrito, también los de semestres anteriores
+// (su historial), con el nombre del docente pero sin sus datos de contacto (D18). Primero los actuales.
+type FilaCursoEstudiante = {
+  id: number;
+  nombre: string;
+  semestre: number;
+  carrera_id: number;
+  carrera_codigo: string;
+  carrera_nombre: string;
+  docente_nombres: string | null;
+  docente_apellidos: string | null;
+  actual: number;
+};
+const aCursoEstudiante = (f: FilaCursoEstudiante) => ({
+  id: f.id,
+  nombre: f.nombre,
+  semestre: f.semestre,
+  carrera: { id: f.carrera_id, codigo: f.carrera_codigo, nombre: f.carrera_nombre },
+  docente: f.docente_nombres === null ? null : { nombres: f.docente_nombres, apellidos: f.docente_apellidos },
+  actual: f.actual === 1,
+});
+
+cursos.get("/", async (c) => {
   const usuario = c.var.usuario;
+  if (usuario.rol === "estudiante") {
+    const { results } = await c.env.DB.prepare(
+      `SELECT k.id, k.nombre, k.semestre,
+              c.id AS carrera_id, c.codigo AS carrera_codigo, c.nombre AS carrera_nombre,
+              d.nombres AS docente_nombres, d.apellidos AS docente_apellidos,
+              (k.activo = 1 AND k.semestre = e.semestre_actual AND k.carrera_id = e.carrera_id) AS actual
+         FROM inscripciones i
+         JOIN cursos k ON k.id = i.curso_id
+         JOIN carreras c ON c.id = k.carrera_id
+         JOIN estudiantes e ON e.usuario_id = i.estudiante_id
+         LEFT JOIN usuarios d ON d.id = k.docente_id
+        WHERE i.estudiante_id = ?
+        ORDER BY actual DESC, k.semestre DESC, k.nombre`,
+    )
+      .bind(usuario.id)
+      .all<FilaCursoEstudiante>();
+    return c.json(results.map(aCursoEstudiante));
+  }
   if (usuario.rol === "docente") {
     const { results } = await c.env.DB.prepare(`${SELECT_CURSO} WHERE k.docente_id = ? AND k.activo = 1 ${ORDEN}`)
       .bind(usuario.id)

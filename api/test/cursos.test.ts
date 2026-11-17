@@ -143,10 +143,12 @@ describe("asignar docente", () => {
     }
   });
 
-  it("el estudiante no usa esta lista", async () => {
-    const respuesta = await llamar(tokenEstudiante, "GET", "/cursos");
+  // Desde la tarea 4.1, el estudiante recibe aquí los cursos en que está inscrito
+  it("el estudiante recibe solo los cursos en que está inscrito", async () => {
+    const lista = await (await llamar(tokenEstudiante, "GET", "/cursos")).json<{ id: number; semestre: number }[]>();
 
-    expect(respuesta.status).toBe(403);
+    expect(lista.length).toBeGreaterThan(0);
+    expect(lista.every((c) => c.semestre === 1)).toBe(true);
   });
 });
 

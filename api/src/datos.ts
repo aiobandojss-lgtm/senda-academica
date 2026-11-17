@@ -1,7 +1,7 @@
 // Ayudas de acceso a D1 compartidas por las rutas
 
 // Columna de la llave primaria de cada tabla que se actualiza con `actualizar`
-const LLAVE = { carreras: "id", cursos: "id", usuarios: "id", estudiantes: "usuario_id" } as const;
+const LLAVE = { carreras: "id", cursos: "id", usuarios: "id", estudiantes: "usuario_id", actividades: "id", entregas: "id" } as const;
 type Tabla = keyof typeof LLAVE;
 
 // UPDATE solo con las columnas que llegaron (las undefined se ignoran). Los nombres de columna salen de

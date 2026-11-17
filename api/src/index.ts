@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
+import { actividades, actividadesDeCurso } from "./rutas/actividades";
 import { auth } from "./rutas/auth";
 import { cargaEstudiantes } from "./rutas/carga";
 import { carreras } from "./rutas/carreras";
@@ -40,6 +41,9 @@ app.route("/auth", auth);
 app.route("/carreras", carreras);
 app.route("/config", config);
 app.route("/cursos", cursos);
+// Actividades de un curso (/cursos/:id/actividades) y de una actividad (/actividades/:id), tarea 4.1
+app.route("/cursos", actividadesDeCurso);
+app.route("/actividades", actividades);
 app.route("/docentes", docentes);
 // Plantilla y carga masiva por CSV (tarea 3.3), bajo el mismo prefijo que el resto de estudiantes
 app.route("/estudiantes", cargaEstudiantes);
