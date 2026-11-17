@@ -1,8 +1,11 @@
-import type { ReactNode } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { lazy, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
+import { Toaster } from "@/components/ui/sonner";
 import { MENU_POR_ROL } from "@/layout/menus";
 import LayoutRol from "@/layout/LayoutRol";
 import type { Perfil, Rol } from "@/lib/api";
+import { clienteConsultas } from "@/lib/consultas";
 import AceptarAviso from "@/pantallas/acceso/AceptarAviso";
 import CambiarContrasena from "@/pantallas/acceso/CambiarContrasena";
 import Ingresar from "@/pantallas/acceso/Ingresar";
@@ -12,6 +15,21 @@ import { destinoDe, INICIO_POR_ROL, RUTAS, sinCompuertas } from "@/sesion/destin
 import { useSesion } from "@/sesion/useSesion";
 
 const ROLES: Rol[] = ["admin", "docente", "estudiante"];
+
+// Las pantallas de administración se cargan aparte (división por rutas): el estudiante que entra desde
+// el celular no descarga tablas, diálogos ni formularios que nunca va a usar. El Suspense que muestra la
+// espera está en LayoutRol.
+const Carreras = lazy(() => import("@/pantallas/admin/Carreras"));
+const CarreraDetalle = lazy(() => import("@/pantallas/admin/CarreraDetalle"));
+const Docentes = lazy(() => import("@/pantallas/admin/Docentes"));
+const Estudiantes = lazy(() => import("@/pantallas/admin/Estudiantes"));
+
+// Secciones del menú ya construidas; las demás muestran SeccionPendiente hasta su tarea
+const PANTALLAS: Record<string, ReactNode> = {
+  "/admin/carreras": <Carreras />,
+  "/admin/estudiantes": <Estudiantes />,
+  "/admin/docentes": <Docentes />,
+};
 
 // Puerta de una ruta: si el estado de la sesión no le corresponde, lleva a la persona a su destino
 // (destino.ts). Es comodidad de navegación; la seguridad real está en la API, que niega por defecto (D4).
@@ -28,11 +46,14 @@ function IrAlDestino() {
 // La plataforma: enrutador del navegador y sesión cargada antes de la primera pantalla
 export default function App() {
   return (
-    <BrowserRouter>
-      <ProveedorSesion>
-        <Rutas />
-      </ProveedorSesion>
-    </BrowserRouter>
+    <QueryClientProvider client={clienteConsultas}>
+      <BrowserRouter>
+        <ProveedorSesion>
+          <Rutas />
+        </ProveedorSesion>
+      </BrowserRouter>
+      <Toaster position="top-center" richColors={false} />
+    </QueryClientProvider>
   );
 }
 
@@ -64,8 +85,9 @@ function Rutas() {
             {MENU_POR_ROL[rol]
               .filter((item) => item.ruta !== INICIO_POR_ROL[rol])
               .map((item) => (
-                <Route key={item.ruta} path={item.ruta} element={<SeccionPendiente titulo={item.titulo} />} />
+                <Route key={item.ruta} path={item.ruta} element={PANTALLAS[item.ruta] ?? <SeccionPendiente titulo={item.titulo} />} />
               ))}
+            {rol === "admin" && <Route path="/admin/carreras/:id" element={<CarreraDetalle />} />}
           </Route>
         ))}
       </Route>

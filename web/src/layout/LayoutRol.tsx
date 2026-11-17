@@ -1,7 +1,9 @@
 import { KeyRound, LogOut, Menu } from "lucide-react";
+import { Suspense } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import { Marca } from "@/components/marca/SimboloSenda";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Sidebar,
   SidebarContent,
@@ -43,7 +45,15 @@ export default function LayoutRol() {
         <BarraSuperior productoNombre={config.productoNombre} />
         {/* SidebarInset ya es el <main> de la página: aquí va un div para no anidar dos landmarks */}
         <div id="contenido" tabIndex={-1} className="flex-1 px-5 py-8 outline-none md:px-10 md:py-10">
-          <Outlet />
+          <Suspense
+            fallback={
+              <div className="grid min-h-40 place-items-center">
+                <Spinner className="size-5 text-primary" />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </div>
       </SidebarInset>
     </SidebarProvider>

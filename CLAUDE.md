@@ -53,7 +53,7 @@ Flujo de trabajo (las skills se invocan como comandos):
 
 ## Stack y decisiones (detalle en los `design.md`)
 
-- **Cloudflare Workers** (Worker `senda`) con **Hono** para la API (`/api/*`) y **React + Vite + Tailwind + shadcn/ui** con **React Router 8** (modo declarativo) servido como static assets del mismo Worker. Un solo `wrangler deploy`.
+- **Cloudflare Workers** (Worker `senda`) con **Hono** para la API (`/api/*`) y **React + Vite + Tailwind + shadcn/ui** con **React Router 8** (modo declarativo) y **TanStack Query** (`web/src/lib/consultas.ts`) servido como static assets del mismo Worker. Un solo `wrangler deploy`.
 - **D1** (SQLite) para datos; migraciones en `migrations/` con `wrangler d1 migrations`. Las reglas críticas también viven en la base como triggers que abortan con códigos (`PAGO_SUPERA_SALDO`, `PAGO_INMUTABLE`, `CUOTA_CON_PAGOS`, `ENTREGA_CALIFICADA`); la API los traduce a mensajes en español (D13).
 - **Archivos** (entregas y soportes) detrás de la interfaz `AlmacenArchivos`: **Workers KV** hasta después de la presentación (20 de noviembre) (R2 exige medio de pago) y **R2** en producción; lo elige la variable `ALMACEN_ARCHIVOS` (D7, ADR-002). Nunca URLs públicas: la descarga pasa por la API con permisos.
 - **Sesión**: JWT HS256 en la cookie `__Host-sesion` (HttpOnly, Secure, SameSite=Lax), 8 horas desde el ingreso (`JWT_SECRET` como secreto de Wrangler), **revocable** con `usuarios.sesion_version` (D4). Compuertas de primer ingreso: contraseña temporal y aviso de privacidad (D16). Errores de la API siempre como `{ codigo, mensaje }` (`api/src/errores.ts`); validación de cuerpos con zod (`validarJson`).

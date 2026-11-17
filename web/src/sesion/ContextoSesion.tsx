@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { PantallaCarga, PantallaSinConexion } from "@/components/marca/PantallaCarga";
 import { api, type ConfigPublica, ErrorApi, escucharErroresDeSesion, type Perfil } from "@/lib/api";
+import { clienteConsultas } from "@/lib/consultas";
 import { ContextoSesion } from "./useSesion";
 
 type Estado = { perfil: Perfil | null; avisoIngreso: string | null };
@@ -56,6 +57,12 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (config) document.title = config.productoNombre;
   }, [config]);
+
+  // Sin sesión, la caché de datos se vacía: en un computador compartido, quien ingrese después no
+  // puede encontrar en memoria los datos de la sesión anterior (Habeas Data)
+  useEffect(() => {
+    if (!estado.perfil) clienteConsultas.clear();
+  }, [estado.perfil]);
 
   const ingresar = useCallback(async (documento: string, contrasena: string) => {
     const perfil = await api.post<Perfil>("/auth/ingresar", { documento, contrasena });

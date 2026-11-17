@@ -30,7 +30,9 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - Tarea 2.6 cerrada: `GET /api/config/publica` (con prueba) y las pantallas de ingreso, cambio de contraseña, aviso de privacidad (borrador) y layout por rol. Se usó React Router 8 y el Sidebar de shadcn para los tres roles, por decisión de Aymer. Se verificó con Playwright en 375 y 1280 px, incluido el primer ingreso del seed. Grupo 2 completo (16 de 31).
   - Tarea 3.1 cerrada: API de carreras, cursos y docentes. Antes se actualizó la spec con 4 reglas aprobadas por Aymer. Entre ellas, la carrera y el semestre de un curso no se editan, y reactivar un curso inscribe a sus estudiantes.
   - Tarea 5.1 adelantada (decisión de Aymer): `calcularEstadoMora` y `hoyEnBogota`, con 15 pruebas unitarias. El filtro por estado de cartera de la 3.2 la necesita.
-  - Siguen 3.2, 3.3 y 3.4. Vamos más o menos un día atrás (el plan ponía hoy el grupo 4) y no hay colchón: si hace falta, se aplican las reglas de recorte.
+  - Tareas 3.2 y 3.3 cerradas: API de estudiantes (comprobada contra el seed: 45 al día, 5 en riesgo, 9 bloqueados, 1 con excepción) y carga masiva por CSV, todo o nada.
+  - Tarea 3.4 cerrada: pantallas de administración de carreras y cursos, estudiantes (con carga masiva) y docentes, con TanStack Query (decisión de Aymer) y formularios en diálogo. Verificadas con Playwright en 375 y 1280 px. Grupo 3 completo (21 de 31, con la 5.1 adelantada).
+  - Sigue el grupo 4 (actividades y entregas). Vamos más o menos medio día atrás (el plan ponía hoy el grupo 4) y no hay colchón: si hace falta, se aplican las reglas de recorte.
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 4
 - [ ] Día 5

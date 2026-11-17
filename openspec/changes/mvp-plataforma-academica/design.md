@@ -31,6 +31,8 @@ Rápido de construir y de desplegar como estático. Los componentes de interfaz 
 Navegación (decidido en la tarea 2.6):
 - **React Router 8 en modo declarativo.** Es el estándar de la industria y da rutas hijas con `<Outlet>`, enlaces directos y el botón Atrás del celular. Se descartaron wouter, más liviano pero menos usado, y no usar enrutador, que obligaba a programar a mano la historia del navegador.
 - **El `Sidebar` de shadcn/ui para los tres roles.** Es un solo componente accesible: en el celular se abre como un `Sheet`, y el inicio de cada rol muestra sus secciones como tarjetas para no depender del menú escondido. Una barra inferior para el estudiante queda como mejora si sobra tiempo.
+- **Datos con TanStack Query** (decidido por Aymer en la tarea 3.4). Es el estándar de la industria para datos del servidor: caché por llave, reintentos y recarga de las listas después de cada cambio (invalidación). Se descartó un hook propio, más simple pero sin caché ni invalidación. La caché se vacía al cerrar o terminar la sesión, para que en un computador compartido nadie encuentre en memoria los datos de la sesión anterior.
+- **Las pantallas de administración se cargan aparte** (`React.lazy`): el estudiante que entra desde el celular no descarga código que nunca usa.
 - **Las redirecciones del frontend son solo comodidad.** Siguen el mismo orden que la API (sesión, contraseña temporal, aviso y rol), pero la seguridad sigue en el servidor (D4).
 
 ### D4. Sesión con JWT firmado en cookie HttpOnly, revocable
