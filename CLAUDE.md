@@ -155,7 +155,7 @@ npm run typecheck      # tsc -b (web, api y configuración)
 npm run cf-typegen     # regenera api/worker-configuration.d.ts tras cambiar wrangler.jsonc
 npm run deploy         # build + wrangler deploy
 npm test               # Vitest: pruebas de la API en workerd (npm run test:watch para modo interactivo)
-npm run test:e2e       # Playwright (se agrega en la tarea 6.1)
+npm run test:e2e       # Playwright: flujo de la demo contra el build de producción (vite preview, puerto 4173); recarga el seed local antes y lo deja como al final de la demo (después: npm run db:seed). Solo sirve del 6 al 29 de noviembre de 2026 (ver PLAN.md)
 npm run db:migrate     # aplica las migraciones pendientes en la D1 local
 npm run db:seed        # regenera el seed (determinista), lo carga en la D1 local y sube el PDF de ejemplo al KV local
 ```

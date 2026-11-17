@@ -3,10 +3,10 @@
 Base para el guion de la presentación. Muestra qué prácticas del curso AI Agentic Engineer se aplicaron, cómo y dónde está la evidencia. Es un documento vivo: se actualiza al cerrar cada grupo de tareas.
 
 **Estado al 2026-11-16 (noche):**
-- MVP: 29 de 31 tareas (grupos 1 a 5 completos). Faltan la integración de la demo (grupo 6) y el asistente RAG.
-- 251 pruebas en verde.
-- 20 de 20 ejecuciones del pipeline en verde.
-- 56 commits.
+- MVP: 30 de 31 tareas (grupos 1 a 5 completos y la 6.1). Faltan la revisión visual (6.2) y el asistente RAG.
+- 251 pruebas de la API (Vitest) y la prueba E2E del flujo de la demo (Playwright), en verde.
+- 22 de 22 ejecuciones del pipeline en verde.
+- 58 commits.
 - En <https://senda.creativebycode.workers.dev>: los dos flujos de la demo. El académico: el docente publica, el estudiante entrega desde el celular y ve su nota. El de cartera: el estudiante en mora no entra; se registra el pago y entra.
 
 Fuentes del curso que se compararon: las guías de OpenSpec, MCP, skills y pruebas, pruebas E2E y agentes QA, y arquitectura (clase 04).
@@ -24,7 +24,8 @@ Fuentes del curso que se compararon: las guías de OpenSpec, MCP, skills y prueb
 | **Pruebas desde la spec, no desde el código** | Cada escenario WHEN/THEN se vuelve una prueba con el mismo nombre. Corren en workerd (el runtime de producción) contra una D1 efímera con las migraciones reales, y con usuarios propios de cada prueba, no los del seed | `api/test/*.test.ts` |
 | **TDD de verdad: el rojo correcto** | Siempre rojo antes de verde, y el rojo debe fallar por la razón correcta. En la tarea 2.1 se detectó y corrigió una prueba que pasaba con la función vacía | [Bitácora del día 2](../bitacora/2026-11-15-dia-2.md) |
 | **Probar las pruebas: mutación** | 17 mutaciones, todas detectadas: se daña el código a propósito (quitar HttpOnly, leer el token sin verificar la firma, saltarse el límite...) y alguna prueba debe fallar | Bitácora del día 2 |
-| **CI/CD** | GitHub Actions: calidad (lint, tipos, pruebas, build) → migraciones remotas → deploy → prueba de humo. Actions fijadas por SHA, token de Cloudflare con permisos mínimos y vencimiento, y `secrets.required` para que el deploy falle si falta un secreto | `.github/workflows/ci.yml`, [despliegue.md](../operacion/despliegue.md) |
+| **E2E con Playwright como compuerta** | Una prueba recorre el flujo de la demo en un navegador real contra el build de producción, con una persona por contexto (estudiantes en celular, docente y administrador en escritorio). Busca los elementos por rol y etiqueta, como un lector de pantalla. Si el flujo se rompe, no se despliega | `e2e/demo.spec.ts`; job "e2e" del pipeline |
+| **CI/CD** | GitHub Actions: calidad (lint, tipos, pruebas, build) y E2E en paralelo → migraciones remotas → deploy → prueba de humo. Actions fijadas por SHA, token de Cloudflare con permisos mínimos y vencimiento, y `secrets.required` para que el deploy falle si falta un secreto | `.github/workflows/ci.yml`, [despliegue.md](../operacion/despliegue.md) |
 | **Humano en el bucle y seguridad** | Los secretos los carga Aymer y nunca pasan por el chat. El clasificador de permisos bloqueó un `wrangler secret put` del agente, y se respetó. Ante varias opciones se presentan pros y contras antes de decidir | `docs/operacion/despliegue.md` |
 | **Decisiones explicadas** (criterio 6) | ADR con contexto, decisión, alternativas y consecuencias. ADR-003 midió antes de decidir: 20 ms de CPU frente a 10 ms del plan Free | `docs/decisiones/` |
 | **Bitácora diaria** | Qué se hizo, qué se aprendió y qué problemas hubo, cada día | `docs/bitacora/` |
@@ -43,10 +44,8 @@ El **límite de intentos de ingreso (tarea 2.3)** recorre todo el ciclo con un s
 
 | Práctica | Plan |
 |---|---|
-| MCP de shadcn/ui | Tarea 1.7 |
 | Hooks | Propuesta: typecheck automático tras cada edición o bloqueo de lectura de `.dev.vars` |
 | Subagente que revisa el código | Propuesta: revisión independiente al cerrar cada tarea |
-| E2E con Playwright como compuerta del CI | Grupo 6 del MVP |
 | Visión: el agente revisa las pantallas | Capturas a 375 y 1280 px en cada pantalla (tareas 2.6 en adelante) |
 | RAG con guardas y evaluación ≥ 90 % | Cambio `asistente-academico-rag` |
 | Archivar el cambio | `/openspec-archive-change`: las specs pasan a ser la fuente de verdad del sistema |

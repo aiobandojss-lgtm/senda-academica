@@ -36,7 +36,8 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - Seed corregido: las entregas del Taller 3 caían después del día de la presentación (21 a 23 de noviembre). Ahora son anteriores a la fecha de referencia, y solo cambiaron esas líneas.
   - El plan del día 3 quedó cumplido.
   - Grupo 5 cerrado (adelantado del día 4): cuotas, pagos y anulaciones con los triggers de D13 traducidos a español, bloqueo por mora al ingresar y en cada petición (30 días entra, 31 no), excepciones, estado de cuenta del estudiante y del administrador y resumen de cartera. Antes se actualizaron las specs con 4 reglas aprobadas, y el soporte del pago quedó aplazado (decisión de Aymer). Demo verificada con Playwright: Manuela (bloqueada) no entra, el administrador registra el pago y Manuela entra "en riesgo".
-  - MVP completo hasta el grupo 5 (29 de 31). Siguen el grupo 6 (E2E con Playwright y revisión visual) y el asistente RAG (día 5).
+  - MVP completo hasta el grupo 5 (29 de 31).
+  - Tarea 6.1 cerrada (adelantada del día 6): prueba E2E con Playwright del flujo de la demo, contra el build de producción. Pasó 3 veces seguidas en local y en el CI, donde corre en paralelo con la calidad. El despliegue ahora necesita los dos jobs en verde (30 de 31). Siguen la 6.2 (revisión visual) y el asistente RAG (día 5).
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 4
 - [ ] Día 5
@@ -66,4 +67,5 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 
 ## Después de la presentación
 
+- [ ] **Antes del 30 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 29 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
 - [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).
