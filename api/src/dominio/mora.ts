@@ -74,3 +74,10 @@ export async function estadosDeCartera(db: D1Database, hoy: string, estudianteId
   }
   return (id) => calcularEstadoMora(cuotasPor.get(id) ?? [], excepcionesPor.get(id) ?? [], hoy);
 }
+
+// ¿El estudiante está bloqueado hoy? Lo usan el ingreso y el middleware de cada petición (tarea 5.3).
+// Dos consultas en un solo batch: el costo de que el desbloqueo sea inmediato al registrar el pago (D6).
+export async function estaBloqueado(db: D1Database, estudianteId: number): Promise<boolean> {
+  const estadoDe = await estadosDeCartera(db, hoyEnBogota(), estudianteId);
+  return estadoDe(estudianteId) === "bloqueado";
+}

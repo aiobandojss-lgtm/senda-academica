@@ -1,11 +1,14 @@
 import { createContext, useContext, useEffect } from "react";
 import type { ConfigPublica, Perfil } from "@/lib/api";
 
+export type AvisoIngreso = { mensaje: string; tipo: "info" | "suspendido" };
+
 export type ValorSesion = {
   config: ConfigPublica;
   perfil: Perfil | null;
-  // Mensaje para la pantalla de ingreso: por qué terminó la sesión anterior
-  avisoIngreso: string | null;
+  // Mensaje para la pantalla de ingreso: por qué terminó la sesión anterior. "suspendido" es el bloqueo por
+  // mora, que se muestra con el aviso de acceso suspendido de la guía visual.
+  avisoIngreso: AvisoIngreso | null;
   ingresar: (documento: string, contrasena: string) => Promise<Perfil>;
   salir: (motivo?: string) => Promise<void>;
   actualizarPerfil: (perfil: Perfil) => void;

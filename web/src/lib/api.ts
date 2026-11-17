@@ -51,7 +51,8 @@ export function escucharErroresDeSesion(oyente: Oyente | null) {
   oyenteDeSesion = oyente;
 }
 
-const CODIGOS_DE_SESION = new Set(["NO_AUTENTICADO", "DEBE_CAMBIAR_PASSWORD", "DEBE_ACEPTAR_AVISO"]);
+// ACCESO_SUSPENDIDO: el estudiante quedó bloqueado por mora con la sesión abierta (tarea 5.3)
+const CODIGOS_DE_SESION = new Set(["NO_AUTENTICADO", "DEBE_CAMBIAR_PASSWORD", "DEBE_ACEPTAR_AVISO", "ACCESO_SUSPENDIDO"]);
 
 // FormData: el navegador pone el Content-Type multipart con su separador; no se escribe a mano
 type Cuerpo = { json: unknown } | { texto: string; tipo: string } | { formulario: FormData };

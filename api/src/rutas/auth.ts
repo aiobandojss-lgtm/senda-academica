@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { z } from "zod";
+import { estaBloqueado } from "../dominio/mora";
 import { responderError, validarJson } from "../errores";
 import { HASH_SIMULADO, hashContrasena, validarContrasenaNueva, verificarContrasena } from "../seguridad/contrasenas";
 import { limpiarIntentos, registrarIntento } from "../seguridad/intentos";
-import { type FilaUsuarioSesion, noAutenticado, usuarioSesion } from "../seguridad/permisos";
+import { accesoSuspendido, type FilaUsuarioSesion, noAutenticado, usuarioSesion } from "../seguridad/permisos";
 import { abrirSesion, cerrarSesion } from "../seguridad/sesion";
 import type { AppEnv, UsuarioSesion } from "../tipos";
 
@@ -61,6 +62,10 @@ auth.post("/ingresar", validarJson(esquemaIngreso, "Escribe tu documento y tu co
   if (usuario.activo !== 1) {
     return responderError(c, 403, "CUENTA_INACTIVA", `Tu cuenta está inactiva. Comunícate con ${c.env.CONTACTO_FUNDACION}.`);
   }
+
+  // Bloqueo por mora (spec "Estudiante bloqueado no puede ingresar"): después de la contraseña, para no revelar
+  // a quien no la sabe que la cuenta existe. Sin sesión abierta. A docentes y administradores no se les evalúa.
+  if (usuario.rol === "estudiante" && (await estaBloqueado(c.env.DB, usuario.id))) return accesoSuspendido(c);
 
   await abrirSesion(c, { usuarioId: usuario.id, rol: usuario.rol, version: usuario.sesion_version });
   return c.json(perfil(usuarioSesion(usuario, c.env.AVISO_PRIVACIDAD_VERSION)));
