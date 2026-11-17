@@ -33,7 +33,7 @@
 
 - [x] 4.1 Implementar la API de actividades (crear, editar, publicar y devolver a borrador sin entregas, con la fecha límite en hora de Colombia) restringida al docente del curso, y la lista de cursos del estudiante; verificar con pruebas que un borrador no es visible para estudiantes y que no se devuelve a borrador una actividad con entregas
 - [x] 4.2 Implementar la interfaz `AlmacenArchivos` con sus implementaciones KV y R2 (D7), el archivo de apoyo de la actividad y la subida de entregas con validación de tipo por contenido y tamaño, reemplazo antes de la nota con borrado del archivo anterior (D7) y marca de tardía calculada al vuelo (D20); verificar con pruebas los escenarios de la spec `actividades-entregas`, incluido que el trigger `ENTREGA_CALIFICADA` rechaza el cambio de archivo aunque se intente directo en SQL
-- [ ] 4.3 Implementar la descarga protegida de archivos (entregas y apoyos) y la calificación (0.0 a 5.0, un decimal, corregible); verificar con pruebas el acceso denegado a otro estudiante y a un estudiante de otro curso, la nota fuera de rango y que el seguimiento del docente no incluye datos de contacto
+- [x] 4.3 Implementar la descarga protegida de archivos (entregas y apoyos) y la calificación (0.0 a 5.0, un decimal, corregible); verificar con pruebas el acceso denegado a otro estudiante y a un estudiante de otro curso, la nota fuera de rango y que el seguimiento del docente no incluye datos de contacto
 - [ ] 4.4 Construir las pantallas del docente (mis cursos, actividades, seguimiento de entregas, calificar) y del estudiante (mis cursos, actividades, subir entrega, ver nota); verificar el flujo completo a mano con usuarios del seed
 
 ## 5. Cartera y bloqueo por mora (día 4)

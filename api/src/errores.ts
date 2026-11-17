@@ -18,13 +18,16 @@ export const responderError = (c: Context, estado: ContentfulStatusCode, codigo:
 // sin ejecutar la ruta. Un cuerpo que no es JSON llega vacío y tampoco cumple el esquema.
 // - Con `mensaje` fijo (rutas de autenticación) no se dice qué campo falló.
 // - Sin él, se usa el mensaje del primer error, que los esquemas escriben en español campo por campo.
-export const validarJson = <T extends ZodType>(esquema: T, mensaje?: string) =>
+// - `codigoPorCampo` da a un campo su propio código (p. ej. la nota: NOTA_FUERA_DE_RANGO).
+export const validarJson = <T extends ZodType>(esquema: T, opcion?: string | { codigoPorCampo: Record<string, string> }) =>
   zValidator("json", esquema, (resultado, c) => {
     if (resultado.success) return;
     const problema = resultado.error.issues[0];
+    const mensaje = typeof opcion === "string" ? opcion : undefined;
     if (mensaje || !problema) return responderError(c, 400, "SOLICITUD_INVALIDA", mensaje ?? "La solicitud no es válida");
     const campo = problema.path.join(".");
-    return c.json<ErrorApi>({ codigo: "SOLICITUD_INVALIDA", mensaje: problema.message, ...(campo ? { campo } : {}) }, 400);
+    const codigo = (typeof opcion === "object" && opcion.codigoPorCampo[campo]) || "SOLICITUD_INVALIDA";
+    return c.json<ErrorApi>({ codigo, mensaje: problema.message, ...(campo ? { campo } : {}) }, 400);
   });
 
 // Violación de una restricción UNIQUE de D1 sobre `tabla.columna` (p. ej. "usuarios.documento").

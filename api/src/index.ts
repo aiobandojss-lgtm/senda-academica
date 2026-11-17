@@ -2,7 +2,9 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { actividades, actividadesDeCurso } from "./rutas/actividades";
+import { archivos } from "./rutas/archivos";
 import { auth } from "./rutas/auth";
+import { calificaciones } from "./rutas/calificaciones";
 import { cargaEstudiantes } from "./rutas/carga";
 import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
@@ -47,6 +49,9 @@ app.route("/cursos", actividadesDeCurso);
 app.route("/actividades", actividades);
 // Entrega del estudiante y archivo de apoyo de una actividad, tarea 4.2
 app.route("/actividades", archivosDeActividad);
+// Descarga protegida y calificación, tarea 4.3
+app.route("/archivos", archivos);
+app.route("/entregas", calificaciones);
 app.route("/docentes", docentes);
 // Plantilla y carga masiva por CSV (tarea 3.3), bajo el mismo prefijo que el resto de estudiantes
 app.route("/estudiantes", cargaEstudiantes);

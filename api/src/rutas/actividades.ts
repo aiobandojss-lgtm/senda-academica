@@ -176,3 +176,28 @@ actividades.patch("/:id", validarJson(esquemaEditar), async (c) => {
   const [vista] = await vistaDocente(c.env.DB, { actividadId: actividad.id });
   return c.json(vista);
 });
+
+// Seguimiento de entregas (spec "Seguimiento de entregas", D18): para el docente del curso o el
+// administrador, cada estudiante del curso con el estado de su entrega. Solo nombres y apellidos: nunca
+// documento, correo ni celular. Son los activos, más cualquier retirado que alcanzó a entregar.
+actividades.get("/:id/entregas", async (c) => {
+  const actividad = await actividadVisible(c, idDeRuta(c));
+  if (actividad instanceof Response) return actividad;
+  if (c.var.usuario.rol === "estudiante") return accesoDenegado(c);
+
+  const { results } = await c.env.DB.prepare(
+    `SELECT u.id, u.nombres, u.apellidos,
+            e.id AS entrega_id, e.entregado_en, e.nota, e.comentario, e.nombre_archivo, a.fecha_limite
+       FROM actividades a
+       JOIN inscripciones i ON i.curso_id = a.curso_id
+       JOIN usuarios u ON u.id = i.estudiante_id
+       LEFT JOIN entregas e ON e.actividad_id = a.id AND e.estudiante_id = u.id
+      WHERE a.id = ? AND (u.activo = 1 OR e.id IS NOT NULL)
+      ORDER BY u.apellidos, u.nombres`,
+  )
+    .bind(actividad.id)
+    .all<{ id: number; nombres: string; apellidos: string } & FilaEntrega>();
+  return c.json(
+    results.map((f) => ({ estudiante: { id: f.id, nombres: f.nombres, apellidos: f.apellidos }, entrega: aEntrega(f) })),
+  );
+});

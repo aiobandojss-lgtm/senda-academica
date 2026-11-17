@@ -202,8 +202,8 @@ cursos.patch("/:id", requiereRol("admin"), validarJson(esquemaEditar), async (c)
 
 // Estudiantes del curso (spec `autenticacion`, "Docente consulta sus estudiantes"; D18): solo el docente
 // asignado o el administrador. El docente NUNCA recibe documento, correo ni celular. Son los activos: un
-// retirado conserva su inscripción como historial, pero ya no es parte del grupo. La tarea 4.3 le suma el
-// estado de las entregas.
+// retirado conserva su inscripción como historial, pero ya no es parte del grupo. El estado de las entregas
+// de cada actividad está en GET /api/actividades/:id/entregas (tarea 4.3).
 cursos.get("/:id/estudiantes", requiereRol("admin", "docente"), async (c) => {
   const id = idDeRuta(c);
   const curso = id ? await c.env.DB.prepare("SELECT docente_id FROM cursos WHERE id = ?").bind(id).first<{ docente_id: number | null }>() : null;
