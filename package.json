@@ -18,7 +18,8 @@
     "cf-typegen": "wrangler types --strict-vars=false ./api/worker-configuration.d.ts",
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "db:seed": "node db/seed/generar-seed.mjs && wrangler d1 execute DB --local --file db/seed/seed.sql && wrangler kv key put seed/placeholder.pdf --path db/seed/placeholder.pdf --binding ARCHIVOS_KV --local",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
@@ -42,6 +43,7 @@
     "@cloudflare/vite-plugin": "^1.69.1",
     "@cloudflare/vitest-plugin": "1.7.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",

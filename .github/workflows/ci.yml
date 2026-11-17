@@ -37,9 +37,41 @@ jobs:
       - name: Build de producción
         run: npm run build
 
+  # Corre en paralelo con "calidad": el flujo de la demo en un navegador real contra el build de producción
+  # (vite preview), con D1 y KV locales y el seed ficticio. No toca nada en Cloudflare.
+  e2e:
+    name: Prueba E2E del flujo de la demo (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Instalar dependencias exactas del package-lock.json
+        run: npm ci
+      - name: Instalar Chromium (solo el navegador sin interfaz) y sus dependencias del sistema
+        run: npx playwright install --with-deps --only-shell chromium
+      # El Worker local necesita JWT_SECRET. Es la misma clave pública de pruebas de vitest.config.ts: no es un
+      # secreto. Se escribe en .dev.vars porque así la lee Wrangler en local, igual que en tu equipo.
+      - name: Clave de sesión de pruebas para el Worker local
+        run: echo "JWT_SECRET=clave-de-pruebas-publica-no-usar-en-ningun-otro-lado" > .dev.vars
+      - name: Flujo de la demo de punta a punta
+        run: npm run test:e2e
+      # Si falla, el reporte trae capturas y la traza paso a paso (npx playwright show-trace)
+      - name: Guardar el reporte de Playwright
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: reporte-playwright
+          path: playwright-report/
+          retention-days: 7
+
   desplegar:
     name: Migraciones y despliegue
-    needs: calidad
+    # Solo se despliega si pasan las dos: calidad del código y el flujo de la demo
+    needs: [calidad, e2e]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
