@@ -42,6 +42,16 @@
     "binding": "AI",
     "remote": true
   },
+  // Índice vectorial de los documentos del asistente (RAG design.md D2): 1024 dimensiones y coseno, con índices de
+  // metadatos carrera_id (número) y tipo (texto). Los índices de metadatos se crean ANTES de cargar vectores: los
+  // vectores cargados antes no quedan filtrables. Tampoco tiene simulador local: `npm run dev` usa el índice real.
+  "vectorize": [
+    {
+      "binding": "VECTORES",
+      "index_name": "fundacion-docs",
+      "remote": true
+    }
+  ],
   // Secretos que el Worker necesita (solo los nombres; los valores nunca van en el repositorio).
   // - `wrangler deploy` falla si alguno no está cargado en Cloudflare: mejor que publicar un login roto.
   // - `wrangler types` los toma de aquí y no de .dev.vars, así los tipos son iguales en local y en el CI.

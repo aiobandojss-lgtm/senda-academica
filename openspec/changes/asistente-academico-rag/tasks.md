@@ -3,7 +3,7 @@
 ## 1. Infraestructura RAG (día 5)
 
 - [x] 1.1 Verificar en el catálogo vigente de Workers AI el modelo de embeddings y 2 modelos de chat candidatos con function calling (D2); dejar los nombres en `MODELO_EMBEDDINGS` y `MODELO_CHAT` en `wrangler.jsonc` y verificar una llamada de prueba con `wrangler dev`
-- [ ] 1.2 Crear el índice Vectorize `fundacion-docs` (1024 dimensiones, coseno) con índices de metadatos `carrera_id` y `tipo`, y agregar los bindings `AI` y `VECTORES`; verificar con `wrangler vectorize list`
+- [x] 1.2 Crear el índice Vectorize `fundacion-docs` (1024 dimensiones, coseno) con índices de metadatos `carrera_id` y `tipo`, y agregar los bindings `AI` y `VECTORES`; verificar con `wrangler vectorize list`
 - [ ] 1.3 Crear `migrations/0002_base_conocimiento.sql` con las tablas `documentos`, `fragmentos` y `asistente_mensajes` (D8) y aplicarla local y remoto; verificar con `SELECT count(*) FROM documentos`
 
 ## 2. Base de conocimiento (día 5)
