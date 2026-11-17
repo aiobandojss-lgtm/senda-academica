@@ -143,6 +143,32 @@ actividadesDeCurso.post("/:id/actividades", validarJson(esquemaCrear), async (c)
   return c.json(actividad, 201);
 });
 
+// Inicio del estudiante (tarea 4.4): actividades publicadas sin entregar de sus cursos actuales, por fecha
+// límite (también las vencidas: todavía puede entregarlas como tardías), y su avance. Va antes de "/:id"
+// para que "pendientes" no se tome como un id.
+actividades.get("/pendientes", async (c) => {
+  const usuario = c.var.usuario;
+  if (usuario.rol !== "estudiante") return accesoDenegado(c);
+  const { results } = await c.env.DB.prepare(
+    `SELECT ${COLUMNAS}, k.nombre AS curso_nombre, en.id AS entrega_id
+       FROM actividades a
+       JOIN cursos k ON k.id = a.curso_id AND k.activo = 1
+       JOIN inscripciones i ON i.curso_id = k.id AND i.estudiante_id = ?
+       JOIN estudiantes e ON e.usuario_id = i.estudiante_id AND e.semestre_actual = k.semestre AND e.carrera_id = k.carrera_id
+       LEFT JOIN entregas en ON en.actividad_id = a.id AND en.estudiante_id = i.estudiante_id
+      WHERE a.publicada = 1
+      ORDER BY a.fecha_limite, a.id`,
+  )
+    .bind(usuario.id)
+    .all<Omit<ActividadConAcceso, "docente_id"> & { curso_nombre: string; entrega_id: number | null }>();
+  const pendientes = results.filter((f) => f.entrega_id === null);
+  return c.json({
+    pendientes: pendientes.map((f) => ({ ...aActividad(f), curso: { id: f.curso_id, nombre: f.curso_nombre } })),
+    publicadas: results.length,
+    entregadas: results.length - pendientes.length,
+  });
+});
+
 actividades.get("/:id", async (c) => {
   const actividad = await actividadVisible(c, idDeRuta(c));
   if (actividad instanceof Response) return actividad;

@@ -115,3 +115,80 @@ export function useCambioCatalogo<Entrada, Salida>(enviar: (entrada: Entrada) =>
     onSuccess: () => Promise.all(PREFIJOS_CATALOGO.map((queryKey) => cliente.invalidateQueries({ queryKey }))),
   });
 }
+
+// ---- Docente y estudiante (tarea 4.4) ----
+
+export type EstadoEntrega = "sin_entregar" | "entregada" | "tardia" | "calificada";
+export type Entrega = {
+  id: number | null;
+  estado: EstadoEntrega;
+  tardia: boolean;
+  entregadoEn: string | null;
+  nombreArchivo: string | null;
+  nota: number | null;
+  comentario: string | null;
+};
+
+type ActividadBase = {
+  id: number;
+  cursoId: number;
+  tipo: "taller" | "evaluacion";
+  titulo: string;
+  instrucciones: string;
+  // UTC (D9); la interfaz la muestra en hora de Colombia
+  fechaLimite: string;
+  publicada: boolean;
+  apoyo: { formato: string } | null;
+};
+export type ActividadDocente = ActividadBase & { entregas: number; calificadas: number; inscritos: number };
+export type ActividadEstudiante = ActividadBase & { entrega: Entrega };
+export type Pendientes = {
+  pendientes: (ActividadBase & { curso: { id: number; nombre: string } })[];
+  publicadas: number;
+  entregadas: number;
+};
+
+export type CursoDocente = {
+  id: number;
+  nombre: string;
+  semestre: number;
+  carrera: { id: number; codigo: string; nombre: string };
+  inscritos: number;
+  porCalificar: number;
+};
+export type CursoEstudiante = {
+  id: number;
+  nombre: string;
+  semestre: number;
+  carrera: { id: number; codigo: string; nombre: string };
+  docente: { nombres: string; apellidos: string } | null;
+  actual: boolean;
+};
+export type FilaSeguimiento = { estudiante: { id: number; nombres: string; apellidos: string }; entrega: Entrega };
+
+// Misma ruta (/api/cursos), distinta proyección según el rol de la sesión (D18)
+export const useCursosDocente = () => useQuery({ queryKey: ["cursos", "docente"], queryFn: () => api.get<CursoDocente[]>("/cursos") });
+export const useCursosEstudiante = () =>
+  useQuery({ queryKey: ["cursos", "estudiante"], queryFn: () => api.get<CursoEstudiante[]>("/cursos") });
+
+export const useActividadesDocente = (cursoId: number) =>
+  useQuery({ queryKey: ["actividades", "curso", cursoId], queryFn: () => api.get<ActividadDocente[]>(`/cursos/${cursoId}/actividades`) });
+export const useActividadesEstudiante = (cursoId: number) =>
+  useQuery({ queryKey: ["actividades", "curso", cursoId], queryFn: () => api.get<ActividadEstudiante[]>(`/cursos/${cursoId}/actividades`) });
+
+export const useActividadDocente = (id: number) =>
+  useQuery({ queryKey: ["actividades", id], queryFn: () => api.get<ActividadDocente>(`/actividades/${id}`) });
+export const useActividadEstudiante = (id: number) =>
+  useQuery({ queryKey: ["actividades", id], queryFn: () => api.get<ActividadEstudiante>(`/actividades/${id}`) });
+
+export const useSeguimiento = (actividadId: number) =>
+  useQuery({ queryKey: ["actividades", actividadId, "entregas"], queryFn: () => api.get<FilaSeguimiento[]>(`/actividades/${actividadId}/entregas`) });
+
+export const usePendientes = () => useQuery({ queryKey: ["actividades", "pendientes"], queryFn: () => api.get<Pendientes>("/actividades/pendientes") });
+
+// Cambios académicos (actividades, entregas, notas): los conteos se cruzan entre cursos, actividades y
+// pendientes, así que se recargan todas las consultas activas
+export function useCambio<Entrada, Salida>(enviar: (entrada: Entrada) => Promise<Salida>) {
+  const cliente = useQueryClient();
+  return useMutation({ mutationFn: enviar, onSuccess: () => cliente.invalidateQueries() });
+}

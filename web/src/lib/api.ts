@@ -53,17 +53,25 @@ export function escucharErroresDeSesion(oyente: Oyente | null) {
 
 const CODIGOS_DE_SESION = new Set(["NO_AUTENTICADO", "DEBE_CAMBIAR_PASSWORD", "DEBE_ACEPTAR_AVISO"]);
 
-type Cuerpo = { json: unknown } | { texto: string; tipo: string };
+// FormData: el navegador pone el Content-Type multipart con su separador; no se escribe a mano
+type Cuerpo = { json: unknown } | { texto: string; tipo: string } | { formulario: FormData };
 
-async function pedir<T>(metodo: "GET" | "POST" | "PATCH", ruta: string, cuerpo?: Cuerpo): Promise<T> {
+type Metodo = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+
+const encabezados = (cuerpo?: Cuerpo) =>
+  cuerpo === undefined || "formulario" in cuerpo ? undefined : { "Content-Type": "json" in cuerpo ? "application/json" : cuerpo.tipo };
+const contenido = (cuerpo?: Cuerpo) =>
+  cuerpo === undefined ? undefined : "json" in cuerpo ? JSON.stringify(cuerpo.json) : "texto" in cuerpo ? cuerpo.texto : cuerpo.formulario;
+
+async function pedir<T>(metodo: Metodo, ruta: string, cuerpo?: Cuerpo): Promise<T> {
   let respuesta: Response;
   try {
     respuesta = await fetch(`/api${ruta}`, {
       method: metodo,
       // La sesión viaja en la cookie __Host-sesion (HttpOnly): JavaScript nunca la lee ni la guarda
       credentials: "same-origin",
-      headers: cuerpo === undefined ? undefined : { "Content-Type": "json" in cuerpo ? "application/json" : cuerpo.tipo },
-      body: cuerpo === undefined ? undefined : "json" in cuerpo ? JSON.stringify(cuerpo.json) : cuerpo.texto,
+      headers: encabezados(cuerpo),
+      body: contenido(cuerpo),
     });
   } catch {
     throw new ErrorApi(0, "SIN_CONEXION", "No hay conexión. Revisa tu internet e intenta de nuevo");
@@ -89,4 +97,12 @@ export const api = {
   patch: <T>(ruta: string, cuerpo: unknown) => pedir<T>("PATCH", ruta, { json: cuerpo }),
   // Texto plano, como el CSV de la carga masiva
   postTexto: <T>(ruta: string, texto: string, tipo: string) => pedir<T>("POST", ruta, { texto, tipo }),
+  put: <T>(ruta: string, cuerpo: unknown) => pedir<T>("PUT", ruta, { json: cuerpo }),
+  delete: <T>(ruta: string) => pedir<T>("DELETE", ruta),
+  // Archivos: multipart/form-data con el campo "archivo" (entregas y archivos de apoyo)
+  subirArchivo: <T>(metodo: "POST" | "PUT", ruta: string, archivo: File) => {
+    const formulario = new FormData();
+    formulario.append("archivo", archivo);
+    return pedir<T>(metodo, ruta, { formulario });
+  },
 };

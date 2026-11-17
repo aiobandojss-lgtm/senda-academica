@@ -192,3 +192,37 @@ describe("GET /api/cursos (estudiante)", () => {
     expect(Object.keys(cursos[0].docente as object).sort()).toEqual(["apellidos", "nombres"]);
   });
 });
+
+describe("inicio del estudiante y del docente (tarea 4.4)", () => {
+  it("pendientes del estudiante: publicadas sin entregar de sus cursos actuales, por fecha límite, con su avance", async () => {
+    const lejana = await (await crear({ titulo: "Pendiente lejana", fechaLimite: "2099-12-01T10:00", publicada: true })).json<Actividad>();
+    const cercana = await (await crear({ titulo: "Pendiente cercana", fechaLimite: "2099-01-01T10:00", publicada: true })).json<Actividad>();
+    const borrador = await (await crear({ titulo: "Borrador oculto", fechaLimite: "2098-01-01T10:00" })).json<Actividad>();
+
+    const respuesta = await llamar(tokenInscrito, "GET", "/actividades/pendientes");
+
+    expect(respuesta.status).toBe(200);
+    const { pendientes, publicadas, entregadas } = await respuesta.json<{
+      pendientes: (Actividad & { curso: { id: number; nombre: string } })[];
+      publicadas: number;
+      entregadas: number;
+    }>();
+    const ids = pendientes.map((p) => p.id);
+    expect(ids).not.toContain(borrador.id);
+    expect(ids.indexOf(cercana.id)).toBeLessThan(ids.indexOf(lejana.id));
+    expect(pendientes[0].curso).toEqual({ id: cursoId, nombre: "Lógica" });
+    // Una de las publicadas ya tiene entrega (la de "volver a borrador con entregas")
+    expect(entregadas).toBe(1);
+    expect(publicadas).toBe(pendientes.length + entregadas);
+  });
+
+  it("solo los estudiantes tienen pendientes", async () => {
+    expect((await llamar(tokenDocenteA, "GET", "/actividades/pendientes")).status).toBe(403);
+  });
+
+  it("el docente ve en sus cursos cuántas entregas tiene por calificar", async () => {
+    const cursos = await (await llamar(tokenDocenteA, "GET", "/cursos")).json<{ id: number; porCalificar: number }[]>();
+
+    expect(cursos.find((c) => c.id === cursoId)?.porCalificar).toBe(1);
+  });
+});

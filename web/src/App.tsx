@@ -24,11 +24,43 @@ const CarreraDetalle = lazy(() => import("@/pantallas/admin/CarreraDetalle"));
 const Docentes = lazy(() => import("@/pantallas/admin/Docentes"));
 const Estudiantes = lazy(() => import("@/pantallas/admin/Estudiantes"));
 
+// Docente y estudiante (tarea 4.4)
+const InicioDocente = lazy(() => import("@/pantallas/docente/CursosDocente").then((m) => ({ default: m.InicioDocente })));
+const MisCursosDocente = lazy(() => import("@/pantallas/docente/CursosDocente").then((m) => ({ default: m.MisCursosDocente })));
+const CursoDocente = lazy(() => import("@/pantallas/docente/CursoDocente"));
+const ActividadDocente = lazy(() => import("@/pantallas/docente/ActividadDocente"));
+const InicioEstudiante = lazy(() => import("@/pantallas/estudiante/InicioEstudiante"));
+const MisCursosEstudiante = lazy(() => import("@/pantallas/estudiante/CursosEstudiante").then((m) => ({ default: m.MisCursosEstudiante })));
+const CursoEstudiante = lazy(() => import("@/pantallas/estudiante/CursosEstudiante").then((m) => ({ default: m.CursoEstudiante })));
+const ActividadEstudiante = lazy(() => import("@/pantallas/estudiante/ActividadEstudiante"));
+
+// Inicio de cada rol
+const INICIOS: Record<Rol, ReactNode> = {
+  admin: <InicioRol />,
+  docente: <InicioDocente />,
+  estudiante: <InicioEstudiante />,
+};
+
+// Pantallas de detalle, fuera del menú
+const DETALLES: Record<Rol, { ruta: string; pantalla: ReactNode }[]> = {
+  admin: [{ ruta: "/admin/carreras/:id", pantalla: <CarreraDetalle /> }],
+  docente: [
+    { ruta: "/docente/cursos/:id", pantalla: <CursoDocente /> },
+    { ruta: "/docente/actividades/:id", pantalla: <ActividadDocente /> },
+  ],
+  estudiante: [
+    { ruta: "/estudiante/cursos/:id", pantalla: <CursoEstudiante /> },
+    { ruta: "/estudiante/actividades/:id", pantalla: <ActividadEstudiante /> },
+  ],
+};
+
 // Secciones del menú ya construidas; las demás muestran SeccionPendiente hasta su tarea
 const PANTALLAS: Record<string, ReactNode> = {
   "/admin/carreras": <Carreras />,
   "/admin/estudiantes": <Estudiantes />,
   "/admin/docentes": <Docentes />,
+  "/docente/cursos": <MisCursosDocente />,
+  "/estudiante/cursos": <MisCursosEstudiante />,
 };
 
 // Puerta de una ruta: si el estado de la sesión no le corresponde, lleva a la persona a su destino
@@ -81,13 +113,15 @@ function Rutas() {
             path={INICIO_POR_ROL[rol]}
             element={<Puerta permite={(p) => p?.rol === rol}><Outlet /></Puerta>}
           >
-            <Route index element={<InicioRol />} />
+            <Route index element={INICIOS[rol]} />
             {MENU_POR_ROL[rol]
               .filter((item) => item.ruta !== INICIO_POR_ROL[rol])
               .map((item) => (
                 <Route key={item.ruta} path={item.ruta} element={PANTALLAS[item.ruta] ?? <SeccionPendiente titulo={item.titulo} />} />
               ))}
-            {rol === "admin" && <Route path="/admin/carreras/:id" element={<CarreraDetalle />} />}
+            {DETALLES[rol].map((d) => (
+              <Route key={d.ruta} path={d.ruta} element={d.pantalla} />
+            ))}
           </Route>
         ))}
       </Route>

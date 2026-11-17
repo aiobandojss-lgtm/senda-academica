@@ -139,7 +139,7 @@ describe("asignar docente", () => {
 
     expect(lista.length).toBeGreaterThan(0);
     for (const curso of lista) {
-      expect(Object.keys(curso).sort()).toEqual(["carrera", "id", "inscritos", "nombre", "semestre"]);
+      expect(Object.keys(curso).sort()).toEqual(["carrera", "id", "inscritos", "nombre", "porCalificar", "semestre"]);
     }
   });
 

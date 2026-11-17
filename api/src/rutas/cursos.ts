@@ -48,6 +48,7 @@ type FilaCurso = {
   docente_apellidos: string | null;
   docente_activo: number | null;
   inscritos: number;
+  por_calificar: number;
 };
 
 // "inscritos" cuenta solo estudiantes activos: un retirado conserva su inscripción (historial), pero no
@@ -57,7 +58,9 @@ const SELECT_CURSO = `
     c.id AS carrera_id, c.codigo AS carrera_codigo, c.nombre AS carrera_nombre,
     d.id AS docente_id, d.nombres AS docente_nombres, d.apellidos AS docente_apellidos, d.activo AS docente_activo,
     (SELECT COUNT(*) FROM inscripciones i JOIN usuarios u ON u.id = i.estudiante_id AND u.activo = 1
-      WHERE i.curso_id = k.id) AS inscritos
+      WHERE i.curso_id = k.id) AS inscritos,
+    (SELECT COUNT(*) FROM entregas en JOIN actividades a ON a.id = en.actividad_id
+      WHERE a.curso_id = k.id AND en.nota IS NULL) AS por_calificar
   FROM cursos k
   JOIN carreras c ON c.id = k.carrera_id
   LEFT JOIN usuarios d ON d.id = k.docente_id`;
@@ -84,6 +87,8 @@ const aCursoDocente = (f: FilaCurso) => ({
   semestre: f.semestre,
   carrera: carreraDe(f),
   inscritos: f.inscritos,
+  // Entregas sin nota: lo pendiente del docente en su inicio (tarea 4.4)
+  porCalificar: f.por_calificar,
 });
 
 const buscarCurso = (db: D1Database, id: number) => db.prepare(`${SELECT_CURSO} WHERE k.id = ?`).bind(id).first<FilaCurso>();

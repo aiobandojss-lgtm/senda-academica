@@ -237,7 +237,12 @@ for (const a of actividades) {
     if (!entrega) continue;
     const limiteDia = sumarDias(FECHA_REF, a.dias);
     const tardia = a.orden <= 2 && rnd() < 0.1 && !esDemoPrincipal;
-    const diaEntrega = tardia ? sumarDias(limiteDia, entre(1, 3)) : sumarDias(limiteDia, -entre(0, 4));
+    // El Taller 3 sigue abierto en la fecha de referencia (el día de la presentación): sus entregas son
+    // anteriores a ese día, nunca futuras. Se consume el mismo número de llamadas aleatorias que antes, así el
+    // resto del seed (determinista) no cambia.
+    const diaEntrega = a.orden === 3
+      ? sumarDias(FECHA_REF, -entre(1, 4))
+      : tardia ? sumarDias(limiteDia, entre(1, 3)) : sumarDias(limiteDia, -entre(0, 4));
     const entregadoEn = horaBogota(diaEntrega, entre(7, 22), entre(0, 59));
     const apellido = quitarTildes(e.apellidos.split(' ')[0]).toLowerCase();
     let n = null, com = null, calEn = null, calPor = null;
