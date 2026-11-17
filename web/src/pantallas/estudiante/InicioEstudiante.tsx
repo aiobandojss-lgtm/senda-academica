@@ -8,6 +8,7 @@ import { useCursosEstudiante, usePendientes } from "@/lib/consultas";
 import { fechaHora, TIPO_ACTIVIDAD, vencida } from "@/lib/formato";
 import { ENTRADA } from "@/lib/movimiento";
 import { useSesion, useTituloPagina } from "@/sesion/useSesion";
+import { TarjetaEstadoCuenta } from "./EstadoCuentaEstudiante";
 
 // Inicio del estudiante (tarea 4.4): lo primero que ve desde el celular es su próxima entrega y su avance,
 // como en la composición de docs/identidad-visual.md. El estado de cuenta se suma en la tarea 5.5.
@@ -29,6 +30,9 @@ export default function InicioEstudiante() {
         )}
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Hola, {perfil?.nombres}</h1>
       </header>
+
+      {/* Como en la composición de la guía visual: primero el estado de cuenta, después la próxima entrega */}
+      <TarjetaEstadoCuenta />
 
       <EstadoConsulta cargando={pendientes.isPending} error={pendientes.error} alReintentar={() => void pendientes.refetch()} />
 

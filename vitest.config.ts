@@ -39,5 +39,10 @@ export default defineConfig({
   test: {
     include: ["api/test/**/*.test.ts"],
     setupFiles: ["./api/test/aplicar-migraciones.ts"],
+    // Cada ingreso calcula PBKDF2 con 100.000 iteraciones (lento a propósito, D5) y los archivos corren en
+    // paralelo: con 23 archivos, algunas pruebas pasaban los 5 s por defecto por pura contención de CPU
+    // (solas tardan milisegundos). No se bajan las iteraciones en pruebas: deben usar el algoritmo real.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
 });

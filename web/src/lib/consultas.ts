@@ -192,3 +192,55 @@ export function useCambio<Entrada, Salida>(enviar: (entrada: Entrada) => Promise
   const cliente = useQueryClient();
   return useMutation({ mutationFn: enviar, onSuccess: () => cliente.invalidateQueries() });
 }
+
+// ---- Cartera (tarea 5.5) ----
+
+export type Pago = {
+  id: number;
+  cuotaId: number;
+  valor: number;
+  fechaPago: string;
+  medio: "efectivo" | "transferencia" | "consignacion";
+  anulado: boolean;
+  motivoAnulacion: string | null;
+  anuladoEn: string | null;
+};
+export type Cuota = {
+  id: number;
+  concepto: string;
+  valor: number;
+  fechaVencimiento: string;
+  pagado: number;
+  saldo: number;
+  estado: "pagada" | "pendiente" | "vencida";
+  diasAtraso: number;
+  pagos: Pago[];
+};
+export type EstadoCuenta = {
+  estudiante: { id: number; nombres: string; apellidos: string };
+  estadoCartera: EstadoCartera;
+  totalAdeudado: number;
+  totalVencido: number;
+  cuotas: Cuota[];
+  excepciones: { id: number; motivo: string; hasta: string; vigente: boolean }[];
+};
+export type ResumenCartera = {
+  mes: string;
+  recaudadoMes: number;
+  totalVencido: number;
+  enMora: {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    documento: string;
+    carrera: { codigo: string };
+    diasAtraso: number;
+    saldoVencido: number;
+    estadoCartera: EstadoCartera;
+  }[];
+};
+
+export const useEstadoCuentaPropio = () => useQuery({ queryKey: ["cartera", "propia"], queryFn: () => api.get<EstadoCuenta>("/estado-cuenta") });
+export const useEstadoCuenta = (estudianteId: number) =>
+  useQuery({ queryKey: ["cartera", "estudiante", estudianteId], queryFn: () => api.get<EstadoCuenta>(`/estudiantes/${estudianteId}/estado-cuenta`) });
+export const useResumenCartera = () => useQuery({ queryKey: ["cartera", "resumen"], queryFn: () => api.get<ResumenCartera>("/cartera/resumen") });

@@ -34,7 +34,9 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - Tarea 3.4 cerrada: pantallas de administración de carreras y cursos, estudiantes (con carga masiva) y docentes, con TanStack Query (decisión de Aymer) y formularios en diálogo. Verificadas con Playwright en 375 y 1280 px. Grupo 3 completo (21 de 31, con la 5.1 adelantada).
   - Grupo 4 cerrado (4.1 a 4.4): actividades, entregas con archivo de apoyo (construido ahora, decisión de Aymer), descarga protegida, calificación y las pantallas del docente y del estudiante. Antes se actualizó la spec con 4 reglas aprobadas: formato por contenido, volver a borrador sin entregas, corregir notas y fecha límite en hora de Colombia. El flujo de la demo se verificó de punta a punta con Playwright: la estudiante entrega desde el celular, la docente califica con 4,2 y la estudiante ve la nota.
   - Seed corregido: las entregas del Taller 3 caían después del día de la presentación (21 a 23 de noviembre). Ahora son anteriores a la fecha de referencia, y solo cambiaron esas líneas.
-  - El plan del día 3 quedó cumplido. Sigue el grupo 5 (5.2 a 5.5, porque la 5.1 ya está): cuotas y pagos, bloqueo al ingresar y en cada petición, excepciones y estado de cuenta.
+  - El plan del día 3 quedó cumplido.
+  - Grupo 5 cerrado (adelantado del día 4): cuotas, pagos y anulaciones con los triggers de D13 traducidos a español, bloqueo por mora al ingresar y en cada petición (30 días entra, 31 no), excepciones, estado de cuenta del estudiante y del administrador y resumen de cartera. Antes se actualizaron las specs con 4 reglas aprobadas, y el soporte del pago quedó aplazado (decisión de Aymer). Demo verificada con Playwright: Manuela (bloqueada) no entra, el administrador registra el pago y Manuela entra "en riesgo".
+  - MVP completo hasta el grupo 5 (29 de 31). Siguen el grupo 6 (E2E con Playwright y revisión visual) y el asistente RAG (día 5).
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
 - [ ] Día 4
 - [ ] Día 5

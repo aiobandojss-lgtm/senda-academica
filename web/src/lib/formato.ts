@@ -31,3 +31,18 @@ export const vencida = (utc: string) => new Date(utc).getTime() < Date.now();
 export const nota = (valor: number) => valor.toLocaleString("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export const TIPO_ACTIVIDAD = { taller: "Taller", evaluacion: "Evaluación" } as const;
+
+// Dinero en pesos enteros (D9): 250000 → "$ 250.000", con un espacio que no se parte: en el celular el "$" nunca
+// queda solo en una línea
+const ESPACIO_DURO = String.fromCharCode(160);
+export const pesos = (valor: number) => `$${ESPACIO_DURO}${String(valor).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+
+// Fecha de negocio YYYY-MM-DD → "5 de diciembre de 2026". Se lee como fecha de calendario (UTC) para que la
+// zona horaria del navegador no la corra un día.
+const FECHA = new Intl.DateTimeFormat("es-CO", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" });
+export const fecha = (yyyyMmDd: string) => FECHA.format(new Date(`${yyyyMmDd}T00:00:00Z`));
+
+// Hoy en Colombia como YYYY-MM-DD, para los valores por defecto de los formularios
+export const hoyColombia = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
+
+export const MEDIO_PAGO = { efectivo: "Efectivo", transferencia: "Transferencia", consignacion: "Consignación" } as const;

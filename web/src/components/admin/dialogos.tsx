@@ -1,4 +1,5 @@
-import { Check, Copy, EllipsisVertical, KeyRound, Pencil, UserCheck, UserX } from "lucide-react";
+import { Check, Copy, EllipsisVertical, KeyRound, Pencil, UserCheck, UserX, Wallet } from "lucide-react";
+import { Link } from "react-router";
 import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -128,7 +129,8 @@ const AL_DESACTIVAR: Record<Tipo, string> = {
 };
 
 // Acciones sobre la cuenta de un docente o un estudiante (spec `carreras-estudiantes` y `autenticacion`)
-export function MenuCuenta({ persona, tipo, alEditar }: { persona: PersonaBasica; tipo: Tipo; alEditar: () => void }) {
+// `enlaceCuenta`: para estudiantes, el estado de cuenta (tarea 5.5)
+export function MenuCuenta({ persona, tipo, alEditar, enlaceCuenta }: { persona: PersonaBasica; tipo: Tipo; alEditar: () => void; enlaceCuenta?: string }) {
   const [confirmando, setConfirmando] = useState<"restablecer" | "estado" | null>(null);
   const [contrasena, setContrasena] = useState<string | null>(null);
   const nombre = `${persona.nombres} ${persona.apellidos}`;
@@ -163,6 +165,14 @@ export function MenuCuenta({ persona, tipo, alEditar }: { persona: PersonaBasica
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {enlaceCuenta && (
+            <DropdownMenuItem asChild>
+              <Link to={enlaceCuenta}>
+                <Wallet aria-hidden="true" />
+                Estado de cuenta
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onSelect={alEditar}>
             <Pencil aria-hidden="true" />
             Editar datos

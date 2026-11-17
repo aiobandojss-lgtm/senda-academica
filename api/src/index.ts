@@ -6,7 +6,7 @@ import { archivos } from "./rutas/archivos";
 import { auth } from "./rutas/auth";
 import { calificaciones } from "./rutas/calificaciones";
 import { cargaEstudiantes } from "./rutas/carga";
-import { carteraDeEstudiante, cuotas, estadoCuentaPropio, pagos } from "./rutas/cartera";
+import { carteraDeEstudiante, cuotas, estadoCuentaPropio, pagos, resumenCartera } from "./rutas/cartera";
 import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
 import { cursos } from "./rutas/cursos";
@@ -62,6 +62,7 @@ app.route("/estudiantes", carteraDeEstudiante);
 app.route("/cuotas", cuotas);
 app.route("/pagos", pagos);
 app.route("/estado-cuenta", estadoCuentaPropio);
+app.route("/cartera", resumenCartera);
 app.route("/usuarios", usuarios);
 
 app.onError((error, c) => {

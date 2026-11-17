@@ -34,6 +34,11 @@ const MisCursosEstudiante = lazy(() => import("@/pantallas/estudiante/CursosEstu
 const CursoEstudiante = lazy(() => import("@/pantallas/estudiante/CursosEstudiante").then((m) => ({ default: m.CursoEstudiante })));
 const ActividadEstudiante = lazy(() => import("@/pantallas/estudiante/ActividadEstudiante"));
 
+// Cartera (tarea 5.5)
+const Cartera = lazy(() => import("@/pantallas/admin/Cartera"));
+const EstadoCuentaAdmin = lazy(() => import("@/pantallas/admin/EstadoCuentaAdmin"));
+const EstadoCuentaEstudiante = lazy(() => import("@/pantallas/estudiante/EstadoCuentaEstudiante"));
+
 // Inicio de cada rol
 const INICIOS: Record<Rol, ReactNode> = {
   admin: <InicioRol />,
@@ -43,7 +48,10 @@ const INICIOS: Record<Rol, ReactNode> = {
 
 // Pantallas de detalle, fuera del menú
 const DETALLES: Record<Rol, { ruta: string; pantalla: ReactNode }[]> = {
-  admin: [{ ruta: "/admin/carreras/:id", pantalla: <CarreraDetalle /> }],
+  admin: [
+    { ruta: "/admin/carreras/:id", pantalla: <CarreraDetalle /> },
+    { ruta: "/admin/estudiantes/:id/cuenta", pantalla: <EstadoCuentaAdmin /> },
+  ],
   docente: [
     { ruta: "/docente/cursos/:id", pantalla: <CursoDocente /> },
     { ruta: "/docente/actividades/:id", pantalla: <ActividadDocente /> },
@@ -61,6 +69,8 @@ const PANTALLAS: Record<string, ReactNode> = {
   "/admin/docentes": <Docentes />,
   "/docente/cursos": <MisCursosDocente />,
   "/estudiante/cursos": <MisCursosEstudiante />,
+  "/admin/cartera": <Cartera />,
+  "/estudiante/cuenta": <EstadoCuentaEstudiante />,
 };
 
 // Puerta de una ruta: si el estado de la sesión no le corresponde, lleva a la persona a su destino

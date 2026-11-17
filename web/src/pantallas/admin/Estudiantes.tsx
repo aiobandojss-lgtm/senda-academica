@@ -150,7 +150,7 @@ export default function Estudiantes() {
                     <EstadoCarteraBadge estado={e.estadoCartera} />
                   </TableCell>
                   <TableCell>
-                    <MenuCuenta persona={e} tipo="estudiante" alEditar={() => setFormulario(e)} />
+                    <MenuCuenta persona={e} tipo="estudiante" alEditar={() => setFormulario(e)} enlaceCuenta={`/admin/estudiantes/${e.id}/cuenta`} />
                   </TableCell>
                 </TableRow>
               ))}

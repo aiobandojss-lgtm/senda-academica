@@ -2,7 +2,7 @@ import { type Context, Hono } from "hono";
 import { z } from "zod";
 import { actualizar } from "../datos";
 import { estadoDeCuota, fechasDelPlan } from "../dominio/cuotas";
-import { estadosDeCartera, hoyEnBogota } from "../dominio/mora";
+import { diasEntre, estadosDeCartera, hoyEnBogota } from "../dominio/mora";
 import { codigoDeTrigger, idDeRuta, pesos, responderError, validarJson } from "../errores";
 import { accesoDenegado, requiereRol } from "../seguridad/permisos";
 import type { AppEnv } from "../tipos";
@@ -271,4 +271,56 @@ estadoCuentaPropio.get("/", async (c) => {
   const usuario = c.var.usuario;
   if (usuario.rol !== "estudiante") return accesoDenegado(c);
   return c.json(await estadoDeCuenta(c.env.DB, usuario.id, { paraEstudiante: true }));
+});
+
+// Resumen de cartera (spec "Resumen de cartera", tarea 5.5): lo recaudado en el mes (pagos no anulados), el
+// total vencido y los estudiantes con cuotas vencidas, primero los de más días de atraso
+export const resumenCartera = new Hono<AppEnv>();
+resumenCartera.use("*", requiereRol("admin"));
+
+resumenCartera.get("/resumen", async (c) => {
+  const hoy = hoyEnBogota();
+  const mes = hoy.slice(0, 7);
+  const [recaudo, vencidas] = await c.env.DB.batch([
+    c.env.DB.prepare("SELECT COALESCE(SUM(valor), 0) AS total FROM pagos WHERE anulado = 0 AND substr(fecha_pago, 1, 7) = ?").bind(mes),
+    c.env.DB.prepare(
+      `SELECT v.estudiante_id AS id, u.nombres, u.apellidos, u.documento, c.codigo AS carrera_codigo,
+              MIN(v.fecha_vencimiento) AS mas_antigua, SUM(v.saldo) AS saldo_vencido
+         FROM v_saldo_cuotas v
+         JOIN usuarios u ON u.id = v.estudiante_id
+         JOIN estudiantes e ON e.usuario_id = v.estudiante_id
+         JOIN carreras c ON c.id = e.carrera_id
+        WHERE v.saldo > 0 AND v.fecha_vencimiento < ?
+        GROUP BY v.estudiante_id`,
+    ).bind(hoy),
+  ]);
+  const estadoDe = await estadosDeCartera(c.env.DB, hoy);
+  const filas = vencidas.results as {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    documento: string;
+    carrera_codigo: string;
+    mas_antigua: string;
+    saldo_vencido: number;
+  }[];
+  const enMora = filas
+    .map((f) => ({
+      id: f.id,
+      nombres: f.nombres,
+      apellidos: f.apellidos,
+      documento: f.documento,
+      carrera: { codigo: f.carrera_codigo },
+      diasAtraso: diasEntre(f.mas_antigua, hoy),
+      saldoVencido: f.saldo_vencido,
+      estadoCartera: estadoDe(f.id),
+    }))
+    .sort((a, b) => b.diasAtraso - a.diasAtraso || a.apellidos.localeCompare(b.apellidos, "es"));
+
+  return c.json({
+    mes,
+    recaudadoMes: (recaudo.results[0] as { total: number }).total,
+    totalVencido: enMora.reduce((total, e) => total + e.saldoVencido, 0),
+    enMora,
+  });
 });

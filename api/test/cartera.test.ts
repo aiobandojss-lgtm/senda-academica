@@ -259,3 +259,42 @@ describe("estado de cuenta", () => {
     expect((await llamar(tokenEstudiante, "GET", `/estudiantes/${estudianteId}/estado-cuenta`)).status).toBe(403);
   });
 });
+
+describe("GET /api/cartera/resumen", () => {
+  it("ver estudiantes en mora: primero los de más días de atraso, con el total vencido y lo recaudado del mes", async () => {
+    const carrera = await crearCarrera("TL-RES");
+    const hash = await hashContrasena(CONTRASENA);
+    const reciente = await crearEstudiante({ documento: "7390000901", carreraId: carrera, semestre: 1 }, hash);
+    const antiguo = await crearEstudiante({ documento: "7390000902", carreraId: carrera, semestre: 1 }, hash);
+    const antes = await (await llamar(admin, "GET", "/cartera/resumen")).json<{ recaudadoMes: number; totalVencido: number }>();
+    await crearCuota(reciente, { concepto: "Reciente", valor: 100_000, fechaVencimiento: fechaDesdeHoy(-10) });
+    await crearCuota(antiguo, { concepto: "Antigua", valor: 200_000, fechaVencimiento: fechaDesdeHoy(-45) });
+    const pagada = await crearCuota(antiguo, { concepto: "Pagada hoy", valor: 50_000, fechaVencimiento: fechaDesdeHoy(-45) });
+    await pagar(pagada.id, { valor: 50_000 });
+    const anulado = await (await pagar((await crearCuota(antiguo, { valor: 70_000, fechaVencimiento: fechaDesdeHoy(30) })).id, { valor: 70_000 })).json<Pago>();
+    await llamar(admin, "POST", `/pagos/${anulado.id}/anular`, { motivo: "duplicado" });
+
+    const respuesta = await llamar(admin, "GET", "/cartera/resumen");
+
+    expect(respuesta.status).toBe(200);
+    const resumen = await respuesta.json<{
+      recaudadoMes: number;
+      totalVencido: number;
+      enMora: { id: number; diasAtraso: number; saldoVencido: number; estadoCartera: string; carrera: { codigo: string } }[];
+    }>();
+    // Lo nuevo de esta prueba: 50.000 recaudados (el pago anulado no cuenta) y 300.000 vencidos
+    expect(resumen.recaudadoMes - antes.recaudadoMes).toBe(50_000);
+    expect(resumen.totalVencido - antes.totalVencido).toBe(300_000);
+    const deEstaPrueba = resumen.enMora.filter((e) => e.id === reciente || e.id === antiguo);
+    expect(deEstaPrueba.map((e) => [e.id, e.diasAtraso, e.saldoVencido, e.estadoCartera])).toEqual([
+      [antiguo, 45, 200_000, "bloqueado"],
+      [reciente, 10, 100_000, "en_riesgo"],
+    ]);
+    const dias = resumen.enMora.map((e) => e.diasAtraso);
+    expect(dias).toEqual([...dias].sort((a, b) => b - a));
+  });
+
+  it("solo lo ve el administrador", async () => {
+    expect((await llamar(tokenDocente, "GET", "/cartera/resumen")).status).toBe(403);
+  });
+});

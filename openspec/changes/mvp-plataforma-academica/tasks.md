@@ -42,7 +42,7 @@
 - [x] 5.2 Implementar la API de cuotas (generar plan con el último día del mes para los días 29 a 31, cuota individual, editar o eliminar sin pagos) y de pagos (registrar sin fecha futura, anular con motivo, validación de saldo) y el estado de cuenta, traduciendo los códigos de los triggers de D13 a mensajes en español; verificar con pruebas los escenarios de la spec `cartera` y que los triggers `PAGO_SUPERA_SALDO`, `PAGO_INMUTABLE` y `CUOTA_CON_PAGOS` rechazan los cambios aunque se intenten directo en SQL
 - [x] 5.3 Aplicar el bloqueo en el login y en el middleware de cada petición de estudiante, con el mensaje y el contacto de la Fundación; verificar con pruebas que el estudiante en mora del seed no ingresa y que al registrar su pago sí ingresa
 - [x] 5.4 Implementar excepciones de mora (crear con motivo y fecha final de hoy o futura); verificar con pruebas que el estudiante con excepción del seed ingresa y aparece con estado "con excepción"
-- [ ] 5.5 Construir el estado de cuenta del estudiante y, para el administrador, el registro de pagos, las excepciones y el resumen de cartera; verificar con los perfiles de cartera del seed
+- [x] 5.5 Construir el estado de cuenta del estudiante y, para el administrador, el registro de pagos, las excepciones y el resumen de cartera; verificar con los perfiles de cartera del seed
 
 ## 6. Integración de la demo (día 6)
 

@@ -3,11 +3,11 @@
 Base para el guion de la presentación. Muestra qué prácticas del curso AI Agentic Engineer se aplicaron, cómo y dónde está la evidencia. Es un documento vivo: se actualiza al cerrar cada grupo de tareas.
 
 **Estado al 2026-11-16 (noche):**
-- MVP: 25 de 31 tareas (grupos 1 a 4 completos y la 5.1 adelantada).
-- 213 pruebas en verde.
-- 19 de 19 ejecuciones del pipeline en verde.
-- 51 commits.
-- En <https://senda.creativebycode.workers.dev>: ingreso y primer ingreso, administración (carreras, cursos, docentes, estudiantes y carga por CSV), y el flujo académico de la demo: el docente publica y califica, y el estudiante entrega y ve su nota.
+- MVP: 29 de 31 tareas (grupos 1 a 5 completos). Faltan la integración de la demo (grupo 6) y el asistente RAG.
+- 251 pruebas en verde.
+- 20 de 20 ejecuciones del pipeline en verde.
+- 56 commits.
+- En <https://senda.creativebycode.workers.dev>: los dos flujos de la demo. El académico: el docente publica, el estudiante entrega desde el celular y ve su nota. El de cartera: el estudiante en mora no entra; se registra el pago y entra.
 
 Fuentes del curso que se compararon: las guías de OpenSpec, MCP, skills y pruebas, pruebas E2E y agentes QA, y arquitectura (clase 04).
 
