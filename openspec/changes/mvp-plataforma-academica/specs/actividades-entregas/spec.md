@@ -17,8 +17,27 @@ El sistema SHALL permitir al docente crear en sus cursos actividades de tipo tal
 - **WHEN** el docente guarda una actividad sin publicarla
 - **THEN** ningún estudiante la ve
 
+#### Scenario: Archivo de apoyo
+- **WHEN** el docente adjunta a una actividad publicada un archivo de apoyo
+- **THEN** los estudiantes del curso lo pueden descargar
+
+### Requirement: Edición de actividades
+El sistema SHALL permitir al docente editar el tipo, el título, las instrucciones, la fecha límite y el archivo de apoyo de sus actividades, y devolver a borrador una actividad publicada solo mientras no tenga entregas. La fecha límite SHALL escribirse y mostrarse en hora de Colombia (America/Bogota) y guardarse en UTC.
+
+#### Scenario: Volver a borrador sin entregas
+- **WHEN** el docente devuelve a borrador una actividad publicada que nadie ha entregado
+- **THEN** la actividad deja de ser visible para los estudiantes
+
+#### Scenario: Volver a borrador con entregas
+- **WHEN** el docente intenta devolver a borrador una actividad que ya tiene entregas
+- **THEN** el sistema lo rechaza e indica que ya hay entregas
+
+#### Scenario: Fecha límite en hora de Colombia
+- **WHEN** el docente fija la fecha límite a las 11:59 p. m. del 23 de noviembre
+- **THEN** la actividad vence a las 11:59 p. m. del 23 de noviembre en Colombia (4:59 a. m. del 24 en UTC)
+
 ### Requirement: Entrega de archivos
-El sistema SHALL permitir al estudiante subir un archivo por actividad en formato PDF, DOCX, JPG o PNG de hasta 10 MB.
+El sistema SHALL permitir al estudiante subir un archivo por actividad en formato PDF, DOCX, JPG o PNG de hasta 10 MB. El sistema MUST verificar el formato por el contenido del archivo (sus primeros bytes) y no solo por su extensión.
 
 #### Scenario: Entrega válida
 - **WHEN** el estudiante sube un PDF de 2 MB a una actividad publicada
@@ -30,6 +49,10 @@ El sistema SHALL permitir al estudiante subir un archivo por actividad en format
 
 #### Scenario: Formato no permitido
 - **WHEN** el estudiante sube un archivo con otro formato
+- **THEN** el sistema rechaza el archivo e indica los formatos permitidos
+
+#### Scenario: Archivo renombrado
+- **WHEN** el estudiante sube un archivo cuyo contenido no corresponde a su extensión, por ejemplo un ejecutable renombrado como .pdf
 - **THEN** el sistema rechaza el archivo e indica los formatos permitidos
 
 ### Requirement: Reemplazo de la entrega
@@ -62,7 +85,7 @@ El sistema SHALL mostrar al docente, por actividad, la lista de estudiantes del 
 - **THEN** ve a todos los estudiantes del curso con el estado de su entrega
 
 ### Requirement: Calificación
-El sistema SHALL permitir al docente registrar una nota entre 0.0 y 5.0, con un decimal, y un comentario opcional por entrega; el estudiante MUST ver su nota y comentario.
+El sistema SHALL permitir al docente registrar una nota entre 0.0 y 5.0, con un decimal, y un comentario opcional por entrega, y corregirlos después; el estudiante MUST ver su nota y comentario. Corregir la nota no habilita reemplazar la entrega.
 
 #### Scenario: Calificar entrega
 - **WHEN** el docente registra nota 4.2 y un comentario
@@ -72,9 +95,17 @@ El sistema SHALL permitir al docente registrar una nota entre 0.0 y 5.0, con un 
 - **WHEN** el docente registra una nota de 5.5
 - **THEN** el sistema rechaza la nota e indica el rango 0.0 a 5.0
 
+#### Scenario: Corregir una nota
+- **WHEN** el docente cambia una nota de 4.2 a 4.5 porque se equivocó al digitarla
+- **THEN** el estudiante ve la nota 4.5 y su entrega sigue sin poder reemplazarse
+
 ### Requirement: Acceso privado a los archivos
-Los archivos entregados MUST ser accesibles solo para su autor, el docente del curso y el administrador.
+Los archivos entregados MUST ser accesibles solo para su autor, el docente del curso y el administrador. El archivo de apoyo de una actividad MUST ser accesible solo para el docente del curso, el administrador y, si la actividad está publicada, los estudiantes inscritos en el curso.
 
 #### Scenario: Estudiante intenta descargar la entrega de otro
 - **WHEN** un estudiante pide el archivo de la entrega de otro estudiante
+- **THEN** el sistema responde acceso denegado
+
+#### Scenario: Estudiante de otro curso pide un archivo de apoyo
+- **WHEN** un estudiante que no está inscrito en el curso pide el archivo de apoyo de una de sus actividades
 - **THEN** el sistema responde acceso denegado
