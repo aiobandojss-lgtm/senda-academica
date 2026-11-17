@@ -40,3 +40,14 @@ export function idDeRuta(c: Context): number | null {
   const id = Number(c.req.param("id"));
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
+
+// Código de un trigger de D13 (RAISE(ABORT, 'CODIGO')) dentro del error de D1, o null. La API lo traduce a un
+// mensaje en español: es el mismo principio que RAISE_APPLICATION_ERROR en Oracle.
+const CODIGOS_DE_TRIGGER = ["PAGO_SUPERA_SALDO", "PAGO_INMUTABLE", "CUOTA_CON_PAGOS", "ENTREGA_CALIFICADA"] as const;
+export function codigoDeTrigger(error: unknown): (typeof CODIGOS_DE_TRIGGER)[number] | null {
+  if (!(error instanceof Error)) return null;
+  return CODIGOS_DE_TRIGGER.find((codigo) => error.message.includes(codigo)) ?? null;
+}
+
+// Pesos colombianos para los mensajes: 80000 → "$ 80.000" (dinero en enteros, D9)
+export const pesos = (valor: number) => `$ ${String(valor).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;

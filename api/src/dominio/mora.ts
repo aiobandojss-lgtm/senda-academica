@@ -15,7 +15,7 @@ const MS_POR_DIA = 86_400_000;
 
 // Días de calendario entre dos fechas YYYY-MM-DD. Se calculan en UTC para que no influyan zonas horarias
 // ni cambios de hora: solo importa la fecha.
-function diasEntre(desde: string, hasta: string): number {
+export function diasEntre(desde: string, hasta: string): number {
   const aUtc = (fecha: string) => {
     const [anio, mes, dia] = fecha.split("-").map(Number);
     return Date.UTC(anio, mes - 1, dia);

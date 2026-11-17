@@ -6,6 +6,7 @@ import { archivos } from "./rutas/archivos";
 import { auth } from "./rutas/auth";
 import { calificaciones } from "./rutas/calificaciones";
 import { cargaEstudiantes } from "./rutas/carga";
+import { carteraDeEstudiante, cuotas, estadoCuentaPropio, pagos } from "./rutas/cartera";
 import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
 import { cursos } from "./rutas/cursos";
@@ -56,6 +57,11 @@ app.route("/docentes", docentes);
 // Plantilla y carga masiva por CSV (tarea 3.3), bajo el mismo prefijo que el resto de estudiantes
 app.route("/estudiantes", cargaEstudiantes);
 app.route("/estudiantes", estudiantes);
+// Cartera: cuotas, pagos y estado de cuenta, tarea 5.2
+app.route("/estudiantes", carteraDeEstudiante);
+app.route("/cuotas", cuotas);
+app.route("/pagos", pagos);
+app.route("/estado-cuenta", estadoCuentaPropio);
 app.route("/usuarios", usuarios);
 
 app.onError((error, c) => {
