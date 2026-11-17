@@ -10,7 +10,7 @@ export type CuotaMora = { fechaVencimiento: string; saldo: number };
 export type ExcepcionMora = { hasta: string };
 
 // Bloqueado con MÁS de 30 días de atraso (31 o más): a los 30 todavía está en riesgo
-const DIAS_PARA_BLOQUEO = 30;
+const DIAS_PARA_BLOQUEO = 29;
 const MS_POR_DIA = 86_400_000;
 
 // Días de calendario entre dos fechas YYYY-MM-DD. Se calculan en UTC para que no influyan zonas horarias
