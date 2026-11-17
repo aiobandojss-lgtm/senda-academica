@@ -21,7 +21,7 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 
 - [x] Día 1: tareas 1.0 a 1.5 el sábado; 1.6 y 1.8 se cerraron el domingo y 1.7 (MCP de shadcn) el lunes 16, al verificarla en una sesión nueva. [Bitácora](docs/bitacora/2026-11-14-dia-1.md)
 - [ ] Día 2, parcial: revisión y aprobación del MVP, tareas 2.1 a 2.3 (11 de 31). Pasan al lunes 2.0, 2.4 a 2.6 y el grupo 3. [Bitácora](docs/bitacora/2026-11-15-dia-2.md)
-- [ ] Día 3 (lunes 16, festivo), en curso:
+- [x] Día 3 (lunes 16, festivo): se recuperó el atraso y se adelantaron el grupo 5 y la 6.1 (30 de 31). [Bitácora](docs/bitacora/2026-11-16-dia-3.md), con el estado frente a la rúbrica:
   - Repaso de la metodología, con el mapa en [docs/presentacion/metodologia-aplicada.md](docs/presentacion/metodologia-aplicada.md).
   - Tarea 1.7 cerrada: con la sesión abierta en `proyecto/`, el servidor `shadcn` conecta, lee el `components.json` (registro `@shadcn`) y lista los 61 componentes `ui`.
   - Tarea 2.4 cerrada: middleware de sesión y permisos por rol con "negar por defecto" (toda ruta de `/api` exige sesión salvo la lista de públicas en `api/src/index.ts`).
@@ -39,7 +39,7 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - MVP completo hasta el grupo 5 (29 de 31).
   - Tarea 6.1 cerrada (adelantada del día 6): prueba E2E con Playwright del flujo de la demo, contra el build de producción. Pasó 3 veces seguidas en local y en el CI, donde corre en paralelo con la calidad. El despliegue ahora necesita los dos jobs en verde (30 de 31). Siguen la 6.2 (revisión visual) y el asistente RAG (día 5).
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
-- [ ] Día 4
+- [ ] Día 4 (martes 17), siguiente: Aymer muestra el tema de la clase del lunes para ver si algo se aplica; luego la 6.2 (revisión visual), archivar el cambio del MVP y empezar el asistente RAG, un día antes de lo planeado.
 - [ ] Día 5
 - [ ] Día 6
 - [ ] Presentación
@@ -67,5 +67,6 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 
 ## Después de la presentación
 
+- [ ] **Antes de operar con la Fundación** (revisado el 16 de noviembre; no afecta la demo): crear el primer administrador en una base nueva, un requisito que **falta en las specs** porque hoy el único administrador sale del seed. Además: Workers Paid (ADR-003), R2 (ADR-002), el aviso de privacidad definitivo y validar con la Fundación los supuestos de las specs.
 - [ ] **Antes del 30 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 29 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
 - [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).
