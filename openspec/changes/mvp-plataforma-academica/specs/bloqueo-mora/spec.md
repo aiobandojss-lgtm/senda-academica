@@ -37,7 +37,7 @@ El sistema SHALL clasificar a cada estudiante en uno de cuatro estados de carter
 - **THEN** su estado es "en riesgo" y puede ingresar
 
 ### Requirement: Estudiante bloqueado no puede ingresar
-El sistema MUST impedir el ingreso de un estudiante bloqueado y SHALL mostrarle un mensaje que indique que su acceso está suspendido por mora y cómo comunicarse con la Fundación.
+El sistema MUST impedir el ingreso de un estudiante bloqueado y SHALL mostrarle un mensaje que indique que su acceso está suspendido por mora y cómo comunicarse con la Fundación. Mientras esté bloqueado, el estudiante MUST NOT acceder a ninguna pantalla ni operación, tampoco a su estado de cuenta.
 
 #### Scenario: Intento de ingreso bloqueado
 - **WHEN** un estudiante bloqueado ingresa credenciales correctas
@@ -58,7 +58,7 @@ El sistema SHALL desbloquear al estudiante en cuanto ninguna de sus cuotas cumpl
 - **THEN** el estudiante puede ingresar de inmediato
 
 ### Requirement: Excepciones autorizadas
-El sistema SHALL permitir al administrador crear una excepción para un estudiante con motivo y fecha final; mientras esté vigente, el estudiante MUST poder ingresar aunque cumpla la regla de bloqueo.
+El sistema SHALL permitir al administrador crear una excepción para un estudiante con motivo y fecha final, que MUST ser hoy o una fecha futura; mientras esté vigente, el estudiante MUST poder ingresar aunque cumpla la regla de bloqueo.
 
 #### Scenario: Acuerdo de pago
 - **WHEN** el administrador crea una excepción hasta el 30 de noviembre con motivo "acuerdo de pago"
@@ -67,6 +67,10 @@ El sistema SHALL permitir al administrador crear una excepción para un estudian
 #### Scenario: Excepción vencida
 - **WHEN** la fecha final de la excepción ya pasó y la mora sigue
 - **THEN** el estudiante vuelve a estar bloqueado
+
+#### Scenario: Excepción con fecha pasada
+- **WHEN** el administrador intenta crear una excepción con una fecha final anterior a hoy
+- **THEN** el sistema la rechaza e indica que la fecha final debe ser hoy o posterior
 
 ### Requirement: El bloqueo solo aplica a estudiantes
 El sistema MUST NOT bloquear a administradores ni a docentes por esta regla.

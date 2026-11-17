@@ -7,11 +7,15 @@ Lleva el control de lo que cada estudiante debe y ha pagado a la Fundación, con
 ## ADDED Requirements
 
 ### Requirement: Plan de cuotas
-El sistema SHALL permitir al administrador generar el plan de cuotas de un estudiante indicando concepto, valor por cuota en pesos colombianos, número de cuotas y fecha del primer vencimiento, con vencimientos mensuales el mismo día.
+El sistema SHALL permitir al administrador generar el plan de cuotas de un estudiante indicando concepto, valor por cuota en pesos colombianos, número de cuotas y fecha del primer vencimiento, con vencimientos mensuales el mismo día. Si ese día no existe en un mes, la cuota de ese mes SHALL vencer el último día del mes.
 
 #### Scenario: Generar seis cuotas
 - **WHEN** el administrador genera 6 cuotas de 180.000 desde el 5 de agosto
 - **THEN** el estudiante queda con 6 cuotas que vencen el día 5 de agosto a enero
+
+#### Scenario: Plan que empieza un día 31
+- **WHEN** el administrador genera 3 cuotas desde el 31 de enero
+- **THEN** vencen el 31 de enero, el 28 de febrero y el 31 de marzo
 
 ### Requirement: Cuotas individuales
 El sistema SHALL permitir al administrador agregar una cuota individual (por ejemplo, la matrícula) y editar el valor o la fecha, o eliminar, una cuota que no tenga pagos registrados. Una cuota con pagos registrados, incluidos los anulados, MUST NOT poder editarse ni eliminarse, para conservar el historial.
@@ -29,7 +33,7 @@ El sistema SHALL permitir al administrador agregar una cuota individual (por eje
 - **THEN** el sistema rechaza la eliminación
 
 ### Requirement: Registro de pagos
-El sistema SHALL permitir al administrador registrar pagos totales o parciales a una cuota, con fecha, valor, medio de pago (efectivo, transferencia o consignación) y soporte opcional. El valor MUST ser mayor que cero y MUST NOT superar el saldo de la cuota.
+El sistema SHALL permitir al administrador registrar pagos totales o parciales a una cuota, con fecha, valor y medio de pago (efectivo, transferencia o consignación). El valor MUST ser mayor que cero y MUST NOT superar el saldo de la cuota, y la fecha MUST NOT ser posterior a hoy en Colombia.
 
 #### Scenario: Pago total
 - **WHEN** el administrador registra un pago igual al saldo de la cuota
@@ -42,6 +46,10 @@ El sistema SHALL permitir al administrador registrar pagos totales o parciales a
 #### Scenario: Pago mayor al saldo
 - **WHEN** el administrador registra un pago mayor al saldo
 - **THEN** el sistema rechaza el pago e indica el saldo actual
+
+#### Scenario: Pago con fecha futura
+- **WHEN** el administrador registra un pago con la fecha de mañana
+- **THEN** el sistema rechaza el pago e indica que la fecha no puede ser posterior a hoy
 
 ### Requirement: Anulación de pagos
 El sistema SHALL permitir al administrador anular un pago registrado por error indicando un motivo; el pago anulado MUST conservarse en el historial y MUST NOT contar para el saldo. Un pago registrado MUST NOT poder modificarse ni volver a activarse: la única corrección permitida es anularlo y registrar uno nuevo.

@@ -13,11 +13,11 @@ El producto se llama **Senda** (nombre genérico e independiente de la Fundació
 - Protección del acceso: límite de intentos de ingreso, invalidación de sesiones al restablecer la contraseña o desactivar un usuario, y contraseñas temporales que solo se muestran una vez.
 - Aceptación del aviso de privacidad en el primer ingreso (Ley 1581 de 2012), con versión y fecha guardadas.
 - Cursos por carrera, con talleres y evaluaciones publicados por el docente; el estudiante sube su entrega y el docente la califica (escala 0.0 a 5.0).
-- Plan de cuotas por estudiante, registro manual de pagos (totales o parciales) con soporte opcional, y estado de cuenta.
+- Plan de cuotas por estudiante, registro manual de pagos (totales o parciales) y estado de cuenta.
 - Bloqueo automático de acceso al estudiante con una cuota vencida hace más de 30 días, con excepciones autorizadas por el administrador.
 - Aplicación web responsiva en español.
 
-Fuera del alcance de este cambio: app móvil nativa, pasarela de pagos en línea, facturación electrónica, certificados y boletines, clases en vivo, inscripción en línea de aspirantes, notificaciones por WhatsApp o SMS, **recuperación de contraseña por correo** (fase posterior: por ahora el administrador restablece la contraseña), **periodos académicos** (fase posterior: el MVP opera un periodo a la vez), manejo especial de estudiantes menores de edad, becas y descuentos, y el asistente con IA (va en el cambio `asistente-academico-rag`).
+Fuera del alcance de este cambio: app móvil nativa, pasarela de pagos en línea, facturación electrónica, certificados y boletines, **soporte (comprobante) adjunto al pago** (fase posterior, aplazado en el grupo 5: la columna `pagos.soporte_key` ya existe), clases en vivo, inscripción en línea de aspirantes, notificaciones por WhatsApp o SMS, **recuperación de contraseña por correo** (fase posterior: por ahora el administrador restablece la contraseña), **periodos académicos** (fase posterior: el MVP opera un periodo a la vez), manejo especial de estudiantes menores de edad, becas y descuentos, y el asistente con IA (va en el cambio `asistente-academico-rag`).
 
 ## Capabilities
 
