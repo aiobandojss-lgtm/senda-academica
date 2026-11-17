@@ -30,5 +30,8 @@ export default defineConfig({
     url: `http://localhost:${PUERTO}/api/salud`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
+    // Sin bindings remotos (vite.config.ts): la prueba no toca Cloudflare ni necesita credenciales, en tu equipo
+    // ni en el CI. Workers AI queda sin conexión; el asistente usará un modelo simulado en el E2E (RAG tarea 4.2)
+    env: { CLOUDFLARE_VITE_FORCE_LOCAL: "true" },
   },
 });

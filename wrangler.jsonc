@@ -29,7 +29,18 @@
     // Debe coincidir con la versión del aviso que acepta el seed (db/seed/generar-seed.mjs)
     "AVISO_PRIVACIDAD_VERSION": "2026-11",
     // "kv" mientras la cuenta no tenga medio de pago; "r2" en producción (ADR-002)
-    "ALMACEN_ARCHIVOS": "kv"
+    "ALMACEN_ARCHIVOS": "kv",
+    // Modelos de Workers AI del asistente (RAG design.md D2), verificados en el catálogo el 2026-11-17 (tarea 1.1).
+    // Si cambia el de embeddings, hay que recrear el índice Vectorize (1024 dimensiones) y reindexar los documentos.
+    "MODELO_EMBEDDINGS": "@cf/baai/bge-m3",
+    // Provisional: la evaluación (tarea 4.1) lo compara con @cf/meta/llama-3.3-70b-instruct-fp8-fast y deja aquí el ganador
+    "MODELO_CHAT": "@cf/openai/gpt-oss-20b"
+  },
+  // Workers AI no tiene simulador local: cada llamada va a Cloudflare y gasta la cuota gratuita (10.000 neuronas
+  // diarias), incluso en `npm run dev`. Las pruebas de Vitest y el E2E corren sin bindings remotos y no lo llaman.
+  "ai": {
+    "binding": "AI",
+    "remote": true
   },
   // Secretos que el Worker necesita (solo los nombres; los valores nunca van en el repositorio).
   // - `wrangler deploy` falla si alguno no está cargado en Cloudflare: mejor que publicar un login roto.

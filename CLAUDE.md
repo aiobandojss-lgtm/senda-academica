@@ -59,7 +59,7 @@ Flujo de trabajo (las skills se invocan como comandos):
 - **Sesión**: JWT HS256 en la cookie `__Host-sesion` (HttpOnly, Secure, SameSite=Lax), 8 horas desde el ingreso (`JWT_SECRET` como secreto de Wrangler), **revocable** con `usuarios.sesion_version` (D4). Compuertas de primer ingreso: contraseña temporal y aviso de privacidad (D16). Errores de la API siempre como `{ codigo, mensaje }` (`api/src/errores.ts`); validación de cuerpos con zod (`validarJson`).
 - **Contraseñas**: PBKDF2-SHA256, 100.000 iteraciones, formato `pbkdf2_sha256$100000$<sal_b64>$<hash_b64>` (el seed usa el mismo formato). Límite de 5 intentos fallidos por documento en 15 minutos (D14). ⚠️ El plan Free de Workers da 10 ms de CPU por petición: se mide en la tarea 1.8.
 - **Mora**: se calcula al vuelo con la función pura `calcularEstadoMora(cuotas, excepciones, hoy)` → `al_dia | en_riesgo | bloqueado | con_excepcion`; "hoy" siempre en America/Bogota. Bloqueado si alguna cuota con saldo > 0 tiene **más de 30 días** de vencida (31 o más), salvo excepción vigente. Se aplica en el login y en cada petición de un estudiante.
-- **RAG**: Workers AI (embeddings `@cf/baai/bge-m3`) + Vectorize. Modelo de chat con function calling: verificar el catálogo vigente y comparar 2 candidatos. Historial en D1 (`asistente_mensajes`), 30 preguntas diarias, retención de 30 días.
+- **RAG**: Workers AI (embeddings `@cf/baai/bge-m3`) + Vectorize. Modelo de chat con function calling: candidatos `@cf/openai/gpt-oss-20b` (provisional en `MODELO_CHAT`) y `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, elegidos en la tarea 1.1 (aprobados por Aymer); la evaluación (4.1) decide. Workers AI no tiene simulador local: `npm run dev` lo llama de verdad y gasta cuota, y las pruebas y el E2E corren sin bindings remotos (`CLOUDFLARE_VITE_FORCE_LOCAL=true` en `playwright.config.ts`). Historial en D1 (`asistente_mensajes`), 30 preguntas diarias, retención de 30 días.
 - **Pruebas**: Vitest **^4.1** con `@cloudflare/vitest-plugin` (el antiguo `@cloudflare/vitest-pool-workers`, que Cloudflare renombró y marcó como obsoleto en octubre de 2026) y Playwright para E2E. Las pruebas de la API corren en workerd con D1 y KV locales y efímeros (`remoteBindings: false` en `vitest.config.ts`); viven en `api/test/` y se tipan con `tsconfig.test.json`.
 - **Fechas**: `YYYY-MM-DD` para fechas de negocio, `YYYY-MM-DDTHH:MM:SSZ` (UTC) para fecha-hora. **Dinero**: enteros en pesos. **Notas**: 0.0 a 5.0 con un decimal. "Tardía" se calcula, no se guarda (D20).
 - **Variables del Worker**: `PRODUCTO_NOMBRE` (Senda), `FUNDACION_NOMBRE` (la Fundación se llama **Funafrocol**, pero la demo pública muestra "Fundación (demo)" hasta que autoricen por escrito), `CONTACTO_FUNDACION`, `AVISO_PRIVACIDAD_VERSION` (`2026-11`, igual que el seed), `ALMACEN_ARCHIVOS` (`kv` | `r2`). Ningún nombre queda quemado en el código.
@@ -148,7 +148,7 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 ## Comandos
 
 ```
-npm run dev            # Vite + Worker en workerd en http://localhost:5173 (API y frontend en el mismo puerto)
+npm run dev            # Vite + Worker en workerd en http://localhost:5173 (API y frontend en el mismo puerto); requiere `wrangler login` por Workers AI
 npm run build          # tsc -b + build de producción (dist/client y dist/senda)
 npm run lint           # ESLint
 npm run typecheck      # tsc -b (web, api y configuración)
