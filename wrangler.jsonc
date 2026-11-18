@@ -34,7 +34,10 @@
     // Si cambia el de embeddings, hay que recrear el índice Vectorize (1024 dimensiones) y reindexar los documentos.
     "MODELO_EMBEDDINGS": "@cf/baai/bge-m3",
     // Provisional: la evaluación (tarea 4.1) lo compara con @cf/meta/llama-3.3-70b-instruct-fp8-fast y deja aquí el ganador
-    "MODELO_CHAT": "@cf/openai/gpt-oss-20b"
+    "MODELO_CHAT": "@cf/openai/gpt-oss-20b",
+    // Espacio (namespace) de Vectorize de este entorno (RAG design.md D2). `npm run dev` usa el índice real, el mismo de
+    // producción: vite.config.ts lo cambia a "local" solo en desarrollo para que las pruebas locales no toquen la demo
+    "RAG_ESPACIO": "produccion"
   },
   // Workers AI no tiene simulador local: cada llamada va a Cloudflare y gasta la cuota gratuita (10.000 neuronas
   // diarias), incluso en `npm run dev`. Las pruebas de Vitest y el E2E corren sin bindings remotos y no lo llaman.

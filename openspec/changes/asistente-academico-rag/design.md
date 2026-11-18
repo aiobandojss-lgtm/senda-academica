@@ -36,6 +36,11 @@ Todo queda en Cloudflare, sin llaves externas ni costo para la Fundación (plan 
   - La evaluación (D7, tarea 4.1) compara los dos y deja el ganador en `MODELO_CHAT`.
 - La cuota gratuita es de 10.000 neuronas diarias para toda la cuenta y se reinicia a las 00:00 UTC (7:00 p. m. en Colombia). El costo real de una pregunta, con documentos e historial, se mide en la tarea 4.1.
 - Workers AI y Vectorize no tienen simulador local. `npm run dev` usa los servicios reales (bindings remotos). Vitest y el E2E corren sin bindings remotos, con dobles de prueba, y no necesitan credenciales de Cloudflare.
+- **Un espacio por entorno en el mismo índice** (decisión de Aymer, 2026-11-18).
+  - El problema: `npm run dev` usa la D1 local pero el índice Vectorize real, el mismo de producción, y el id de un vector es único en todo el índice. Sin separación, cargar documentos en local sobrescribiría vectores de producción, y reemplazar uno en local borraría vectores que la URL pública sigue usando.
+  - La solución: la variable `RAG_ESPACIO` (`produccion` en `wrangler.jsonc`) es el *namespace* de Vectorize de cada vector y de cada búsqueda, y también el prefijo de su id (`produccion:17`, `local:17`).
+  - `vite.config.ts` la cambia a `local` solo en `npm run dev`. Es automático: no depende de editar `.dev.vars`, un paso que se podría olvidar. El build que se despliega conserva `produccion`.
+  - Alternativas descartadas: un segundo índice para desarrollo (Wrangler por entornos con los bindings duplicados: más piezas a dos días de la presentación) y no indexar nunca en local (cada prueba del asistente sería contra producción).
 - El asistente se presenta como **Senda**, el asistente académico de `FUNDACION_NOMBRE` (ambos nombres salen de las variables del Worker).
 
 ### D3. Fragmentación por secciones

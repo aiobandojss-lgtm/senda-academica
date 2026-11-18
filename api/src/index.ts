@@ -11,6 +11,7 @@ import { carreras } from "./rutas/carreras";
 import { config } from "./rutas/config";
 import { cursos } from "./rutas/cursos";
 import { docentes } from "./rutas/docentes";
+import { documentos } from "./rutas/documentos";
 import { archivosDeActividad } from "./rutas/entregas";
 import { estudiantes } from "./rutas/estudiantes";
 import { usuarios } from "./rutas/usuarios";
@@ -64,6 +65,8 @@ app.route("/pagos", pagos);
 app.route("/estado-cuenta", estadoCuentaPropio);
 app.route("/cartera", resumenCartera);
 app.route("/usuarios", usuarios);
+// Documentos oficiales del asistente (RAG tarea 2.2)
+app.route("/documentos", documentos);
 
 app.onError((error, c) => {
   // Errores de la solicitud que detecta Hono, como un JSON mal formado

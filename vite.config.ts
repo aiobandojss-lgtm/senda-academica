@@ -14,11 +14,26 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 // versiones nuevas del plugin leen por sí mismas; la 1.69 instalada solo entiende la opción `remoteBindings`.
 const soloLocal = process.env.CLOUDFLARE_VITE_FORCE_LOCAL === "true";
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), cloudflare({ remoteBindings: !soloLocal })],
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./web/src", import.meta.url)),
+export default defineConfig(({ command, isPreview }) => {
+  // Solo `npm run dev` (vite serve), no `vite build` ni `vite preview`. El índice Vectorize es el real, el mismo de
+  // producción, así que el desarrollo trabaja en su propio espacio: RAG_ESPACIO=local (RAG design.md D2). Es
+  // automático a propósito: si dependiera de editar .dev.vars, un olvido escribiría en el espacio de la demo.
+  // El build que se despliega conserva "produccion" de wrangler.jsonc.
+  const esDesarrollo = command === "serve" && !isPreview;
+
+  return {
+    plugins: [
+      react(),
+      tailwindcss(),
+      cloudflare({
+        remoteBindings: !soloLocal,
+        ...(esDesarrollo ? { config: (worker) => ({ vars: { ...worker.vars, RAG_ESPACIO: "local" } }) } : {}),
+      }),
+    ],
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./web/src", import.meta.url)),
+      },
     },
-  },
+  };
 });
