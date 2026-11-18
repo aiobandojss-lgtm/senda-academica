@@ -80,6 +80,9 @@ export async function ejecutarHerramienta(nombre: string, argumentos: unknown, c
 
 type FilaFragmento = { id: number; titulo: string; seccion: string; contenido: string };
 
+// "Documento – Sección": el formato de cita de la spec (con raya, no guion)
+export const citaDe = (documento: string, seccion: string) => `${documento} – ${seccion}`;
+
 async function buscarDocumentos(argumentos: unknown, { db, carreraId, embeddings, indice }: ContextoHerramientas) {
   const consultaRecibida = (argumentos as { consulta?: unknown } | null)?.consulta;
   const consulta = typeof consultaRecibida === "string" ? consultaRecibida.trim().slice(0, MAXIMO_CONSULTA) : "";
@@ -105,7 +108,17 @@ async function buscarDocumentos(argumentos: unknown, { db, carreraId, embeddings
   const resultados = coincidencias
     .flatMap((c) => {
       const f = porId.get(c.fragmentoId);
-      return f ? [{ documento: f.titulo, seccion: f.seccion, contenido: f.contenido, similitud: Math.round(c.similitud * 1000) / 1000 }] : [];
+      if (!f) return [];
+      return [
+        {
+          // La cita ya armada: el modelo la copia tal cual, en lugar de componerla (design.md D2, tarea 3.2)
+          fuente: citaDe(f.titulo, f.seccion),
+          documento: f.titulo,
+          seccion: f.seccion,
+          contenido: f.contenido,
+          similitud: Math.round(c.similitud * 1000) / 1000,
+        },
+      ];
     })
     .slice(0, MAXIMO_RESULTADOS);
   return resultados.length > 0 ? { resultados } : SIN_RESULTADOS;

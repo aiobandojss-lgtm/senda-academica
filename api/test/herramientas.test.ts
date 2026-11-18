@@ -172,6 +172,15 @@ describe("buscar_documentos", () => {
     expect(resultado.resultados[0].similitud).toBeCloseTo(0.8);
   });
 
+  it("cada resultado trae la cita ya armada para que el modelo la copie tal cual (tarea 3.2)", async () => {
+    ai.fijarVector(CONSULTA, direccion({ 0: 1 }));
+    await sembrarFragmento({ clave: "reglamento", titulo: "Reglamento estudiantil", carreraId: null, seccion: "Evaluación", contenido: "La mínima es 3.0.", vector: direccion({ 0: 1 }) });
+
+    const resultado = (await ejecutarHerramienta("buscar_documentos", { consulta: CONSULTA }, deAna())) as { resultados: { fuente: string }[] };
+
+    expect(resultado.resultados[0].fuente).toBe("Reglamento estudiantil – Evaluación");
+  });
+
   it("descarta los resultados de Vectorize cuyo fragmento ya no existe en D1 (vector viejo aún no borrado)", async () => {
     ai.fijarVector(CONSULTA, direccion({ 0: 0.8, 1: 0.6 }));
     const viejo = await sembrarFragmento({ clave: "calendario", titulo: "Calendario", carreraId: null, seccion: "Parciales", contenido: "Fecha vieja.", vector: direccion({ 0: 1 }) });

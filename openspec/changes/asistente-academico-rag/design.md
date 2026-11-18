@@ -32,7 +32,8 @@ Todo queda en Cloudflare, sin llaves externas ni costo para la Fundación (plan 
   - `@cf/openai/gpt-oss-20b`: provisional en `MODELO_CHAT`. En una pregunta de prueba de dos pasos tomó ~1,2 s y ~11 neuronas.
   - `@cf/meta/llama-3.3-70b-instruct-fp8-fast`: segundo candidato. Tomó ~2 s y ~27 neuronas en la misma prueba.
   - Se descartaron los modelos con fecha de retiro anunciada y los que exigen plan pago.
-  - Los dos candidatos hacen function calling con formatos distintos. gpt-oss usa el formato Responses (`input` y elementos `function_call`); llama usa el formato de chat (`tool_calls`). Es otra razón para la interfaz `ModeloLenguaje` (D1): cada modelo tiene su adaptador.
+  - En la 1.1 se probó gpt-oss con el formato Responses (`input` y elementos `function_call`) y llama con el formato de chat (`tool_calls`). En la tarea 3.2 se probó un ciclo real de dos pasos (el modelo pide la herramienta, recibe el resultado con `role: "tool"` y responde): **los dos aceptan el formato de chat compatible con OpenAI**. Por eso hay un solo adaptador, `ModeloChatWorkersAi`, para ambos. La interfaz `ModeloLenguaje` (D1) se mantiene para cambiar de proveedor y para el modelo simulado de las pruebas y del E2E.
+  - En esa prueba, llama citó `[Documento – Evaluación y calificaciones]`: copió la palabra "Documento" del ejemplo de las instrucciones. Por eso cada resultado de `buscar_documentos` trae la cita ya armada (`fuente`), las instrucciones piden copiarla tal cual, y la validación de citas (D5) reemplaza la respuesta si aun así la cita no corresponde a un fragmento recuperado.
   - La evaluación (D7, tarea 4.1) compara los dos y deja el ganador en `MODELO_CHAT`.
 - La cuota gratuita es de 10.000 neuronas diarias para toda la cuenta y se reinicia a las 00:00 UTC (7:00 p. m. en Colombia). El costo real de una pregunta, con documentos e historial, se mide en la tarea 4.1.
 - Workers AI y Vectorize no tienen simulador local. `npm run dev` usa los servicios reales (bindings remotos). Vitest y el E2E corren sin bindings remotos, con dobles de prueba, y no necesitan credenciales de Cloudflare.
@@ -61,7 +62,11 @@ Las herramientas toman el `usuario_id` de la sesión, nunca de los argumentos de
 ### D5. Guardas contra alucinación
 1. Umbral de similitud: si ningún fragmento supera el umbral (inicial 0,55, ajustable con la evaluación), `buscar_documentos` devuelve "sin resultados" y el agente debe responder que no tiene la información.
 2. Prompt de sistema: responder solo con resultados de herramientas, citar `[Documento – Sección]`, negarse a temas ajenos y a resolver actividades.
-3. Validación de salida: si la respuesta usó documentos pero no trae citas válidas (que existan entre los fragmentos recuperados), se reemplaza por la respuesta de "no tengo esa información".
+3. Validación de salida: si la respuesta usó documentos pero no trae citas válidas (que existan entre los fragmentos recuperados), se reemplaza por la respuesta de "no tengo esa información". En concreto (tarea 3.2):
+   - Una cita que no corresponde a ningún fragmento recuperado invalida toda la respuesta.
+   - Si el agente buscó en los documentos, no consultó datos del estudiante y la respuesta no trae ninguna cita válida, también se reemplaza. Así se cubre el modelo que inventa después de recibir "sin resultados".
+   - Una respuesta solo con datos del estudiante (notas, actividades, estado de cuenta) no necesita cita.
+   - Si después de 4 pasos el modelo sigue pidiendo herramientas, se responde "no tengo esa información".
 
 ### D6. Privacidad
 El contexto enviado al modelo solo incluye nombre de pila, carrera y resultados de herramientas sin documento, correo ni celular. Las herramientas filtran esos campos. Una prueba verifica el contenido enviado al modelo con un doble de prueba.

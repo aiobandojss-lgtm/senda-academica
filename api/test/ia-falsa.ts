@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import app from "../src/index";
+import type { MensajeModelo, ModeloLenguaje, RespuestaModelo } from "../src/rag/modelo";
 import { conCookie, JSON_HEADERS } from "./utilidades";
 
 // Dobles de prueba de Workers AI y Vectorize (RAG design.md D2): no tienen simulador local, y las pruebas no deben
@@ -99,6 +100,27 @@ export class VectorizeFalso {
     return [...this.vectores.values()].filter((v) => v.namespace === espacio).map((v) => v.id).sort();
   }
 }
+
+// Modelo de lenguaje con guion (RAG tarea 3.2): devuelve las respuestas en orden y guarda lo que recibió en cada
+// paso, para revisar qué se le envió al modelo (privacidad, D6). Implementa la interfaz ModeloLenguaje
+export class ModeloGuionado implements ModeloLenguaje {
+  recibidos: MensajeModelo[][] = [];
+  constructor(private readonly guion: (RespuestaModelo | Error)[]) {}
+
+  async responder(mensajes: MensajeModelo[]) {
+    this.recibidos.push(structuredClone(mensajes));
+    const siguiente = this.guion[Math.min(this.recibidos.length - 1, this.guion.length - 1)];
+    if (siguiente instanceof Error) throw siguiente;
+    return siguiente;
+  }
+}
+
+// Atajos para escribir guiones: una llamada a herramienta o un texto final
+export const pide = (nombre: string, argumentos: Record<string, unknown> = {}, id = `llamada-${nombre}`): RespuestaModelo => ({
+  texto: "",
+  llamadas: [{ id, nombre, argumentos }],
+});
+export const dice = (texto: string): RespuestaModelo => ({ texto, llamadas: [] });
 
 // Petición a la API con los bindings de IA reemplazados por los dobles (y, si hace falta, otras variables).
 // app.request recibe el entorno como tercer argumento: es la misma app que atiende en producción.
