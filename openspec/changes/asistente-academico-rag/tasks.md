@@ -14,10 +14,10 @@
 
 ## 3. Asistente (día 5)
 
-- [ ] 3.1 Implementar las herramientas de solo lectura (D4) tomando el `usuario_id` de la sesión; verificar con pruebas que nunca devuelven datos de otro estudiante ni documento, correo o celular
+- [ ] 3.1 Implementar las herramientas de solo lectura (D4) tomando el `usuario_id` de la sesión; verificar con pruebas que nunca devuelven datos de otro estudiante ni documento, correo o celular, que `buscar_documentos` filtra con `carrera_id` en `[0, carrera del estudiante]` (D2) y que descarta los resultados de Vectorize cuyo fragmento ya no existe en D1 (D3)
 - [ ] 3.2 Implementar el ciclo del agente con function calling (máximo 4 pasos), umbral de similitud y validación de citas (D5); verificar con pruebas usando un modelo simulado: sin resultados → respuesta de "no tengo esa información"; cita inválida → respuesta reemplazada
-- [ ] 3.3 Implementar `POST /api/asistente/mensajes` (recibe solo la pregunta nueva) con autenticación, bloqueo por mora, historial leído de `asistente_mensajes` (D8) y límite diario (D9); verificar con pruebas el 401 sin sesión, el bloqueo del estudiante en mora, que un turno enviado por el cliente se ignora y que la pregunta 31 del día no llama al modelo
-- [ ] 3.4 Construir la pantalla del asistente Senda para estudiantes (chat responsivo con fuentes visibles bajo cada respuesta, preguntas sugeridas y botón para borrar el historial); verificar a mano con el estudiante al día del seed
+- [ ] 3.3 Implementar `POST /api/asistente/mensajes` (recibe solo la pregunta nueva) con autenticación, bloqueo por mora, historial leído de `asistente_mensajes` (D8), límite diario (D9) y respuesta de "no disponible" cuando falla el servicio de IA (D11); verificar con pruebas el 401 sin sesión, el bloqueo del estudiante en mora, que un turno enviado por el cliente se ignora, que la pregunta 31 del día no llama al modelo y que, si el modelo falla, se responde 503 `ASISTENTE_NO_DISPONIBLE` sin guardar la pregunta
+- [ ] 3.4 Construir la pantalla del asistente Senda para estudiantes (chat responsivo con fuentes visibles bajo cada respuesta, preguntas sugeridas, aviso de no escribir datos personales, mensaje de "no disponible" y botón para borrar el historial); verificar a mano con el estudiante al día del seed y con capturas en 375 y 1280 px
 - [ ] 3.5 Implementar `DELETE /api/asistente/mensajes` y el Cron Trigger diario que borra mensajes de más de 30 días (D10); verificar con pruebas que el borrado solo afecta al estudiante que lo pide y que la depuración elimina los mensajes antiguos y conserva los recientes
 
 ## 4. Evaluación y demo (día 6)

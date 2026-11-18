@@ -1,6 +1,6 @@
 # Revisión y aprobación del cambio `asistente-academico-rag`
 
-**Revisor:** Aymer (dueño del producto) · **Fecha:** 17 de noviembre de 2026 · **Estado:** ⏳ pendiente de revisión
+**Revisor:** Aymer (dueño del producto) · **Fecha:** 17 de noviembre de 2026 · **Estado:** ✅ aprobado el 18 de noviembre de 2026
 
 Aquí se aprueba **qué** hace el asistente Senda antes de programar su comportamiento (tareas 2.x y 3.x). Lo que apruebes es lo que el asistente hará y lo que defenderás ante el jurado en el criterio 3 de la rúbrica, "IA con fundamento".
 
@@ -137,4 +137,21 @@ Las tareas de infraestructura (1.x) no dependen de esta aprobación. La 2.1 en a
 
 ## Decisiones registradas
 
-_(Pendiente.)_
+Aymer revisó los documentos y aprobó la guía completa el 18 de noviembre de 2026 ("documento revisado y aprobado"). En las preguntas abiertas se tomó la opción que recomendaba la guía.
+
+| Punto | Decisión | Dónde quedó |
+|---|---|---|
+| P1 | OK | Sin cambios |
+| 1 a 5, 8, 10, 13 y 14 | OK | Sin cambios (el riesgo del punto 13 lo cubre A5) |
+| 6 | El asistente **no** explica temas de los cursos | `design.md` (Non-Goals) y escenario nuevo "Pedir que explique un tema de un curso" |
+| 7 | **Sí** al aviso "no escribas datos personales" en el chat | Spec (requisito de privacidad y escenario nuevo) y tarea 3.4 |
+| 9 | 30 preguntas por día es razonable | Sin cambios; `design.md` D9 aclara que la cuota es de toda la cuenta |
+| 11 | El hueco se cierra con A4 | Ver A4 |
+| 12 | La pantalla de carga de documentos va **después** de la presentación | `design.md` (Non-Goals) |
+| A1 | OK | `design.md` D2: resultados de la tarea 1.1 |
+| A2 | OK | `design.md` D2 y D4: `carrera_id = 0` para los generales (`NULL` en D1) y filtro `$in` |
+| A3 | OK | Spec: "Reglamento estudiantil – Entregas de talleres" |
+| A4 | OK | Spec (requisito nuevo "Servicio de IA no disponible"), `design.md` D11 (503 `ASISTENTE_NO_DISPONIBLE`, la pregunta no se guarda) y tarea 3.3 |
+| A5 | OK | `design.md` D3 (el texto vive en D1 y se cruza) y tarea 3.1 |
+
+Se validó con `openspec validate --all --strict`. Desde aquí se pueden implementar las tareas 2.x y 3.x.

@@ -33,7 +33,7 @@ Cada respuesta basada en documentos MUST indicar el título del documento y de l
 
 #### Scenario: Respuesta con fuente
 - **WHEN** el asistente responde una pregunta sobre entregas tardías
-- **THEN** la respuesta muestra "Reglamento estudiantil – Entregas" como fuente
+- **THEN** la respuesta muestra "Reglamento estudiantil – Entregas de talleres" como fuente
 
 ### Requirement: Reconocer cuando no sabe
 Si no recupera información suficiente para responder, el asistente MUST decir que no tiene esa información y remitir al contacto de la Fundación, y MUST NOT inventar datos, fechas, valores ni normas.
@@ -68,12 +68,20 @@ El asistente MUST NOT responder preguntas ajenas a la vida académica y administ
 - **WHEN** el estudiante pide que el asistente le resuelva un taller
 - **THEN** el asistente se niega a resolverlo y puede explicarle qué dice el reglamento sobre entregas
 
+#### Scenario: Pedir que explique un tema de un curso
+- **WHEN** el estudiante pide que le explique un tema de un curso que no está en los documentos de la Fundación, como "¿qué es un arreglo?"
+- **THEN** el asistente responde que no tiene esa información y no lo explica con conocimiento propio del modelo
+
 ### Requirement: Privacidad de los datos enviados al modelo
-El sistema MUST NOT enviar al modelo de lenguaje el número de documento, el correo ni el celular del estudiante, ni datos de otros estudiantes.
+El sistema MUST NOT enviar al modelo de lenguaje el número de documento, el correo ni el celular del estudiante, ni datos de otros estudiantes. La pantalla del asistente SHALL recordar al estudiante que no escriba datos personales en sus preguntas, porque lo que escribe sí se envía al modelo.
 
 #### Scenario: Revisión de lo enviado al modelo
 - **WHEN** se inspecciona el contenido enviado al modelo en una conversación
 - **THEN** no aparece el documento, el correo ni el celular del estudiante
+
+#### Scenario: Aviso de no escribir datos personales
+- **WHEN** el estudiante abre el asistente
+- **THEN** la pantalla le recuerda no escribir datos personales como su número de documento o su celular
 
 ### Requirement: Historial guardado en el servidor
 El sistema SHALL guardar en el servidor los mensajes de cada conversación y SHALL usar como contexto solo los últimos turnos guardados del propio estudiante; MUST NOT aceptar como historial turnos enviados por el cliente.
@@ -92,6 +100,17 @@ El sistema SHALL permitir a cada estudiante un máximo de 30 preguntas por día,
 #### Scenario: Límite alcanzado
 - **WHEN** un estudiante que ya hizo 30 preguntas hoy hace otra
 - **THEN** el sistema no consulta el modelo e indica que podrá preguntar de nuevo mañana
+
+### Requirement: Servicio de IA no disponible
+Si el modelo de lenguaje o la búsqueda de documentos fallan, por ejemplo porque se agotó la cuota del día, el sistema SHALL indicar al estudiante que el asistente no está disponible por ahora y que lo intente más tarde. El sistema MUST NOT inventar ni completar una respuesta, y MUST NOT contar esa pregunta para el límite diario.
+
+#### Scenario: El modelo no responde
+- **WHEN** el estudiante hace una pregunta y el servicio de IA falla
+- **THEN** el asistente indica que no está disponible por ahora y que lo intente más tarde, sin dar una respuesta
+
+#### Scenario: La pregunta fallida no cuenta para el límite
+- **WHEN** una pregunta no obtuvo respuesta porque el servicio de IA falló
+- **THEN** esa pregunta no cuenta para las 30 preguntas del día del estudiante
 
 ### Requirement: Retención limitada de las conversaciones
 El sistema MUST eliminar los mensajes del asistente con más de 30 días de antigüedad y SHALL permitir al estudiante borrar su historial cuando quiera.

@@ -14,6 +14,8 @@ Se construye sobre el MVP (`mvp-plataforma-academica`): ya existen autenticació
 **Non-Goals:**
 - Memoria de largo plazo entre conversaciones (solo los últimos turnos de la conversación actual).
 - Streaming de tokens (se puede agregar si sobra tiempo).
+- Pantalla de administración de documentos. Para la demo bastan la API y el script `npm run rag:indexar`, que muestra los fragmentos indexados por documento. La pantalla se construye después de la presentación, porque un administrador de la Fundación sin conocimientos técnicos la va a necesitar (decisión de Aymer, revisión del 2026-11-18).
+- Explicar temas de los cursos (por ejemplo, "¿qué es un arreglo?"). Esa explicación no está en los documentos de la Fundación, así que el asistente responde que no tiene esa información: explicar sin fuente es lo que el criterio "IA con fundamento" penaliza (decisión de Aymer, revisión del 2026-11-18).
 
 ## Decisions
 
@@ -21,16 +23,30 @@ Se construye sobre el MVP (`mvp-plataforma-academica`): ya existen autenticació
 Todo queda en Cloudflare, sin llaves externas ni costo para la Fundación (plan gratuito). Alternativa: API de OpenAI o Anthropic con mejor calidad, pero con costo mensual que la Fundación no puede asumir. La llamada al modelo queda detrás de una interfaz `ModeloLenguaje` para poder cambiar de proveedor.
 
 ### D2. Modelos
-- Embeddings: `@cf/baai/bge-m3` (multilingüe, bueno en español, 1024 dimensiones). Índice Vectorize `fundacion-docs` con métrica coseno y metadatos `documento_id`, `carrera_id`, `tipo`.
-- Generación: un modelo instruct de Workers AI con soporte de function calling y retención cero de datos. El catálogo cambió desde que se escribió el kit (a noviembre de 2026 hay, entre otros, `gpt-oss-20b` y modelos Qwen 3.x con function calling, además del candidato original `@cf/meta/llama-3.3-70b-instruct-fp8-fast`). **Verificar en el catálogo vigente antes de implementar**, comparar 2 candidatos con el conjunto de evaluación (D7) y dejar el elegido en la variable `MODELO_CHAT`.
+- Embeddings: `@cf/baai/bge-m3` (multilingüe, bueno en español, 1024 dimensiones), en la variable `MODELO_EMBEDDINGS`. Índice Vectorize `fundacion-docs` con métrica coseno y metadatos `documento_id`, `carrera_id` y `tipo`.
+  - `carrera_id` es un número, y los documentos generales llevan `0`. En D1, la carrera de un documento es opcional (`NULL` = general), con llave foránea a `carreras`. Solo en los metadatos de Vectorize se escribe `0`, que nunca es el id de una carrera.
+  - Los índices de metadatos `carrera_id` (número) y `tipo` (texto) se crearon antes de cargar vectores (tarea 1.2). Vectorize no puede filtrar los vectores cargados antes de crear el índice.
+  - En la prueba de la tarea 1.1, bge-m3 dio 0,743 de similitud entre una pregunta y su fragmento correcto, y 0,35 con un texto ajeno. Es coherente con el umbral inicial de 0,55 (D5).
+- Generación: un modelo instruct de Workers AI con function calling, verificado en el catálogo el 2026-11-17 (tarea 1.1):
+  - `@cf/openai/gpt-oss-20b`: provisional en `MODELO_CHAT`. En una pregunta de prueba de dos pasos tomó ~1,2 s y ~11 neuronas.
+  - `@cf/meta/llama-3.3-70b-instruct-fp8-fast`: segundo candidato. Tomó ~2 s y ~27 neuronas en la misma prueba.
+  - Se descartaron los modelos con fecha de retiro anunciada y los que exigen plan pago.
+  - Los dos candidatos hacen function calling con formatos distintos. gpt-oss usa el formato Responses (`input` y elementos `function_call`); llama usa el formato de chat (`tool_calls`). Es otra razón para la interfaz `ModeloLenguaje` (D1): cada modelo tiene su adaptador.
+  - La evaluación (D7, tarea 4.1) compara los dos y deja el ganador en `MODELO_CHAT`.
+- La cuota gratuita es de 10.000 neuronas diarias para toda la cuenta y se reinicia a las 00:00 UTC (7:00 p. m. en Colombia). El costo real de una pregunta, con documentos e historial, se mide en la tarea 4.1.
+- Workers AI y Vectorize no tienen simulador local. `npm run dev` usa los servicios reales (bindings remotos). Vitest y el E2E corren sin bindings remotos, con dobles de prueba, y no necesitan credenciales de Cloudflare.
 - El asistente se presenta como **Senda**, el asistente académico de `FUNDACION_NOMBRE` (ambos nombres salen de las variables del Worker).
 
 ### D3. Fragmentación por secciones
 Se divide el Markdown por títulos (`#`, `##`, `###`) y, si una sección supera ~1.200 caracteres, por párrafos con ~150 de solapamiento. Cada fragmento lleva el título del documento y la ruta de la sección, para citar. Alternativa: fragmentos de tamaño fijo; pierden la sección y empeoran las citas.
 
+**El texto vive en D1, no en Vectorize.** Las tablas `documentos` y `fragmentos` (`migrations/0002_base_conocimiento.sql`) guardan el texto, la sección y el documento de origen. Vectorize guarda solo el vector y los metadatos, y el id del vector es el id del fragmento.
+
+Cada resultado de Vectorize se cruza con D1 por ese id, y se descarta el que ya no existe allí. Vectorize es *eventualmente consistente*: un borrado tarda unos segundos en aplicarse. Si el texto se leyera de Vectorize, justo después de reemplazar un documento el asistente podría citar la versión anterior. Al cruzar con D1, un fragmento borrado deja de existir de inmediato y se cumple el "nunca la versión vieja" de la spec `base-conocimiento`.
+
 ### D4. Agente con herramientas de solo lectura
 El asistente es un ciclo de function calling con un máximo de 4 pasos y estas herramientas:
-- `buscar_documentos(consulta)`: busca en Vectorize filtrando por documentos generales o de la carrera del estudiante.
+- `buscar_documentos(consulta)`: busca en Vectorize con el filtro `carrera_id` en `[0, carrera del estudiante]` (operador `$in`), es decir, documentos generales o de su carrera. Vectorize no permite una "o" entre dos campos distintos ("es general" **o** "es de mi carrera"). Por eso los generales llevan `carrera_id = 0` (D2) en lugar de un campo aparte. Los resultados se cruzan con D1 (D3).
 - `mis_actividades_pendientes()`: actividades publicadas sin entrega del estudiante.
 - `mis_notas()`: entregas calificadas del estudiante.
 - `mi_estado_de_cuenta()`: reusa el servicio de cartera del MVP.
@@ -51,7 +67,12 @@ El contexto enviado al modelo solo incluye nombre de pila, carrera y resultados 
 Tabla `asistente_mensajes (id, usuario_id, rol ('usuario'|'asistente'), contenido, fuentes_json, creado_en)` en `migrations/0002_base_conocimiento.sql`. El endpoint recibe solo la pregunta nueva; el historial (los últimos 6 turnos del estudiante) se lee de la tabla. Así un cliente no puede inyectar turnos falsos del asistente, se puede contar el límite diario y queda trazabilidad para revisar respuestas dudosas. Alternativa: que el navegador envíe el historial; descartada por la inyección de turnos y porque el límite diario no se podría contar de forma confiable.
 
 ### D9. Límite diario
-Antes de llamar al modelo se cuentan los mensajes con `rol = 'usuario'` del estudiante desde las 00:00 de hoy en America/Bogota (convertido a UTC). Con 30 o más, se responde sin llamar al modelo. Protege la cuota gratuita de Workers AI (10.000 neuronas diarias).
+Antes de llamar al modelo se cuentan los mensajes con `rol = 'usuario'` del estudiante desde las 00:00 de hoy en America/Bogota (convertido a UTC). Con 30 o más, se responde sin llamar al modelo. Protege la cuota gratuita de Workers AI (10.000 neuronas diarias). Es una cuota de toda la cuenta: el límite por estudiante evita que uno solo la agote para los demás.
+
+### D11. Falla del servicio de IA
+Workers AI o Vectorize pueden fallar: por ejemplo, porque se agotó la cuota del día o porque el servicio no responde. En ese caso la API responde 503 con `{ codigo: "ASISTENTE_NO_DISPONIBLE", mensaje }` y la pantalla muestra que el asistente no está disponible por ahora y que lo intente más tarde.
+
+Nunca se arma una respuesta con resultados parciales. La pregunta no se guarda en `asistente_mensajes`, así que no cuenta para el límite diario (D9) ni ensucia el historial (D8). Alternativa: un error genérico 500, descartada porque en la demo en vivo un mensaje claro es mucho mejor que una pantalla de error. La decisión sale del ajuste A4 de la revisión del 2026-11-18.
 
 ### D10. Retención de 30 días
 Un Cron Trigger diario del mismo Worker (el plan Free permite 5 por cuenta) borra los mensajes de más de 30 días; además, `DELETE /api/asistente/mensajes` borra el historial del estudiante que lo pide. Los mensajes pueden contener datos personales que el estudiante escribe, así que no se guardan más de lo necesario (Ley 1581: finalidad y temporalidad).
@@ -59,13 +80,15 @@ Un Cron Trigger diario del mismo Worker (el plan Free permite 5 por cuenta) borr
 ## Risks / Trade-offs
 
 - [Modelos abiertos menos precisos en español que los comerciales] → Guardas de D5 y evaluación; si el resultado es pobre, cambiar `MODELO_CHAT` sin tocar el resto.
-- [Cuota diaria del plan gratuito de Workers AI] → Límite de 30 preguntas por estudiante por día (D9) y evaluación fuera del CI.
+- [Cuota diaria del plan gratuito de Workers AI, compartida por todos los estudiantes] → Límite de 30 preguntas por estudiante por día (D9), evaluación fuera del CI y mensaje de "no disponible" si se agota (D11). Con el costo medido en la tarea 4.1 se calcula cuántas preguntas diarias aguanta la Fundación.
+- [Vectorize es eventualmente consistente] → El texto vive en D1 y cada resultado se cruza con D1 (D3).
+- [El estudiante escribe datos personales en una pregunta, y eso sí llega al modelo] → La pantalla del chat le recuerda no escribir su documento ni su celular (spec `asistente-academico`, privacidad).
 - [Mensajes con datos personales guardados] → Retención de 30 días, borrado a pedido del estudiante (D10) y nunca se registran en logs.
 - [Documentos ficticios en la demo] → Se presentan como borradores; al recibir los reales se recargan con la misma ingesta.
 
 ## Migration Plan
 
-1. Crear el índice Vectorize (`wrangler vectorize create fundacion-docs --dimensions=1024 --metric=cosine`) y los índices de metadatos `carrera_id` y `tipo`.
+1. Crear el índice Vectorize (`wrangler vectorize create fundacion-docs --dimensions=1024 --metric=cosine`) y los índices de metadatos `carrera_id` y `tipo`, antes de cargar cualquier vector (hecho el 2026-11-17, tarea 1.2).
 2. Aplicar `migrations/0002_base_conocimiento.sql`.
 3. Ejecutar `npm run rag:indexar` para cargar los documentos de `docs/rag/`.
 
