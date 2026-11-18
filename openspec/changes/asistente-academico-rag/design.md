@@ -67,6 +67,14 @@ Las herramientas toman el `usuario_id` de la sesión, nunca de los argumentos de
    - Si el agente buscó en los documentos, no consultó datos del estudiante y la respuesta no trae ninguna cita válida, también se reemplaza. Así se cubre el modelo que inventa después de recibir "sin resultados".
    - Una respuesta solo con datos del estudiante (notas, actividades, estado de cuenta) no necesita cita.
    - Si después de 4 pasos el modelo sigue pidiendo herramientas, se responde "no tengo esa información".
+   - **Ajustes de la prueba real en `npm run dev` (tarea 3.3).** gpt-oss respondió de memoria, sin llamar ninguna herramienta: "La nota mínima es **4.0**. [Reglamento Académico]" (el reglamento dice 3.0). La cita no tenía raya y la validación no la reconoció. Por eso:
+     - Todo texto entre corchetes debe ser una fuente recuperada, tenga o no la raya.
+     - Una respuesta sin herramientas no puede contener cifras: sin fuente solo vale un saludo o una negativa.
+     - Las instrucciones exigen llamar una herramienta antes de responder sobre la Fundación, y piden no usar tablas (el estudiante lee en el celular).
+     - La temperatura del modelo baja a 0,2, para que las respuestas sean consistentes entre corridas.
+     - Cada reemplazo registra su motivo (`sin_respuesta`, `cita_invalida`, `cifra_sin_fuente`, `sin_cita`, `maximo_pasos`), sin el contenido de la conversación.
+
+     Con esos ajustes, las 8 preguntas de la demo se respondieron bien con el modelo real, y todas usaron una herramienta salvo la negativa a mostrar datos de otra estudiante.
 
 ### D6. Privacidad
 El contexto enviado al modelo solo incluye nombre de pila, carrera y resultados de herramientas sin documento, correo ni celular. Las herramientas filtran esos campos. Una prueba verifica el contenido enviado al modelo con un doble de prueba.

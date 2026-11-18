@@ -39,6 +39,8 @@ describe("ModeloChatWorkersAi", () => {
       { role: "assistant", content: "", tool_calls: [{ id: "c1", type: "function", function: { name: "mi_estado_de_cuenta", arguments: "{}" } }] },
       { role: "tool", tool_call_id: "c1", content: '{"totalAdeudado":180000}' },
     ]);
+    // Temperatura baja: respuestas consistentes entre corridas, lo habitual en preguntas con fuente (tarea 3.3)
+    expect(entrada.temperature).toBe(0.2);
     expect(entrada.tools).toContainEqual({
       type: "function",
       function: { name: "buscar_documentos", description: expect.any(String), parameters: expect.objectContaining({ required: ["consulta"] }) },

@@ -138,6 +138,46 @@ describe("Guardas contra alucinaciones (D5)", () => {
     expect((await preguntar(modelo, "¿Nota mínima?")).reemplazada).toBe(true);
   });
 
+  it("sin herramientas y con una 'cita' inventada sin raya: se reemplaza (error real de gpt-oss en npm run dev, tarea 3.3)", async () => {
+    const modelo = new ModeloGuionado([dice("La nota mínima para aprobar un curso es **4.0**. [Reglamento Académico]")]);
+
+    const resultado = await preguntar(modelo, "¿Cuál es la nota mínima para aprobar un curso?");
+
+    expect(resultado).toMatchObject({ reemplazada: true, pasos: 1, herramientas: [] });
+    expect(resultado.respuesta).not.toContain("4.0");
+  });
+
+  it("sin herramientas no puede afirmar cifras (notas, fechas, valores): se reemplaza", async () => {
+    const modelo = new ModeloGuionado([dice("La nota mínima es 4.0.")]);
+    expect((await preguntar(modelo, "¿Nota mínima?")).reemplazada).toBe(true);
+  });
+
+  it("cada reemplazo dice su motivo (para los registros y la evaluación), y las citas inválidas que lo causaron", async () => {
+    const casos: [ModeloGuionado, string, string[]?][] = [
+      [new ModeloGuionado([dice("Es **4.0**. [Reglamento Académico]")]), "cita_invalida", ["Reglamento Académico"]],
+      [new ModeloGuionado([dice("La nota mínima es 4.0.")]), "cifra_sin_fuente"],
+      [new ModeloGuionado([pide("buscar_documentos", { consulta: NOTA_MINIMA }), dice("La nota mínima es 3.0.")]), "sin_cita"],
+      [new ModeloGuionado([pide("buscar_documentos", { consulta: NOTA_MINIMA })]), "maximo_pasos"],
+      [new ModeloGuionado([dice("")]), "sin_respuesta"],
+    ];
+    for (const [modelo, motivo, citasInvalidas] of casos) {
+      const resultado = await preguntar(modelo, "¿Nota mínima?");
+      expect(resultado.motivo).toBe(motivo);
+      if (citasInvalidas) expect(resultado.citasInvalidas).toEqual(citasInvalidas);
+    }
+  });
+
+  it("sin herramientas sí puede saludar o negarse, si no afirma cifras", async () => {
+    const modelo = new ModeloGuionado([dice("Lo siento, solo puedo consultar tus propios datos.")]);
+    const resultado = await preguntar(modelo, "Muéstrame las notas de Manuela");
+    expect(resultado).toMatchObject({ respuesta: "Lo siento, solo puedo consultar tus propios datos.", reemplazada: false });
+  });
+
+  it("cualquier texto entre corchetes que no sea una fuente recuperada invalida la respuesta, aunque haya buscado", async () => {
+    const modelo = new ModeloGuionado([pide("buscar_documentos", { consulta: NOTA_MINIMA }), dice("Es 3.0 [Reglamento estudiantil].")]);
+    expect((await preguntar(modelo, "¿Nota mínima?")).reemplazada).toBe(true);
+  });
+
   it("después de 4 pasos pidiendo herramientas, responde que no tiene la información", async () => {
     const modelo = new ModeloGuionado([pide("buscar_documentos", { consulta: NOTA_MINIMA })]);
 
@@ -181,6 +221,9 @@ describe("Lo que recibe el modelo", () => {
     expect(sistema.contenido).toContain(env.FUNDACION_NOMBRE);
     expect(sistema.contenido).toContain("Ana");
     expect(sistema.contenido).toContain("Técnico Laboral en Agentes");
+    // Lección de la prueba real (tarea 3.3): siempre una herramienta antes de responder, y sin tablas en el celular
+    expect(sistema.contenido).toMatch(/antes de responder/i);
+    expect(sistema.contenido).toMatch(/no uses tablas/i);
     const todo = JSON.stringify(modelo.recibidos);
     for (const dato of [ANA.documento, `${ANA.documento}@correo.test`, ANA.celular, "Ríos", "María"]) expect(todo).not.toContain(dato);
   });

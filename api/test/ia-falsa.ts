@@ -25,9 +25,15 @@ export function direccion(componentes: Record<number, number>): number[] {
   return vector;
 }
 
+const SIN_CUOTA = "AiError: 4006: you have used up your daily free allocation of 10,000 neurons";
+
 export class AiFalsa {
   llamadas: { modelo: string; entrada: unknown }[] = [];
   falla = false;
+  // Solo falla el modelo de chat (los embeddings siguen funcionando)
+  fallaChat = false;
+  // Respuestas del modelo de chat, en orden y en el formato de Workers AI (usar chatPide y chatDice)
+  guionChat: unknown[] = [];
   // Vector fijo para un texto exacto; los demás textos usan vectorDe
   private fijos = new Map<string, number[]>();
 
@@ -35,12 +41,35 @@ export class AiFalsa {
     this.fijos.set(texto, vector);
   }
 
-  async run(modelo: string, entrada: { text: string[] }) {
-    this.llamadas.push({ modelo, entrada });
-    if (this.falla) throw new Error("AiError: 4006: you have used up your daily free allocation of 10,000 neurons");
-    return { shape: [entrada.text.length, DIMENSIONES], data: entrada.text.map((t) => this.fijos.get(t) ?? vectorDe(t)) };
+  // Mensajes que recibió el modelo de chat en cada llamada
+  get mensajesChat(): { role: string; content: string }[][] {
+    return this.llamadas.flatMap((l) => ("messages" in (l.entrada as object) ? [(l.entrada as { messages: { role: string; content: string }[] }).messages] : []));
+  }
+
+  async run(modelo: string, entrada: { text?: string[]; messages?: unknown[] }) {
+    this.llamadas.push({ modelo, entrada: structuredClone(entrada) });
+    if (entrada.messages) {
+      if (this.falla || this.fallaChat) throw new Error(SIN_CUOTA);
+      const respuesta = this.guionChat.shift();
+      if (!respuesta) throw new Error("El guion del modelo de chat se agotó");
+      return respuesta;
+    }
+    if (this.falla) throw new Error(SIN_CUOTA);
+    const textos = entrada.text ?? [];
+    return { shape: [textos.length, DIMENSIONES], data: textos.map((t) => this.fijos.get(t) ?? vectorDe(t)) };
   }
 }
+
+// Respuestas del modelo de chat en el formato real de Workers AI (compatible con OpenAI), para el guion de AiFalsa
+export const chatPide = (nombre: string, argumentos: Record<string, unknown> = {}) => ({
+  choices: [
+    {
+      message: { content: null, tool_calls: [{ id: `chat-${nombre}`, type: "function", function: { name: nombre, arguments: JSON.stringify(argumentos) } }] },
+      finish_reason: "tool_calls",
+    },
+  ],
+});
+export const chatDice = (texto: string) => ({ choices: [{ message: { content: texto, tool_calls: [] }, finish_reason: "stop" }] });
 
 type VectorGuardado = { id: string; values: number[]; namespace?: string; metadata?: Record<string, unknown> };
 type FiltroFalso = Record<string, { $in?: unknown[]; $eq?: unknown } | string | number>;

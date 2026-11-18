@@ -21,8 +21,12 @@ export interface ModeloLenguaje {
   responder(mensajes: MensajeModelo[], herramientas: readonly DefinicionHerramienta[]): Promise<RespuestaModelo>;
 }
 
+// El modelo del asistente: el de MODELO_CHAT, que la evaluación (tarea 4.1) deja con el ganador
+export const modeloDelAsistente = (env: Env): ModeloLenguaje => new ModeloChatWorkersAi(env.AI, env.MODELO_CHAT);
+
 // Tope de la respuesta. gpt-oss "razona" antes de responder y esos tokens también cuentan
 const MAXIMO_TOKENS = 1000;
+const TEMPERATURA = 0.2;
 
 const ROLES = { sistema: "system", usuario: "user", asistente: "assistant", herramienta: "tool" } as const;
 
@@ -70,6 +74,8 @@ export class ModeloChatWorkersAi implements ModeloLenguaje {
       }),
       tools: herramientas.map((h) => ({ type: "function", function: { name: h.nombre, description: h.descripcion, parameters: h.parametros } })),
       max_tokens: MAXIMO_TOKENS,
+      // Baja: respuestas consistentes entre corridas, lo habitual en preguntas con fuente (tarea 3.3)
+      temperature: TEMPERATURA,
     };
 
     let salida: SalidaChat;

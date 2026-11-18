@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
 import { actividades, actividadesDeCurso } from "./rutas/actividades";
 import { archivos } from "./rutas/archivos";
+import { asistente } from "./rutas/asistente";
 import { auth } from "./rutas/auth";
 import { calificaciones } from "./rutas/calificaciones";
 import { cargaEstudiantes } from "./rutas/carga";
@@ -65,8 +66,9 @@ app.route("/pagos", pagos);
 app.route("/estado-cuenta", estadoCuentaPropio);
 app.route("/cartera", resumenCartera);
 app.route("/usuarios", usuarios);
-// Documentos oficiales del asistente (RAG tarea 2.2)
+// Documentos oficiales del asistente (RAG tarea 2.2) y el asistente de los estudiantes (RAG tarea 3.3)
 app.route("/documentos", documentos);
+app.route("/asistente", asistente);
 
 app.onError((error, c) => {
   // Errores de la solicitud que detecta Hono, como un JSON mal formado

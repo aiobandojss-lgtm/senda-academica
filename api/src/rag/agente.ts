@@ -25,11 +25,17 @@ export type EntradaAgente = {
   hoy?: string;
 };
 
+// Por qué la validación (D5) reemplazó una respuesta. Va a los registros y a la evaluación (tarea 4.1)
+export type MotivoReemplazo = "sin_respuesta" | "cita_invalida" | "cifra_sin_fuente" | "sin_cita" | "maximo_pasos";
+
 export type ResultadoAgente = {
   respuesta: string;
   fuentes: Fuente[];
   // true si la validación (D5) cambió la respuesta del modelo por "no tengo esa información"
   reemplazada: boolean;
+  motivo?: MotivoReemplazo;
+  // Las citas que no correspondían a ningún fragmento recuperado (nombres de documentos, sin datos personales)
+  citasInvalidas?: string[];
   pasos: number;
   herramientas: string[];
 };
@@ -43,9 +49,9 @@ export function instruccionesDelSistema(perfil: EntradaAgente["perfil"], config:
     `Eres ${producto}, el asistente académico de ${fundacion}. Hablas con ${nombrePila}, estudiante de ${carrera}. Hoy es ${hoy} (hora de Colombia).`,
     "",
     "Reglas:",
-    "1. Responde siempre en español, de forma breve, clara y amable.",
+    "1. Responde siempre en español, de forma breve, clara y amable. No uses tablas: el estudiante lee desde el celular. Usa frases cortas o listas.",
     "2. Usa solo la información que te den las herramientas. Nunca uses tu propio conocimiento para normas, fechas, valores, notas, requisitos ni contenidos de los programas.",
-    `3. Para preguntas sobre normas, fechas, el calendario, pagos, entregas o el plan de estudios, usa buscar_documentos. Para los datos de ${nombrePila}, usa mis_actividades_pendientes, mis_notas o mi_estado_de_cuenta.`,
+    `3. Siempre llama al menos una herramienta antes de responder cualquier pregunta sobre ${fundacion}, aunque creas saber la respuesta. Para normas, fechas, el calendario, pagos, entregas, horarios, servicios o el plan de estudios, usa buscar_documentos. Para los datos de ${nombrePila}, usa mis_actividades_pendientes, mis_notas o mi_estado_de_cuenta. Sin herramientas solo puedes saludar o negarte.`,
     '4. Cuando respondas con información de buscar_documentos, cita la fuente copiando exactamente el campo "fuente" del resultado, entre corchetes, al final de la frase que la usa. No inventes ni cambies las fuentes.',
     '5. Si las herramientas no traen la información que se pide, responde solo: "No tengo esa información."',
     `6. Solo puedes consultar los datos de ${nombrePila}. Si te piden datos de otra persona, responde que solo puedes consultar sus propios datos.`,
@@ -56,9 +62,11 @@ export function instruccionesDelSistema(perfil: EntradaAgente["perfil"], config:
 
 export const respuestaNoSe = (contacto: string) => `No tengo esa información. Te sugiero consultarlo con ${contacto}.`;
 
-// Una cita es un texto entre corchetes con una raya o un guion entre espacios: [Documento – Sección]
-const ENTRE_CORCHETES = /\[([^[\]]+)\]/g;
-const SEPARADOR = /\s[–—-]\s/;
+// Todo texto entre corchetes cuenta como cita y debe ser una fuente recuperada, tenga o no la raya: en la prueba
+// real (tarea 3.3) gpt-oss respondió de memoria "**4.0**. [Reglamento Académico]". Se excluyen los enlaces
+// de Markdown, [texto](url), que no son citas
+const ENTRE_CORCHETES = /\[([^[\]]+)\](?!\()/g;
+const CIFRA = /\d/;
 // Compara citas sin importar mayúsculas, el tipo de raya, los espacios o un punto final
 const normalizar = (cita: string) =>
   cita
@@ -81,10 +89,12 @@ export async function responderPregunta(entrada: EntradaAgente): Promise<Resulta
   let buscoDocumentos = false;
   let consultoDatos = false;
 
-  const noSe = (pasos: number): ResultadoAgente => ({
+  const noSe = (pasos: number, motivo: MotivoReemplazo, citasInvalidas?: string[]): ResultadoAgente => ({
     respuesta: respuestaNoSe(config.contacto),
     fuentes: [],
     reemplazada: true,
+    motivo,
+    ...(citasInvalidas ? { citasInvalidas } : {}),
     pasos,
     herramientas: [...new Set(usadas)],
   });
@@ -94,11 +104,16 @@ export async function responderPregunta(entrada: EntradaAgente): Promise<Resulta
 
     if (llamadas.length === 0) {
       // Guarda 3 de D5: validación de la respuesta
-      const citas = [...texto.matchAll(ENTRE_CORCHETES)].map((m) => m[1]).filter((c) => SEPARADOR.test(c));
-      if (!texto || citas.some((c) => !recuperadas.has(normalizar(c)))) return noSe(paso);
+      if (!texto) return noSe(paso, "sin_respuesta");
+      const citas = [...texto.matchAll(ENTRE_CORCHETES)].map((m) => m[1]);
+      const invalidas = citas.filter((c) => !recuperadas.has(normalizar(c)));
+      if (invalidas.length > 0) return noSe(paso, "cita_invalida", invalidas.slice(0, 3).map((c) => c.slice(0, 80)));
+      // Sin ninguna herramienta, la respuesta no tiene fuente: solo vale un saludo o una negativa. Una cifra (nota,
+      // fecha, valor) sin fuente es justo la alucinación que hay que evitar
+      if (usadas.length === 0 && CIFRA.test(texto)) return noSe(paso, "cifra_sin_fuente");
       const fuentes = [...new Set(citas.map(normalizar))].map((c) => recuperadas.get(c)!);
       // Buscó en los documentos y no consultó datos propios: sin cita válida, la respuesta no tiene fundamento
-      if (buscoDocumentos && !consultoDatos && fuentes.length === 0) return noSe(paso);
+      if (buscoDocumentos && !consultoDatos && fuentes.length === 0) return noSe(paso, "sin_cita");
       return { respuesta: texto, fuentes, reemplazada: false, pasos: paso, herramientas: [...new Set(usadas)] };
     }
 
@@ -118,5 +133,5 @@ export async function responderPregunta(entrada: EntradaAgente): Promise<Resulta
     }
   }
   // Después de 4 pasos el modelo sigue pidiendo herramientas: no hay una respuesta con fundamento
-  return noSe(MAXIMO_PASOS);
+  return noSe(MAXIMO_PASOS, "maximo_pasos");
 }
