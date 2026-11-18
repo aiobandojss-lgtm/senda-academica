@@ -19,7 +19,8 @@
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "db:seed": "node db/seed/generar-seed.mjs && wrangler d1 execute DB --local --file db/seed/seed.sql && wrangler kv key put seed/placeholder.pdf --path db/seed/placeholder.pdf --binding ARCHIVOS_KV --local",
     "deploy": "npm run build && wrangler deploy",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "rag:indexar": "node scripts/rag-indexar.mjs"
   },
   "dependencies": {
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",

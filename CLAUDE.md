@@ -158,7 +158,10 @@ npm test               # Vitest: pruebas de la API en workerd (npm run test:watc
 npm run test:e2e       # Playwright: flujo de la demo contra el build de producción (vite preview, puerto 4173); recarga el seed local antes y lo deja como al final de la demo (después: npm run db:seed). Solo sirve del 6 al 29 de noviembre de 2026 (ver PLAN.md)
 npm run db:migrate     # aplica las migraciones pendientes en la D1 local
 npm run db:seed        # regenera el seed (determinista), lo carga en la D1 local y sube el PDF de ejemplo al KV local
+npm run rag:indexar    # carga docs/rag en la base de conocimiento por la API (con npm run dev arriba): espacio "local" de Vectorize. Pide la cuenta de administrador (o SENDA_ADMIN_DOCUMENTO y SENDA_ADMIN_CONTRASENA). Gasta unas pocas neuronas
 ```
+
+Vectorize es el índice real también en desarrollo: `npm run dev` escribe en el espacio `local` (lo fija `vite.config.ts`) y producción en `produccion` (RAG design.md D2). Vectorize aplica los cambios unos minutos después (consistencia eventual); se ve con `npx wrangler vectorize info fundacion-docs`.
 
 Las operaciones remotas **no** tienen script a propósito, porque un `npm run` remoto es demasiado fácil de ejecutar por error. Se escriben explícitas, se muestran antes de ejecutarlas y cada una tiene su costo en el plan Free:
 
