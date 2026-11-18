@@ -135,6 +135,10 @@ add('-- Contraseña de todas las cuentas: Demo2026*');
 add('-- ============================================================');
 add('DELETE FROM excepciones_mora;'); add('DELETE FROM pagos;'); add('DELETE FROM cuotas;'); add('DELETE FROM entregas;');
 add('DELETE FROM actividades;'); add('DELETE FROM inscripciones;'); add('DELETE FROM cursos;'); add('DELETE FROM estudiantes;');
+// El historial del asistente apunta a usuarios: se borra antes que ellos. Los documentos y fragmentos del
+// asistente NO se borran: no son datos del seed (los carga `npm run rag:indexar`), y borrarlos dejaría sus
+// vectores huérfanos en Vectorize (migrations/0002_base_conocimiento.sql).
+add('DELETE FROM asistente_mensajes;');
 add('DELETE FROM intentos_fallidos;'); add('DELETE FROM usuarios;'); add('DELETE FROM carreras;');
 add('');
 

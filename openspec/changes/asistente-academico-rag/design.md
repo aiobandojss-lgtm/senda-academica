@@ -24,7 +24,8 @@ Todo queda en Cloudflare, sin llaves externas ni costo para la Fundación (plan 
 
 ### D2. Modelos
 - Embeddings: `@cf/baai/bge-m3` (multilingüe, bueno en español, 1024 dimensiones), en la variable `MODELO_EMBEDDINGS`. Índice Vectorize `fundacion-docs` con métrica coseno y metadatos `documento_id`, `carrera_id` y `tipo`.
-  - `carrera_id` es un número, y los documentos generales llevan `0`. En D1, la carrera de un documento es opcional (`NULL` = general), con llave foránea a `carreras`. Solo en los metadatos de Vectorize se escribe `0`, que nunca es el id de una carrera.
+  - `carrera_id` es un número, y los documentos generales llevan `0`. En D1, la carrera de un documento es opcional (`NULL` = general). Solo en los metadatos de Vectorize se escribe `0`, que nunca es el id de una carrera.
+  - `documentos.carrera_id` **no** tiene llave foránea. El seed de la demo borra y recrea las carreras, y con llave foránea esa recarga fallaría en cuanto hubiera un plan de estudios cargado. La API valida la carrera al cargar el documento, y la aplicación nunca borra carreras. El detalle está en `migrations/0002_base_conocimiento.sql`.
   - Los índices de metadatos `carrera_id` (número) y `tipo` (texto) se crearon antes de cargar vectores (tarea 1.2). Vectorize no puede filtrar los vectores cargados antes de crear el índice.
   - En la prueba de la tarea 1.1, bge-m3 dio 0,743 de similitud entre una pregunta y su fragmento correcto, y 0,35 con un texto ajeno. Es coherente con el umbral inicial de 0,55 (D5).
 - Generación: un modelo instruct de Workers AI con function calling, verificado en el catálogo el 2026-11-17 (tarea 1.1):
