@@ -1,6 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "senda",
+  // Cuenta de Cloudflare de Senda (Sendafundacion@outlook.com's Account). El login de Wrangler es uno solo para todo el
+  // equipo: si alguien entra con otra cuenta (pasó el 2026-11-18), cualquier comando falla con un error de autenticación
+  // en lugar de usar la cuenta equivocada; un `wrangler deploy` no podría publicar `senda` en otra cuenta. No es un
+  // secreto. En el CI manda la variable CLOUDFLARE_ACCOUNT_ID, que debe tener este mismo valor.
+  "account_id": "65a11d0b8bbe0d6fb9eb63ec7b92f876",
   // Punto de entrada del Worker: la API con Hono
   "main": "./api/src/index.ts",
   "compatibility_date": "2026-11-01",
