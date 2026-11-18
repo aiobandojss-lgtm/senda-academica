@@ -8,7 +8,7 @@
 
 ## 2. Base de conocimiento (día 5)
 
-- [ ] 2.1 Implementar la fragmentación por secciones (D3) como función pura; verificar con unit tests que conserva el título de sección y respeta el tamaño máximo
+- [x] 2.1 Implementar la fragmentación por secciones (D3) como función pura; verificar con unit tests que conserva el título de sección y respeta el tamaño máximo
 - [ ] 2.2 Implementar la API de administrador para cargar, reemplazar y retirar documentos (con borrado de vectores anteriores); verificar con pruebas que un estudiante recibe acceso denegado y que reemplazar elimina los fragmentos viejos
 - [ ] 2.3 Crear el script `npm run rag:indexar` que carga los archivos de `docs/rag/` por la API; verificar que el administrador ve el número de fragmentos por documento
 

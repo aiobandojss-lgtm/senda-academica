@@ -5,3 +5,9 @@ declare namespace Cloudflare {
     TEST_MIGRATIONS: import("cloudflare:test").D1Migration[];
   }
 }
+
+// Vite entrega el texto de un archivo importado con `?raw`: las pruebas leen así los documentos reales de docs/rag
+declare module "*.md?raw" {
+  const contenido: string;
+  export default contenido;
+}
