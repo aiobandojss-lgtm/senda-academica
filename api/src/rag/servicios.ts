@@ -8,11 +8,15 @@ export interface GeneradorEmbeddings {
 
 export type VectorFragmento = { fragmentoId: number; valores: number[]; documentoId: number; carreraId: number | null; tipo: string };
 
+export type Coincidencia = { fragmentoId: number; similitud: number };
+
 // Índice vectorial de los fragmentos. Guarda solo vectores y metadatos: el texto vive en D1 (D3)
 export interface IndiceVectorial {
   guardar(vectores: VectorFragmento[]): Promise<void>;
   // Eliminar ids que no existen no es un error
   eliminar(fragmentoIds: number[]): Promise<void>;
+  // Los más parecidos entre los documentos generales y los de la carrera, de mayor a menor similitud (coseno)
+  buscar(vector: number[], opciones: { carreraId: number; maximo: number }): Promise<Coincidencia[]>;
 }
 
 // Workers AI o Vectorize no respondieron (cuota agotada, servicio caído). Las rutas lo traducen a 503 (D11)
@@ -90,6 +94,26 @@ export class IndiceVectorize implements IndiceVectorial {
     for (const lote of enLotes(fragmentoIds, LOTE_VECTORES)) {
       await this.conServicio(() => this.indice.deleteByIds(lote.map((id) => this.idDe(id))));
     }
+  }
+
+  async buscar(vector: number[], { carreraId, maximo }: { carreraId: number; maximo: number }) {
+    let resultado: VectorizeMatches;
+    try {
+      resultado = await this.indice.query(vector, {
+        topK: maximo,
+        namespace: this.espacio,
+        // Vectorize no tiene "o" entre dos campos: los generales llevan carrera_id 0 y se piden con $in (D2 y D4)
+        filter: { carrera_id: { $in: [0, carreraId] } },
+        returnMetadata: "none",
+      });
+    } catch (error) {
+      throw new ServicioIaNoDisponible(error);
+    }
+    const prefijo = `${this.espacio}:`;
+    return resultado.matches.flatMap((m) => {
+      const fragmentoId = Number(m.id.slice(prefijo.length));
+      return m.id.startsWith(prefijo) && Number.isSafeInteger(fragmentoId) ? [{ fragmentoId, similitud: m.score }] : [];
+    });
   }
 
   private async conServicio(operacion: () => Promise<unknown>) {

@@ -146,21 +146,29 @@ actividadesDeCurso.post("/:id/actividades", validarJson(esquemaCrear), async (c)
 // Inicio del estudiante (tarea 4.4): actividades publicadas sin entregar de sus cursos actuales, por fecha
 // límite (también las vencidas: todavía puede entregarlas como tardías), y su avance. Va antes de "/:id"
 // para que "pendientes" no se tome como un id.
+// Actividades publicadas de los cursos actuales del estudiante, con su entrega si la hay. La usan esta ruta y
+// la herramienta mis_actividades_pendientes del asistente (RAG tarea 3.1): una sola regla de "pendiente"
+export async function actividadesPublicadasDe(db: D1Database, estudianteId: number) {
+  const { results } = await db
+    .prepare(
+      `SELECT ${COLUMNAS}, k.nombre AS curso_nombre, en.id AS entrega_id
+         FROM actividades a
+         JOIN cursos k ON k.id = a.curso_id AND k.activo = 1
+         JOIN inscripciones i ON i.curso_id = k.id AND i.estudiante_id = ?
+         JOIN estudiantes e ON e.usuario_id = i.estudiante_id AND e.semestre_actual = k.semestre AND e.carrera_id = k.carrera_id
+         LEFT JOIN entregas en ON en.actividad_id = a.id AND en.estudiante_id = i.estudiante_id
+        WHERE a.publicada = 1
+        ORDER BY a.fecha_limite, a.id`,
+    )
+    .bind(estudianteId)
+    .all<Omit<ActividadConAcceso, "docente_id"> & { curso_nombre: string; entrega_id: number | null }>();
+  return results;
+}
+
 actividades.get("/pendientes", async (c) => {
   const usuario = c.var.usuario;
   if (usuario.rol !== "estudiante") return accesoDenegado(c);
-  const { results } = await c.env.DB.prepare(
-    `SELECT ${COLUMNAS}, k.nombre AS curso_nombre, en.id AS entrega_id
-       FROM actividades a
-       JOIN cursos k ON k.id = a.curso_id AND k.activo = 1
-       JOIN inscripciones i ON i.curso_id = k.id AND i.estudiante_id = ?
-       JOIN estudiantes e ON e.usuario_id = i.estudiante_id AND e.semestre_actual = k.semestre AND e.carrera_id = k.carrera_id
-       LEFT JOIN entregas en ON en.actividad_id = a.id AND en.estudiante_id = i.estudiante_id
-      WHERE a.publicada = 1
-      ORDER BY a.fecha_limite, a.id`,
-  )
-    .bind(usuario.id)
-    .all<Omit<ActividadConAcceso, "docente_id"> & { curso_nombre: string; entrega_id: number | null }>();
+  const results = await actividadesPublicadasDe(c.env.DB, usuario.id);
   const pendientes = results.filter((f) => f.entrega_id === null);
   return c.json({
     pendientes: pendientes.map((f) => ({ ...aActividad(f), curso: { id: f.curso_id, nombre: f.curso_nombre } })),

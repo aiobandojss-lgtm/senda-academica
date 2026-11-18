@@ -19,3 +19,10 @@ export function bogotaAUtc(local: string): string | null {
 
   return `${fecha.toISOString().slice(0, 19)}Z`;
 }
+
+// "2026-11-24T04:59:00Z" → "2026-11-23 23:59" en Colombia. La usa el asistente: al modelo le llegan las fechas
+// límite como las vería el estudiante (RAG tarea 3.1)
+export function utcABogota(utc: string): string {
+  const local = new Date(new Date(utc).getTime() - 5 * 3_600_000);
+  return local.toISOString().slice(0, 16).replace("T", " ");
+}

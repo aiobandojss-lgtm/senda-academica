@@ -16,22 +16,72 @@ export function vectorDe(texto: string): number[] {
   return Array.from({ length: DIMENSIONES }, (_, i) => ((semilla + i * 7919) % 1000) / 1000);
 }
 
+// Vector con componentes elegidas, por ejemplo direccion({ 0: 0.8, 1: 0.6 }). Con vectores así la prueba decide
+// la similitud exacta: el coseno entre direccion({0: 1}) y direccion({0: 0.8, 1: 0.6}) es 0,8
+export function direccion(componentes: Record<number, number>): number[] {
+  const vector = new Array<number>(DIMENSIONES).fill(0);
+  for (const [indice, valor] of Object.entries(componentes)) vector[Number(indice)] = valor;
+  return vector;
+}
+
 export class AiFalsa {
   llamadas: { modelo: string; entrada: unknown }[] = [];
   falla = false;
+  // Vector fijo para un texto exacto; los demás textos usan vectorDe
+  private fijos = new Map<string, number[]>();
+
+  fijarVector(texto: string, vector: number[]) {
+    this.fijos.set(texto, vector);
+  }
 
   async run(modelo: string, entrada: { text: string[] }) {
     this.llamadas.push({ modelo, entrada });
     if (this.falla) throw new Error("AiError: 4006: you have used up your daily free allocation of 10,000 neurons");
-    return { shape: [entrada.text.length, DIMENSIONES], data: entrada.text.map(vectorDe) };
+    return { shape: [entrada.text.length, DIMENSIONES], data: entrada.text.map((t) => this.fijos.get(t) ?? vectorDe(t)) };
   }
 }
 
 type VectorGuardado = { id: string; values: number[]; namespace?: string; metadata?: Record<string, unknown> };
+type FiltroFalso = Record<string, { $in?: unknown[]; $eq?: unknown } | string | number>;
+
+const coseno = (a: number[], b: number[]) => {
+  let producto = 0;
+  let normaA = 0;
+  let normaB = 0;
+  for (let i = 0; i < a.length; i++) {
+    producto += a[i] * b[i];
+    normaA += a[i] * a[i];
+    normaB += b[i] * b[i];
+  }
+  return normaA === 0 || normaB === 0 ? 0 : producto / Math.sqrt(normaA * normaB);
+};
+
+// ¿Cumple el filtro de metadatos? Solo lo que usa la API: igualdad y $in
+const cumpleFiltro = (metadatos: Record<string, unknown> = {}, filtro: FiltroFalso = {}) =>
+  Object.entries(filtro).every(([campo, condicion]) => {
+    const valor = metadatos[campo];
+    if (typeof condicion !== "object") return valor === condicion;
+    if (condicion.$in) return condicion.$in.includes(valor);
+    return valor === condicion.$eq;
+  });
 
 export class VectorizeFalso {
   vectores = new Map<string, VectorGuardado>();
   fallaAlGuardar = false;
+  fallaAlBuscar = false;
+  consultas: { topK?: number; namespace?: string; filter?: FiltroFalso }[] = [];
+
+  // Como Vectorize: primero el espacio y el filtro de metadatos, luego los más parecidos por coseno
+  async query(vector: number[], opciones: { topK?: number; namespace?: string; filter?: FiltroFalso } = {}) {
+    this.consultas.push(opciones);
+    if (this.fallaAlBuscar) throw new Error("VECTOR_QUERY_ERROR (code = 40006)");
+    const matches = [...this.vectores.values()]
+      .filter((v) => v.namespace === opciones.namespace && cumpleFiltro(v.metadata, opciones.filter))
+      .map((v) => ({ id: v.id, score: coseno(vector, v.values) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, opciones.topK ?? 5);
+    return { matches, count: matches.length };
+  }
 
   async upsert(vectores: VectorGuardado[]) {
     if (this.fallaAlGuardar) throw new Error("VECTOR_UPSERT_ERROR (code = 40001)");
