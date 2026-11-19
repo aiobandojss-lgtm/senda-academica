@@ -23,7 +23,7 @@
 ## 4. Evaluación y demo (día 6)
 
 - [x] 4.1 Crear `eval/preguntas.json` (~25 casos: respondibles, datos propios, sin respuesta, fuera de dominio) y el script `npm run eval:rag`; comparar los 2 modelos candidatos y verificar que el elegido llega al menos al 90 % antes de la demo
-- [ ] 4.2 Agregar al E2E de Playwright una pregunta respondible (con fuente visible) y una sin respuesta (con negación); en CI usar el modelo simulado (variable `MODELO_SIMULADO=1`) para no gastar cuota ni depender de respuestas variables; verificar `npm run test:e2e` en verde
+- [x] 4.2 Agregar al E2E de Playwright una pregunta respondible (con fuente visible) y una sin respuesta (con negación); en CI usar el modelo simulado (variable `MODELO_SIMULADO=1`) para no gastar cuota ni depender de respuestas variables; verificar `npm run test:e2e` en verde
 
 ## Workflow follow-up
 

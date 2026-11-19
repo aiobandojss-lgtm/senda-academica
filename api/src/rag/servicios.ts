@@ -1,6 +1,8 @@
 // Servicios de IA del asistente detrás de interfaces pequeñas (RAG design.md D1), como AlmacenArchivos: el resto de
 // la API no conoce Workers AI ni Vectorize. En las pruebas se reemplazan los bindings por dobles (api/test/ia-falsa.ts).
 
+import { EmbeddingsSimulados, IndiceSimulado } from "./simulado";
+
 // Convierte textos en vectores (embeddings) con el modelo de MODELO_EMBEDDINGS
 export interface GeneradorEmbeddings {
   generar(textos: string[]): Promise<number[][]>;
@@ -133,7 +135,8 @@ export function espacioRag(env: Env): EspacioRag {
   return espacio;
 }
 
-export const serviciosRag = (env: Env) => ({
-  embeddings: new EmbeddingsWorkersAi(env.AI, env.MODELO_EMBEDDINGS),
-  indice: new IndiceVectorize(env.VECTORES, espacioRag(env)),
-});
+// `simulado` solo lo activa la prueba E2E en localhost (usarModoSimulado, tarea 4.2): sin Workers AI ni Vectorize
+export function serviciosRag(env: Env, simulado = false): { embeddings: GeneradorEmbeddings; indice: IndiceVectorial & { espacio: string } } {
+  if (simulado) return { embeddings: new EmbeddingsSimulados(), indice: new IndiceSimulado(env.DB) };
+  return { embeddings: new EmbeddingsWorkersAi(env.AI, env.MODELO_EMBEDDINGS), indice: new IndiceVectorize(env.VECTORES, espacioRag(env)) };
+}

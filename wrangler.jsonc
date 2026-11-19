@@ -46,6 +46,10 @@
     // Elegido por la evaluación del 2026-11-19 (tarea 4.1): 96 % de aciertos contra 88 % de
     // @cf/meta/llama-3.3-70b-instruct-fp8-fast, con la mitad del costo (~31 neuronas por pregunta). RAG design.md D2 y D7
     "MODELO_CHAT": "@cf/openai/gpt-oss-20b",
+    // "1" solo en el build de la prueba E2E (playwright.config.ts → vite.config.ts): el asistente usa un modelo y una
+    // búsqueda simulados, sin Workers AI ni Vectorize (RAG design.md D7, tarea 4.2). Aunque llegara a "1" aquí, el
+    // Worker lo ignora fuera de localhost (api/src/rag/simulado.ts)
+    "MODELO_SIMULADO": "0",
     // Espacio (namespace) de Vectorize de este entorno (RAG design.md D2). `npm run dev` usa el índice real, el mismo de
     // producción: vite.config.ts lo cambia a "local" solo en desarrollo para que las pruebas locales no toquen la demo
     "RAG_ESPACIO": "produccion"

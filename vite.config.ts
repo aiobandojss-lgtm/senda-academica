@@ -16,6 +16,9 @@ const soloLocal = process.env.CLOUDFLARE_VITE_FORCE_LOCAL === "true";
 // Para comparar modelos en desarrollo (tarea RAG 4.1): `MODELO_CHAT=<modelo> npm run dev` cambia el modelo del
 // asistente solo en ese servidor, sin editar wrangler.jsonc. El build que se despliega siempre usa el de wrangler.jsonc
 const modeloChat = process.env.MODELO_CHAT?.trim();
+// Prueba E2E (tarea RAG 4.2): playwright.config.ts arranca el build con MODELO_SIMULADO=1 y el asistente usa el modelo
+// y la búsqueda simulados, sin Workers AI ni Vectorize. El Worker lo ignora fuera de localhost (api/src/rag/simulado.ts)
+const simulado = process.env.MODELO_SIMULADO === "1";
 
 export default defineConfig(({ command, isPreview }) => {
   // Solo `npm run dev` (vite serve), no `vite build` ni `vite preview`. El índice Vectorize es el real, el mismo de
@@ -24,6 +27,14 @@ export default defineConfig(({ command, isPreview }) => {
   // El build que se despliega conserva "produccion" de wrangler.jsonc.
   const esDesarrollo = command === "serve" && !isPreview;
   if (esDesarrollo && modeloChat) console.log(`Modelo del asistente en este servidor: ${modeloChat} (variable MODELO_CHAT)`);
+  if (simulado) console.log("MODELO_SIMULADO=1: el asistente usa el modelo simulado de la prueba E2E");
+
+  // Variables que cambian en este comando; el build que se despliega no cambia ninguna
+  const variables: Record<string, string> = {
+    ...(esDesarrollo ? { RAG_ESPACIO: "local" } : {}),
+    ...(esDesarrollo && modeloChat ? { MODELO_CHAT: modeloChat } : {}),
+    ...(simulado ? { MODELO_SIMULADO: "1" } : {}),
+  };
 
   return {
     plugins: [
@@ -31,9 +42,7 @@ export default defineConfig(({ command, isPreview }) => {
       tailwindcss(),
       cloudflare({
         remoteBindings: !soloLocal,
-        ...(esDesarrollo
-          ? { config: (worker) => ({ vars: { ...worker.vars, RAG_ESPACIO: "local", ...(modeloChat ? { MODELO_CHAT: modeloChat } : {}) } }) }
-          : {}),
+        ...(Object.keys(variables).length > 0 ? { config: (worker) => ({ vars: { ...worker.vars, ...variables } }) } : {}),
       }),
     ],
     resolve: {

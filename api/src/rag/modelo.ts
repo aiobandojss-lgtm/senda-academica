@@ -1,5 +1,6 @@
 import type { DEFINICIONES_HERRAMIENTAS } from "./herramientas";
 import { ServicioIaNoDisponible } from "./servicios";
+import { ModeloSimulado } from "./simulado";
 
 // Modelo de lenguaje detrás de una interfaz (RAG design.md D1): el agente no conoce el formato de ningún proveedor.
 // Hoy hay un adaptador para el formato de chat compatible con OpenAI, que aceptan los dos candidatos de Workers AI
@@ -25,8 +26,10 @@ export interface ModeloLenguaje {
   responder(mensajes: MensajeModelo[], herramientas: readonly DefinicionHerramienta[]): Promise<RespuestaModelo>;
 }
 
-// El modelo del asistente: el de MODELO_CHAT, que la evaluación (tarea 4.1) deja con el ganador
-export const modeloDelAsistente = (env: Env): ModeloLenguaje => new ModeloChatWorkersAi(env.AI, env.MODELO_CHAT);
+// El modelo del asistente: el de MODELO_CHAT, elegido por la evaluación (tarea 4.1). `simulado` solo lo activa la
+// prueba E2E en localhost (usarModoSimulado, tarea 4.2)
+export const modeloDelAsistente = (env: Env, simulado = false): ModeloLenguaje =>
+  simulado ? new ModeloSimulado() : new ModeloChatWorkersAi(env.AI, env.MODELO_CHAT);
 
 // Tope de la respuesta. gpt-oss "razona" antes de responder y esos tokens también cuentan
 const MAXIMO_TOKENS = 1000;

@@ -154,7 +154,8 @@ export const dice = (texto: string): RespuestaModelo => ({ texto, llamadas: [] }
 // Petición a la API con los bindings de IA reemplazados por los dobles (y, si hace falta, otras variables).
 // app.request recibe el entorno como tercer argumento: es la misma app que atiende en producción.
 export function pedirConIa(
-  ia: { ai: AiFalsa; vectores: VectorizeFalso; variables?: Partial<Env> },
+  // origen: el modo simulado del E2E (tarea 4.2) solo funciona en localhost; por defecto, un dominio que no es local
+  ia: { ai: AiFalsa; vectores: VectorizeFalso; variables?: Partial<Env>; origen?: string },
   token: string | null,
   metodo: "GET" | "PUT" | "POST" | "DELETE",
   ruta: string,
@@ -166,5 +167,5 @@ export function pedirConIa(
     body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
   };
   const entorno = { ...env, ...ia.variables, AI: ia.ai, VECTORES: ia.vectores } as unknown as Env;
-  return app.request(`https://senda.test/api${ruta}`, token ? conCookie(token, init as RequestInit & { headers: Record<string, string> }) : init, entorno);
+  return app.request(`${ia.origen ?? "https://senda.test"}/api${ruta}`, token ? conCookie(token, init as RequestInit & { headers: Record<string, string> }) : init, entorno);
 }

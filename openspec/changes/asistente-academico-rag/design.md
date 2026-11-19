@@ -105,6 +105,16 @@ Resultado del 2026-11-19, los dos modelos con las mismas reglas:
 - En las preguntas sin respuesta el registro también dice `sin_cita`: la respuesta final es la misma negativa, la escriba el modelo o la guarda.
 - llama falló además en el plan de estudios (`sin_cita`) y en la pregunta de seguimiento sobre la próxima cuota (`cita_invalida`).
 
+Modo simulado para el E2E (tarea 4.2):
+- El E2E corre sin credenciales de Cloudflare, así que no hay Workers AI ni Vectorize. Con `MODELO_SIMULADO=1` (`api/src/rag/simulado.ts`) se simulan el modelo, los embeddings y el índice:
+  - El modelo siempre busca en los documentos y responde con la frase más parecida del mejor resultado y su cita, o con "No tengo esa información.".
+  - La búsqueda puntúa cada fragmento de D1 por la fracción de las palabras clave de la pregunta que contiene.
+  - La ruta, el agente, el umbral y la validación de citas son los reales: el E2E prueba el camino completo sin gastar cuota y con respuestas que no cambian.
+- Cómo llega la variable: `playwright.config.ts` arranca el build con `MODELO_SIMULADO=1` y `vite.config.ts` la escribe en la configuración del build. `vite preview` usa las variables del build, y de `.dev.vars` solo toma los secretos declarados. `wrangler.jsonc` trae `"0"`.
+- **Candado:** el Worker solo usa el modo simulado si la petición llega a localhost. En otro dominio lo ignora y lo registra como error, así que ni un build del E2E publicado por error respondería con el modelo simulado.
+- En el CI la base empieza vacía: `e2e/preparar.ts` carga los documentos con `npm run rag:indexar` por la API (espacio "simulado"). En el equipo de desarrollo los deja como están, para no cambiar los ids de los fragmentos que usa el Vectorize real de `npm run dev`.
+- `e2e/asistente.spec.ts`: desde el celular, la sugerencia de la nota mínima responde 3.0 con la fuente visible, y la pregunta por la cafetería responde que no tiene la información, con el contacto.
+
 ### D8. Historial de la conversación en D1
 Tabla `asistente_mensajes (id, usuario_id, rol ('usuario'|'asistente'), contenido, fuentes_json, creado_en)` en `migrations/0002_base_conocimiento.sql`. El endpoint recibe solo la pregunta nueva; el historial (los últimos 6 turnos del estudiante) se lee de la tabla. Así un cliente no puede inyectar turnos falsos del asistente y queda trazabilidad para revisar respuestas dudosas. Alternativa: que el navegador envíe el historial; descartada por la inyección de turnos.
 

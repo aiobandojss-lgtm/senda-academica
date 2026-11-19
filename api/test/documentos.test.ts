@@ -151,6 +151,22 @@ describe("PUT /api/documentos/:clave: carga e indexación", () => {
     expect((await cargar("con.punto", { titulo: "X", tipo: "otro", contenido: "## A\n\nB" })).status).toBe(400);
   });
 
+  it("con MODELO_SIMULADO=1 (prueba E2E, tarea 4.2) guarda los fragmentos en D1 sin llamar a Workers AI ni a Vectorize", async () => {
+    const respuesta = await pedirConIa(
+      { ai, vectores, variables: { MODELO_SIMULADO: "1" }, origen: "http://localhost:4173" },
+      admin,
+      "PUT",
+      "/documentos/reglamento-e2e",
+      { titulo: "Reglamento estudiantil", tipo: "reglamento", contenido: REGLAMENTO },
+    );
+
+    expect(respuesta.status).toBe(201);
+    expect((await respuesta.json<DocumentoRespuesta>()).espacio).toBe("simulado");
+    expect((await fragmentosDe("reglamento-e2e")).map((f) => f.seccion)).toEqual(["Evaluación", "Entregas de talleres"]);
+    expect(ai.llamadas).toEqual([]);
+    expect(vectores.vectores.size).toBe(0);
+  });
+
   it("en desarrollo (RAG_ESPACIO=local) los vectores van al espacio local y no tocan los de producción", async () => {
     const respuesta = await pedirConIa({ ai, vectores, variables: { RAG_ESPACIO: "local" } }, admin, "PUT", "/documentos/reglamento", {
       titulo: "Reglamento",

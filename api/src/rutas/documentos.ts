@@ -1,8 +1,9 @@
 import { Hono, type Context } from "hono";
 import { z } from "zod";
-import { fragmentarDocumento } from "../dominio/fragmentacion";
+import { fragmentarDocumento, textoDelFragmento } from "../dominio/fragmentacion";
 import { responderError, validarJson } from "../errores";
 import { serviciosRag, ServicioIaNoDisponible } from "../rag/servicios";
+import { usarModoSimulado } from "../rag/simulado";
 import { requiereRol } from "../seguridad/permisos";
 import type { AppEnv } from "../tipos";
 import { texto } from "../validacion";
@@ -105,11 +106,10 @@ documentos.put("/:clave", validarJson(esquemaDocumento), async (c) => {
     return responderError(c, 400, "DOCUMENTO_SIN_TEXTO", "El documento no tiene texto para indexar, solo títulos");
   }
 
-  const rag = serviciosRag(c.env);
+  const rag = serviciosRag(c.env, usarModoSimulado(c.env, c.req.url));
   let valores: number[][];
   try {
-    // Con el título y la sección, el vector representa mejor de qué trata el fragmento
-    valores = await rag.embeddings.generar(fragmentos.map((f) => `${datos.titulo} – ${f.seccion}\n\n${f.contenido}`));
+    valores = await rag.embeddings.generar(fragmentos.map((f) => textoDelFragmento(datos.titulo, f.seccion, f.contenido)));
   } catch (error) {
     if (!(error instanceof ServicioIaNoDisponible)) throw error;
     return servicioNoDisponible(c, error, "El servicio de IA no respondió y el documento no se cambió. Intenta de nuevo en unos minutos");
@@ -182,7 +182,7 @@ documentos.delete("/:clave", async (c) => {
   if (borrado.results.length === 0) return responderError(c, 404, "DOCUMENTO_NO_ENCONTRADO", "El documento no existe");
 
   try {
-    await serviciosRag(c.env).indice.eliminar((fragmentos.results as { id: number }[]).map((f) => f.id));
+    await serviciosRag(c.env, usarModoSimulado(c.env, c.req.url)).indice.eliminar((fragmentos.results as { id: number }[]).map((f) => f.id));
   } catch (error) {
     if (!(error instanceof ServicioIaNoDisponible)) throw error;
     // El documento ya no existe en D1, así que sus vectores huérfanos nunca se usan (D3): basta con dejar constancia

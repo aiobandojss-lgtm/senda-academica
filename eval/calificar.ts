@@ -43,7 +43,7 @@ export type Resultado = { caso: CasoEvaluacion; calificacion: Calificacion };
 export function normalizar(texto: string): string {
   return texto
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/\p{M}/gu, "")
     .toLowerCase()
     .replace(/\*/g, "")
     .replace(/[\u00a0\u202f]/g, " ")

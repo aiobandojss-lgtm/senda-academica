@@ -5,6 +5,7 @@ import { responderError, validarJson } from "../errores";
 import { responderPregunta, type Fuente, type TurnoHistorial } from "../rag/agente";
 import { modeloDelAsistente } from "../rag/modelo";
 import { serviciosRag, ServicioIaNoDisponible } from "../rag/servicios";
+import { usarModoSimulado } from "../rag/simulado";
 import { requiereRol } from "../seguridad/permisos";
 import type { AppEnv } from "../tipos";
 import { texto } from "../validacion";
@@ -80,11 +81,13 @@ asistente.post("/mensajes", validarJson(esquemaPregunta), async (c) => {
   const estudiante = perfil.results[0] as { carrera_id: number; carrera: string } | undefined;
   if (!estudiante) return responderError(c, 404, "ESTUDIANTE_NO_ENCONTRADO", "El estudiante no existe");
 
-  const rag = serviciosRag(c.env);
+  // Solo la prueba E2E, en localhost, usa el modelo y la búsqueda simulados (tarea 4.2)
+  const simulado = usarModoSimulado(c.env, c.req.url);
+  const rag = serviciosRag(c.env, simulado);
   let resultado;
   try {
     resultado = await responderPregunta({
-      modelo: modeloDelAsistente(c.env),
+      modelo: modeloDelAsistente(c.env, simulado),
       contexto: { db, estudianteId: usuario.id, carreraId: estudiante.carrera_id, embeddings: rag.embeddings, indice: rag.indice },
       // D6: solo el nombre de pila y la carrera
       perfil: { nombrePila: usuario.nombres.trim().split(/\s+/)[0], carrera: estudiante.carrera },

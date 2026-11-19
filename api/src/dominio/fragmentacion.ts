@@ -11,6 +11,10 @@ export type OpcionesFragmentacion = { maximo?: number; solapamiento?: number };
 export const MAXIMO_FRAGMENTO = 1200;
 export const SOLAPAMIENTO_FRAGMENTO = 150;
 
+// El texto de un fragmento que se convierte en vector: con el título y la sección, el vector representa mejor de
+// qué trata. Lo usan la carga de documentos y la búsqueda simulada del E2E (api/src/rag/simulado.ts)
+export const textoDelFragmento = (titulo: string, seccion: string, contenido: string) => `${titulo} – ${seccion}\n\n${contenido}`;
+
 // El texto antes del primer título ## (bajo el título # del documento) va en esta sección
 const SECCION_INICIAL = "Introducción";
 const SEPARADOR_RUTA = " > ";

@@ -31,7 +31,8 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
     // Sin bindings remotos (vite.config.ts): la prueba no toca Cloudflare ni necesita credenciales, en tu equipo
-    // ni en el CI. Workers AI queda sin conexión; el asistente usará un modelo simulado en el E2E (RAG tarea 4.2)
-    env: { CLOUDFLARE_VITE_FORCE_LOCAL: "true" },
+    // ni en el CI. Sin Workers AI ni Vectorize, el asistente usa el modelo y la búsqueda simulados (RAG tarea 4.2,
+    // api/src/rag/simulado.ts): no gasta cuota y responde siempre igual. Solo funcionan en localhost
+    env: { CLOUDFLARE_VITE_FORCE_LOCAL: "true", MODELO_SIMULADO: "1" },
   },
 });

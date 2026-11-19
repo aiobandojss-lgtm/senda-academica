@@ -141,6 +141,40 @@ describe("POST /api/asistente/mensajes", () => {
     }
   });
 
+  it("con MODELO_SIMULADO=1 (prueba E2E, tarea 4.2) responde con cita sin llamar a Workers AI ni a Vectorize", async () => {
+    const respuesta = await pedirConIa(
+      { ai, vectores, variables: { MODELO_SIMULADO: "1" }, origen: "http://localhost:4173" },
+      paola,
+      "POST",
+      "/asistente/mensajes",
+      { pregunta: "¿Cuál es la nota mínima para aprobar un curso?" },
+    );
+
+    expect(respuesta.status).toBe(200);
+    expect(await respuesta.json()).toMatchObject({
+      respuesta: `La nota mínima para aprobar un curso es 3.0. ${CITA}`,
+      fuentes: [{ documento: "Reglamento estudiantil", seccion: "Evaluación y calificaciones" }],
+    });
+    expect(ai.llamadas).toEqual([]);
+    expect(vectores.consultas).toEqual([]);
+  });
+
+  it("fuera de localhost MODELO_SIMULADO=1 se ignora: responde el modelo real (candado contra un build del E2E publicado)", async () => {
+    const registro = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      ai.guionChat = [chatPide("buscar_documentos", { consulta: NOTA_MINIMA }), chatDice(`La nota mínima para aprobar un curso es 3.0 ${CITA}.`)];
+      const respuesta = await pedirConIa({ ai, vectores, variables: { MODELO_SIMULADO: "1" } }, paola, "POST", "/asistente/mensajes", {
+        pregunta: "¿Cuál es la nota mínima para aprobar?",
+      });
+
+      expect(respuesta.status).toBe(200);
+      expect(ai.llamadas.some((l) => l.modelo === env.MODELO_CHAT)).toBe(true);
+      expect(registro).toHaveBeenCalledWith(expect.stringContaining("MODELO_SIMULADO"));
+    } finally {
+      registro.mockRestore();
+    }
+  });
+
   it("usa el modelo de MODELO_CHAT y presenta a Senda con el nombre de pila", async () => {
     ai.guionChat = [chatDice("¡Hola, Paola! ¿En qué te ayudo?")];
     await preguntar(paola, { pregunta: "Hola" });
