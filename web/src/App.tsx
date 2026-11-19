@@ -39,6 +39,9 @@ const Cartera = lazy(() => import("@/pantallas/admin/Cartera"));
 const EstadoCuentaAdmin = lazy(() => import("@/pantallas/admin/EstadoCuentaAdmin"));
 const EstadoCuentaEstudiante = lazy(() => import("@/pantallas/estudiante/EstadoCuentaEstudiante"));
 
+// Asistente académico (RAG tarea 3.4)
+const AsistenteEstudiante = lazy(() => import("@/pantallas/estudiante/AsistenteEstudiante"));
+
 // Inicio de cada rol
 const INICIOS: Record<Rol, ReactNode> = {
   admin: <InicioRol />,
@@ -71,6 +74,7 @@ const PANTALLAS: Record<string, ReactNode> = {
   "/estudiante/cursos": <MisCursosEstudiante />,
   "/admin/cartera": <Cartera />,
   "/estudiante/cuenta": <EstadoCuentaEstudiante />,
+  "/estudiante/asistente": <AsistenteEstudiante />,
 };
 
 // Puerta de una ruta: si el estado de la sesión no le corresponde, lleva a la persona a su destino

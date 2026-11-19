@@ -1,5 +1,6 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ErrorApi } from "./api";
+import type { FuenteAsistente } from "./respuesta-asistente";
 
 // Datos de la administración (tarea 3.4) con TanStack Query. Tres ideas:
 // - useQuery({ queryKey, queryFn }): pide los datos y los guarda en caché bajo esa llave. Dos pantallas
@@ -244,3 +245,58 @@ export const useEstadoCuentaPropio = () => useQuery({ queryKey: ["cartera", "pro
 export const useEstadoCuenta = (estudianteId: number) =>
   useQuery({ queryKey: ["cartera", "estudiante", estudianteId], queryFn: () => api.get<EstadoCuenta>(`/estudiantes/${estudianteId}/estado-cuenta`) });
 export const useResumenCartera = () => useQuery({ queryKey: ["cartera", "resumen"], queryFn: () => api.get<ResumenCartera>("/cartera/resumen") });
+
+// ---- Asistente académico (RAG tarea 3.4) ----
+
+export type MensajeAsistente = {
+  id: number;
+  rol: "usuario" | "asistente";
+  contenido: string;
+  fuentes: FuenteAsistente[];
+  creadoEn: string;
+};
+export type ConversacionAsistente = { mensajes: MensajeAsistente[]; preguntasRestantes: number };
+type RespuestaAsistente = { respuesta: string; fuentes: FuenteAsistente[]; preguntasRestantes: number };
+
+const LLAVE_ASISTENTE = ["asistente"] as const;
+
+// La conversación guardada en el servidor (RAG design.md D8) y las preguntas que le quedan hoy (D9)
+export const useConversacion = () =>
+  useQuery({ queryKey: LLAVE_ASISTENTE, queryFn: () => api.get<ConversacionAsistente>("/asistente/mensajes") });
+
+// Una pregunta nueva: el servidor arma el contexto con su propio historial, el navegador solo envía la pregunta.
+// Al responder, los dos mensajes se agregan a la conversación en caché sin volver a pedirla
+export function usePreguntarAsistente() {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: (pregunta: string) => api.post<RespuestaAsistente>("/asistente/mensajes", { pregunta }),
+    onSuccess: (respuesta, pregunta) =>
+      cliente.setQueryData<ConversacionAsistente>(LLAVE_ASISTENTE, (actual) => {
+        const ahora = new Date().toISOString();
+        // Ids locales negativos hasta la próxima carga: nunca chocan con los de la base
+        const id = -Date.now();
+        return {
+          mensajes: [
+            ...(actual?.mensajes ?? []),
+            { id, rol: "usuario", contenido: pregunta, fuentes: [], creadoEn: ahora },
+            { id: id - 1, rol: "asistente", contenido: respuesta.respuesta, fuentes: respuesta.fuentes, creadoEn: ahora },
+          ],
+          preguntasRestantes: respuesta.preguntasRestantes,
+        };
+      }),
+    onError: (error) => {
+      if (error instanceof ErrorApi && error.codigo === "LIMITE_DIARIO") {
+        cliente.setQueryData<ConversacionAsistente>(LLAVE_ASISTENTE, (actual) => actual && { ...actual, preguntasRestantes: 0 });
+      }
+    },
+  });
+}
+
+// Borra la conversación (D10). Las preguntas de hoy siguen contando para el límite (D9)
+export function useBorrarConversacion() {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.delete<null>("/asistente/mensajes"),
+    onSuccess: () => cliente.setQueryData<ConversacionAsistente>(LLAVE_ASISTENTE, (actual) => actual && { ...actual, mensajes: [] }),
+  });
+}
