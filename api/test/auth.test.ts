@@ -207,11 +207,13 @@ describe("POST /api/auth/salir", () => {
   const SALE = { documento: "7000000010" };
   const DOS_EQUIPOS = { documento: "7000000011" };
   const REVOCADO = { documento: "7000000012" };
+  const SALE_CON_FALLA = { documento: "7000000013" };
+  const VICTIMA = { documento: "7000000014" };
   const idsSalir: Record<string, number> = {};
 
   beforeAll(async () => {
     const hash = await hashContrasena(CONTRASENA);
-    for (const u of [SALE, DOS_EQUIPOS, REVOCADO]) {
+    for (const u of [SALE, DOS_EQUIPOS, REVOCADO, SALE_CON_FALLA, VICTIMA]) {
       idsSalir[u.documento] = await crearUsuario({ ...u, avisoVersion: env.AVISO_PRIVACIDAD_VERSION }, hash);
     }
   });
@@ -244,6 +246,32 @@ describe("POST /api/auth/salir", () => {
     expect(await despues.json()).toMatchObject({ codigo: "NO_AUTENTICADO" });
   });
 
+  it("Cerrar sesión: aunque falle la revocación (base de datos o secreto), borra la cookie, responde 204 y registra el error sin datos personales", async () => {
+    // En un computador compartido, una cookie que no se borra deja entrar al siguiente con la cuenta del anterior
+    // (hallazgo del subagente revisor-spec, design.md D2)
+    const token = await sesionDe(SALE_CON_FALLA.documento, CONTRASENA);
+    const consola = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const baseQueFalla = {
+        prepare: () => {
+          throw new Error("D1 no disponible");
+        },
+      } as unknown as D1Database;
+      // app.request permite cambiar la configuración solo para esta petición
+      const conLaBaseCaida = await app.request("/api/auth/salir", conCookie(token, { method: "POST" }), { ...env, DB: baseQueFalla });
+      const conSecretoCorto = await app.request("/api/auth/salir", conCookie(token, { method: "POST" }), { ...env, JWT_SECRET: "corta" });
+
+      for (const respuesta of [conLaBaseCaida, conSecretoCorto]) {
+        expect(respuesta.status).toBe(204);
+        expect(respuesta.headers.get("Set-Cookie")).toMatch(/^__Host-sesion=;/);
+      }
+      expect(consola).toHaveBeenCalledTimes(2);
+      expect(JSON.stringify(consola.mock.calls)).not.toContain(SALE_CON_FALLA.documento);
+    } finally {
+      consola.mockRestore();
+    }
+  });
+
   it("sin sesión también responde 204 y borra la cookie, sin revelar nada", async () => {
     const respuesta = await salir();
 
@@ -270,6 +298,22 @@ describe("POST /api/auth/salir", () => {
     expect((await yo(vieja)).status).toBe(401);
 
     expect((await salir(vieja)).status).toBe(204);
+
+    expect((await yo(vigente)).status).toBe(200);
+  });
+
+  it("Cierre con una sesión que ya no es válida: tampoco cierra la vigente un token vencido de la misma versión ni uno firmado con otra clave", async () => {
+    const vigente = await sesionDe(VICTIMA.documento, CONTRASENA);
+    const { payload } = decode(vigente);
+    // Vencido con la versión actual: ingresar de nuevo no cambia la versión, así que este es el caso realista
+    const hace9Horas = ahora() - 9 * 60 * 60;
+    const vencido = await sign({ ...payload, iat: hace9Horas, exp: hace9Horas + OCHO_HORAS }, env.JWT_SECRET, "HS256");
+    // Forjado: los ids son secuenciales y la versión empieza en un número conocido, así que cualquiera podría armarlo
+    const forjado = await sign(payload, "una-clave-que-no-es-la-del-servidor-2026", "HS256");
+
+    for (const token of [vencido, forjado]) {
+      expect((await salir(token)).status).toBe(204);
+    }
 
     expect((await yo(vigente)).status).toBe(200);
   });

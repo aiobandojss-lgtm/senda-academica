@@ -44,9 +44,16 @@ Alternativas descartadas:
 
 `POST /api/auth/salir` sigue siendo pública. Siempre borra la cookie y responde 204, haya o no sesión, sea válida o no. Así no revela si un token sirve. Sigue siendo POST: con `SameSite=Lax`, otro sitio no puede enviar la cookie en un POST, así que no puede cerrar la sesión de nadie (CSRF).
 
+**La cookie se borra antes de intentar la revocación, y una falla de la revocación no cambia la respuesta.** Si D1 falla o el secreto está mal configurado, el error queda en el log, sin datos personales, y la respuesta sigue siendo 204 con la cookie borrada. Así, en el peor caso, el cierre queda igual que antes de este cambio: este navegador queda sin sesión y una copia del token sirve hasta que venza. Decisión de Aymer del 19 de noviembre, por un hallazgo del subagente revisor-spec. La primera versión respondía 500 sin borrar la cookie, y como el frontend ignora el error y muestra la pantalla de ingreso, en un computador compartido el siguiente entraba con la cuenta del anterior. Alternativa descartada: borrar primero y responder 500. Nadie vería el error, porque el frontend lo ignora, y habría que confiar en que el manejador de errores conserve el borrado de la cookie.
+
 ### D3. Spec del asistente: ajustar el THEN, no el prompt
 
-El THEN de "Pedir que explique un tema de un curso" acepta las dos negativas: "no tengo esa información" o "solo ayudo con temas de la Fundación". Lo que la spec protege es que el modelo no explique el tema con su propio conocimiento. Eso ya lo mide el caso `explicar-arreglo` de `eval/preguntas.json`: `rechaza` acepta cualquiera de las dos negativas, y `noContiene` falla si aparece una explicación. No hay cambio de código.
+El THEN de "Pedir que explique un tema de un curso" acepta las dos negativas: "no tengo esa información" o "solo ayudo con temas de la Fundación". Lo que la spec protege es que el modelo no explique el tema con su propio conocimiento. Eso lo mide la evaluación con el modelo real, no el CI, en el caso `explicar-arreglo` de `eval/preguntas.json`:
+
+- `rechaza` acepta las negativas que piden las reglas 5 a 7 de las instrucciones. Entre ellas están las dos del THEN, pero también otras, como "no puedo…".
+- `noContiene` falla si aparece alguna de cuatro palabras propias de una explicación ("estructura de datos", "almacena", "índice", "posición"). Es una aproximación: una explicación redactada sin esas palabras pasaría.
+
+La respuesta real del 19 de noviembre ("Lo siento, solo ayudo con temas de Fundación (demo).") cumple el THEN. En el CI, la prueba de `api/test/agente.test.ts` que lleva el nombre del escenario verifica la regla 7 de las instrucciones y que la negativa pase la validación (D5 del RAG). Con un modelo guionado no puede verificar que el modelo real no explique. No hay cambio de código. Después de la presentación se puede ampliar `noContiene`.
 
 Alternativa descartada: cambiar la regla 7 para que diga "no tengo esa información". Obligaría a repetir la evaluación (unas 800 neuronas y 26 de las 30 preguntas diarias de la estudiante), y un cambio en el prompt puede mover otras respuestas a cuatro días de la presentación.
 
@@ -54,7 +61,7 @@ Alternativa descartada: cambiar la regla 7 para que diga "no tengo esa informaci
 
 - **[Riesgo] Cerrar sesión también cierra los otros equipos del usuario.** → Aymer lo aceptó. En la demo, cada persona usa su propio navegador: no se cierra la sesión de una persona que esté abierta en otro navegador que se vaya a usar después. Se anota en la preparación del guion.
 - **[Riesgo] Una prueba existente usa el token después de salir** (`api/test/permisos.test.ts`, "Llamada directa a la API con contraseña temporal"). Con la revocación recibiría 401 en lugar del 403 de la compuerta. → Se reordena para verificar la compuerta antes de salir, sin cambiar lo que comprueba.
-- **[Riesgo] Si la escritura en D1 falla,** la ruta responde con error y la cookie no se borra. El frontend ignora el error y muestra la pantalla de ingreso, pero al recargar la sesión sigue abierta. → Es honesto (la sesión sigue válida y se nota), y una falla de D1 es rara. No se cambia el frontend en este cambio.
+- **[Riesgo] Si la revocación falla** (D1 o el secreto), el token sigue siendo válido hasta que vence. → La cookie se borra igual y se responde 204 (D2), así que este navegador queda sin sesión. El error queda en el log para revisarlo. Es el mismo nivel de protección que había antes del cambio, nunca uno peor.
 - **[Trade-off] Una escritura en D1 por cada cierre de sesión.** → Despreciable frente a las 100.000 escrituras diarias del plan Free.
 
 ## Migration Plan

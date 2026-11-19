@@ -115,8 +115,10 @@ describe("compuertas de primer ingreso (D16)", () => {
       mensaje: "Debes cambiar tu contraseña antes de continuar",
     });
 
-    // Permitida también: cerrar sesión. Va al final porque revoca el token (cambio cerrar-sesion-y-temas-de-cursos)
+    // Permitida también: cerrar sesión. Va al final porque revoca el token (cambio cerrar-sesion-y-temas-de-cursos),
+    // aunque la compuerta siga pendiente
     expect((await pedir("/auth/salir", conCookie(token, { method: "POST" }))).status).toBe(204);
+    expect((await pedir("/auth/yo", conCookie(token))).status).toBe(401);
   });
 
   it("No acepta el aviso: sin aceptar la versión vigente del aviso de privacidad responde 403 DEBE_ACEPTAR_AVISO", async () => {

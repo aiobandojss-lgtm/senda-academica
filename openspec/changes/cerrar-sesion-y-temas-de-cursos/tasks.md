@@ -26,10 +26,16 @@
 ## 3. Verificación de conjunto
 
 - [x] 3.1 Correr `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e` y `npx openspec validate --all --strict`. Verificación: todo en verde. Después del E2E, `npm run db:seed` deja la base local como antes.
-- [ ] 3.2 Pedir al subagente `revisor-spec` la revisión del diff del cambio contra las specs delta y las reglas que no se negocian. Verificación: cada hallazgo se verifica contra el código y queda corregido o anotado, con la razón, en la bitácora del día.
+- [x] 3.2 Pedir al subagente `revisor-spec` la revisión del diff del cambio contra las specs delta y las reglas que no se negocian. Verificación: cada hallazgo se verifica contra el código y queda corregido o anotado, con la razón, en la bitácora del día.
+
+## 4. Correcciones de la revisión del subagente (19 de noviembre)
+
+- [x] 4.1 Borrar la cookie antes de la revocación, y si la revocación falla, registrarlo sin datos personales y responder 204 (D2 actualizado, decisión de Aymer). Verificación: una prueba en rojo primero, y después en verde, que con la base de datos fallando y con el secreto mal configurado responde 204, borra la cookie y registra el error sin el documento del usuario.
+- [x] 4.2 Casos borde del escenario "Cierre con una sesión que ya no es válida": un token vencido de la misma versión y uno firmado con otra clave responden 204 y no cierran la sesión vigente. Además, las pruebas de salir de `bloqueo.test.ts` (estudiante en mora) y `permisos.test.ts` (compuertas) verifican que el token queda revocado (401) y no solo el 204. Verificación: `npm test` en verde, y una mutación que lee el token sin verificar la firma hace fallar el caso del token firmado con otra clave.
+- [x] 4.3 Paso E2E (decisión de Aymer): pulsar "Cerrar sesión" y comprobar que vuelve la pantalla de ingreso, la otra mitad del THEN de "Cerrar sesión". Verificación: `npm run test:e2e` en verde y `npm run db:seed` después.
 
 ## Workflow follow-up
 
-- Archivar el cambio con `/openspec-archive-change cerrar-sesion-y-temas-de-cursos`. Después, `npm run trazabilidad` debe dar 130 de 130: los dos escenarios nuevos ya tienen prueba desde la tarea 1.1.
+- Archivar el cambio con `/openspec-archive-change cerrar-sesion-y-temas-de-cursos`. Después, `npm run trazabilidad` debe dar 130 de 130: los dos escenarios nuevos ya tienen prueba desde la tarea 1.1. Actualizar a 130 las cifras de escenarios en `docs/presentacion/guion.md`, `docs/presentacion/metodologia-aplicada.md`, `CLAUDE.md` y `PLAN.md`. Los requisitos siguen siendo 55, y las bitácoras de días anteriores no se tocan.
 - Aymer hace el push y el pipeline despliega.
 - Prueba manual en producción: abrir la sesión de una cuenta de la demo en dos navegadores, cerrarla en uno y comprobar que el otro vuelve a la pantalla de ingreso al navegar. Después, recargar el seed remoto según el plan del lunes, porque la prueba no cambia datos de la demo.

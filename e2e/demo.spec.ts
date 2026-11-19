@@ -95,4 +95,14 @@ test("flujo de la demo: entrega, calificación, bloqueo por mora y desbloqueo al
     await expect(manuela.getByRole("heading", { name: "Hola, Manuela" })).toBeVisible();
     await expect(manuela.getByText("En riesgo", { exact: true })).toBeVisible();
   });
+
+  await test.step("Cerrar sesión: el administrador sale, vuelve a la pantalla de ingreso y al recargar sigue fuera", async () => {
+    await admin.getByRole("button", { name: "Cerrar sesión" }).click();
+    await expect(admin).toHaveURL(/\/ingresar$/);
+    await expect(admin.getByLabel("Número de documento")).toBeVisible();
+
+    // Lo que importa en un computador compartido: quien llega después no entra con la cuenta anterior
+    await admin.goto("/admin");
+    await expect(admin).toHaveURL(/\/ingresar$/);
+  });
 });

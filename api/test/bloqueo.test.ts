@@ -88,11 +88,15 @@ describe("en cada petición", () => {
     expect((await pedir("/auth/yo", conCookie(sesion))).status).toBe(403);
   });
 
-  it("sí puede cerrar su sesión", async () => {
+  it("sí puede cerrar su sesión, y su token queda revocado", async () => {
     const { id, documento } = await estudianteConMora(null);
     const sesion = await sesionDe(documento, CONTRASENA);
     await crearCuota(id, fechaDesdeHoy(-40));
+    expect((await pedir("/auth/yo", conCookie(sesion))).status).toBe(403);
 
     expect((await pedir("/auth/salir", conCookie(sesion, { method: "POST" }))).status).toBe(204);
+
+    // 401 (revocado) y ya no 403 (bloqueado): la ruta de salida no evalúa la mora antes de revocar
+    expect((await pedir("/auth/yo", conCookie(sesion))).status).toBe(401);
   });
 });

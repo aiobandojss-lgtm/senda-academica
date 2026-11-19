@@ -77,13 +77,20 @@ auth.post("/ingresar", validarJson(esquemaIngreso, "Escribe tu documento y tu co
 // versión de sesión, así que esa cookie, aunque alguien la haya copiado, y las sesiones del usuario en otros equipos
 // dejan de servir. La condición sobre la versión impide que un token ya revocado cierre las sesiones vigentes.
 auth.post("/salir", async (c) => {
-  const sesion = await leerSesion(c);
-  if (sesion) {
-    await c.env.DB.prepare("UPDATE usuarios SET sesion_version = sesion_version + 1 WHERE id = ? AND sesion_version = ?")
-      .bind(sesion.usuarioId, sesion.version)
-      .run();
-  }
+  // Primero la cookie: aunque la revocación falle, este navegador queda sin sesión. En un computador compartido, una
+  // cookie que no se borra dejaría entrar al siguiente con la cuenta del anterior (D2)
   cerrarSesion(c);
+  try {
+    const sesion = await leerSesion(c);
+    if (sesion) {
+      await c.env.DB.prepare("UPDATE usuarios SET sesion_version = sesion_version + 1 WHERE id = ? AND sesion_version = ?")
+        .bind(sesion.usuarioId, sesion.version)
+        .run();
+    }
+  } catch (error) {
+    // Sin datos personales: solo el motivo técnico (la base de datos o la configuración del secreto)
+    console.error("No se pudo revocar la sesión al salir", { motivo: error instanceof Error ? error.message : String(error) });
+  }
   return c.body(null, 204);
 });
 
