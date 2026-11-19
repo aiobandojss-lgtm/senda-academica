@@ -66,16 +66,14 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
 
 ## Guion de la presentación (~10 minutos)
 
-1. **El problema (1 min):** fundación que empieza, sin dinero, sin cómo controlar estudiantes, entregas ni pagos.
-2. **Demo del flujo (6 min), con las cuentas de `db/seed/CUENTAS-DEMO.md`:**
-   1. Estudiante al día entra desde el celular y entrega el Taller 3.
-   2. Docente lo califica; el estudiante ve la nota.
-   3. Estudiante pregunta al asistente "¿cuál es la nota mínima para aprobar?" (respuesta con cita) y "¿cuánto debo?" (dato real de su estado de cuenta).
-   4. Pregunta sin respuesta ("¿a qué hora abre la cafetería?") → el asistente dice que no sabe.
-   5. Estudiante en mora intenta entrar → acceso suspendido. El administrador registra el pago → entra.
-3. **Calidad y despliegue (1 min):** pipeline de GitHub Actions en verde, pruebas, URL pública.
-4. **Decisión técnica de la que estoy orgulloso (1 min):** por ejemplo, la mora calculada al vuelo (desbloqueo inmediato, probada con fechas fijas) o las guardas contra alucinación del RAG.
-5. **Metodología (1 min):** cómo OpenSpec guió el trabajo (proposal → specs → design → tasks → código).
+Está en [docs/presentacion/guion.md](docs/presentacion/guion.md):
+1. el problema (1 minuto);
+2. la demo en vivo del flujo principal, con el asistente (4 minutos);
+3. la decisión técnica elegida por Aymer, **las guardas contra la alucinación** (2 minutos y medio);
+4. la metodología (1 minuto y 45 segundos);
+5. el cierre.
+
+Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
 
 ## Antes de presentar
 

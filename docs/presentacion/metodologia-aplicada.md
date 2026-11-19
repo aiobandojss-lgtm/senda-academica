@@ -2,12 +2,15 @@
 
 Base para el guion de la presentación. Muestra qué prácticas del curso AI Agentic Engineer se aplicaron, cómo y dónde está la evidencia. Es un documento vivo: se actualiza al cerrar cada grupo de tareas.
 
-**Estado al 2026-11-16 (noche):**
-- MVP: 30 de 31 tareas (grupos 1 a 5 completos y la 6.1). Faltan la revisión visual (6.2) y el asistente RAG.
-- 251 pruebas de la API (Vitest) y la prueba E2E del flujo de la demo (Playwright), en verde.
-- 22 de 22 ejecuciones del pipeline en verde.
-- 58 commits.
-- En <https://senda.creativebycode.workers.dev>: los dos flujos de la demo. El académico: el docente publica, el estudiante entrega desde el celular y ve su nota. El de cartera: el estudiante en mora no entra; se registra el pago y entra.
+**Estado al 2026-11-19 (tarde):**
+- **Todas las tareas hechas:** MVP 31 de 31 y asistente RAG 13 de 13. Los dos cambios de OpenSpec están archivados.
+- 393 pruebas de Vitest y 2 pruebas E2E con Playwright (el flujo de la demo y el asistente), en verde.
+- Pipeline: 29 de 30 ejecuciones en verde. La única roja es la prueba de fuego del Lab 14 (día 4), que debía fallar.
+- En <https://senda.creativebycode.workers.dev>, los tres flujos de la demo:
+  - el académico: el docente publica, el estudiante entrega desde el celular y ve su nota;
+  - el de cartera: el estudiante en mora no entra; se registra el pago y entra;
+  - el asistente: responde con cita y dice "no tengo esa información" cuando no sabe. Se probó en producción desde el celular.
+- Presentación: lunes 23 de noviembre. Guion en [guion.md](guion.md).
 
 Fuentes del curso que se compararon: las guías de OpenSpec, MCP, skills y pruebas, pruebas E2E y agentes QA, y arquitectura (clase 04).
 
@@ -15,17 +18,19 @@ Fuentes del curso que se compararon: las guías de OpenSpec, MCP, skills y prueb
 
 | Práctica del curso | Cómo se aplicó | Evidencia para mostrar |
 |---|---|---|
-| **Spec-Driven Development (OpenSpec 2)** | Ciclo proposal → specs → design → tasks en dos cambios. **MVP:** 5 capacidades, 40 requisitos, 100 escenarios WHEN/THEN (todos con su prueba), 20 decisiones con su alternativa descartada y 31 tareas, cada una con su verificación. **RAG:** 2 capacidades, 14 requisitos, 23 escenarios, 10 decisiones y 13 tareas | `openspec/changes/`; `openspec validate --all --strict` en verde |
+| **Spec-Driven Development (OpenSpec 2)** | Ciclo completo proposal → specs → design → tasks → código → **archivo** en dos cambios: 31 tareas del MVP y 13 del RAG, cada una con su verificación. Al archivar, las specs delta pasaron a `openspec/specs/`: **7 capacidades, 55 requisitos y 128 escenarios WHEN/THEN**, que describen el producto terminado. Las decisiones, con su alternativa descartada, quedan en los `design.md` archivados | `openspec/specs/`; `openspec validate --all --strict` en verde |
 | **Compuerta humana** | El agente no implementó comportamiento hasta que Aymer leyó y aprobó el proposal y las specs. Se aprobaron con supuestos, que se validarán con la Fundación | [Revisión del MVP](../revision/2026-11-15-revision-mvp.md) |
 | **"Cuando la realidad contradice el plan"** | Primero se corrige el artefacto y después el código. Casos: D14 (condición de carrera), D17 (la "o" también es ambigua) y D11 (paquete de pruebas renombrado por Cloudflare) | Commits que cambian `design.md` antes que el código |
 | **Skills** | 6 skills de OpenSpec en `.agents/skills/`, una convención compartida por varios agentes (también Antigravity), enlazadas desde `.claude/skills/`. `/openspec-apply-change` trabaja una tarea a la vez y marca el checkbox solo con la verificación en verde. La skill de TDD impone rojo → verde → refactor. El plugin `frontend-design` se usa en la identidad visual (tarea 2.0) | `.agents/skills/`, `tasks.md` |
 | **Contexto para el agente** | `CLAUDE.md` con el stack, las reglas que no se negocian (Habeas Data, secretos, migraciones congeladas) y las reglas aprendidas en cada tarea. Además, memoria entre sesiones | `CLAUDE.md` |
-| **MCP** | **context7**: documentación vigente de las librerías; con ella se encontró cómo aplicar las migraciones reales a la base de pruebas. **Playwright**: el agente abre la aplicación y revisa capturas a 375 y 1280 px. **shadcn/ui**: componentes desde el registro oficial (tarea 1.7) | `.mcp.json`; capturas de las pantallas |
+| **MCP** | **context7**: documentación vigente de las librerías (las migraciones en la base de pruebas, el orden de arranque de Playwright, los precios de Workers AI). **Playwright**: el agente abre la aplicación y revisa capturas a 375 y 1280 px; en la tarea 6.2, un recorrido automático midió 25 pantallas en 50 capturas y encontró 4 diferencias con la guía visual. **shadcn/ui**: componentes desde el registro oficial (tarea 1.7) | `.mcp.json`; [revisión visual](../revision/2026-11-19-revision-visual.md) y [recorrido](../revision/recorrido-visual-mcp.js) |
+| **IA con fundamento, medida** | Tres capas contra la alucinación (umbral, instrucciones y validación de citas), ajustadas después de una alucinación real con el modelo real. Evaluación con 25 preguntas y reglas fijas, sin un modelo juez: gpt-oss-20b 96 %, llama-3.3-70b 88 %. El costo se midió en tokens: ~31 neuronas por pregunta | RAG `design.md` D5 y D7, `eval/` y `npm run eval:rag` |
+| **E2E sin gastar cuota** | El asistente entra a la prueba E2E con un modelo y una búsqueda simulados, que el Worker solo acepta en localhost | `e2e/asistente.spec.ts`, `api/src/rag/simulado.ts` |
 | **Pruebas desde la spec, no desde el código** | Cada escenario WHEN/THEN se vuelve una prueba con el mismo nombre. Corren en workerd (el runtime de producción) contra una D1 efímera con las migraciones reales, y con usuarios propios de cada prueba, no los del seed | `api/test/*.test.ts` |
 | **TDD de verdad: el rojo correcto** | Siempre rojo antes de verde, y el rojo debe fallar por la razón correcta. En la tarea 2.1 se detectó y corrigió una prueba que pasaba con la función vacía | [Bitácora del día 2](../bitacora/2026-11-15-dia-2.md) |
 | **Probar las pruebas: mutación** | 17 mutaciones, todas detectadas: se daña el código a propósito (quitar HttpOnly, leer el token sin verificar la firma, saltarse el límite...) y alguna prueba debe fallar | Bitácora del día 2 |
 | **E2E con Playwright como compuerta** | Una prueba recorre el flujo de la demo en un navegador real contra el build de producción, con una persona por contexto (estudiantes en celular, docente y administrador en escritorio). Busca los elementos por rol y etiqueta, como un lector de pantalla. Si el flujo se rompe, no se despliega | `e2e/demo.spec.ts`; job "e2e" del pipeline |
-| **CI/CD** | GitHub Actions: calidad (lint, tipos, pruebas, build) y E2E en paralelo → migraciones remotas → deploy → prueba de humo. Actions fijadas por SHA, token de Cloudflare con permisos mínimos y vencimiento, y `secrets.required` para que el deploy falle si falta un secreto | `.github/workflows/ci.yml`, [despliegue.md](../operacion/despliegue.md) |
+| **CI/CD** | GitHub Actions: calidad (lint, tipos, pruebas, build) y E2E en paralelo → migraciones remotas → deploy → prueba de humo. Actions fijadas por SHA, token de Cloudflare con permisos mínimos y vencimiento, y `secrets.required` para que el deploy falle si falta un secreto. **Prueba de fuego (Lab 14):** la regla de mora se dañó a propósito (30 → 29 días) con la predicción escrita antes, y el pipeline falló tal como se predijo | `.github/workflows/ci.yml`, [despliegue.md](../operacion/despliegue.md), pull request #1 en GitHub |
 | **Humano en el bucle y seguridad** | Los secretos los carga Aymer y nunca pasan por el chat. El clasificador de permisos bloqueó un `wrangler secret put` del agente, y se respetó. Ante varias opciones se presentan pros y contras antes de decidir | `docs/operacion/despliegue.md` |
 | **Decisiones explicadas** (criterio 6) | ADR con contexto, decisión, alternativas y consecuencias. ADR-003 midió antes de decidir: 20 ms de CPU frente a 10 ms del plan Free | `docs/decisiones/` |
 | **Bitácora diaria** | Qué se hizo, qué se aprendió y qué problemas hubo, cada día | `docs/bitacora/` |
@@ -44,23 +49,12 @@ El **límite de intentos de ingreso (tarea 2.3)** recorre todo el ciclo con un s
 
 | Práctica | Plan |
 |---|---|
-| Hooks | Propuesta: typecheck automático tras cada edición o bloqueo de lectura de `.dev.vars` |
-| Subagente que revisa el código | Propuesta: revisión independiente al cerrar cada tarea |
-| Visión: el agente revisa las pantallas | Capturas a 375 y 1280 px en cada pantalla (tareas 2.6 en adelante) |
-| RAG con guardas y evaluación ≥ 90 % | Cambio `asistente-academico-rag` |
-| Archivar el cambio | `/openspec-archive-change`: las specs pasan a ser la fuente de verdad del sistema |
+| Hooks | Viernes 20. Propuesta: typecheck automático tras cada edición o bloqueo de lectura de `.dev.vars` |
+| Subagente que revisa el código | Viernes 20. Propuesta: revisión independiente al cerrar cada tarea |
+| Trazabilidad 100 de 100 | Viernes 20: renombrar las pruebas cuyo nombre no coincide con su escenario, para mostrar con un comando que cada escenario tiene su prueba |
 
-## Propuesta de guion (~10 minutos)
+Hechas desde el día 3: la visión (revisión visual con el MCP de Playwright), el RAG con guardas y evaluación de 90 % o más, y el archivo de los cambios.
 
-La rúbrica pide "~10 minutos de demo en vivo", y 5 de los 6 criterios se demuestran con el producto funcionando. Por eso la metodología se cuenta **usando el producto como evidencia**, no en diapositivas aparte.
+## Guion
 
-| Tiempo | Bloque | Criterios |
-|---|---|---|
-| 1 min | El problema de la Fundación y qué es Senda | – |
-| 2,5 min | OpenSpec con la historia del límite de intentos | 6, 4, 5 |
-| 3 min | Demo del flujo (entrega → nota → asistente → bloqueo por mora → pago), diciendo qué spec respalda cada paso | 1, 2, 3 |
-| 1,5 min | Calidad: pruebas, mutación y pipeline en verde | 4, 5 |
-| 1,5 min | El agente con contexto: `CLAUDE.md`, skills, MCP, hooks y humano en el bucle | 6 |
-| 0,5 min | Cierre | – |
-
-Pregunta para el profesor: cuánto pesa la exposición de la metodología frente a la demo en vivo.
+El guion está en [guion.md](guion.md). La decisión técnica elegida por Aymer para contar son las guardas contra la alucinación del asistente. La historia del límite de intentos (arriba) queda como respaldo para las preguntas.
