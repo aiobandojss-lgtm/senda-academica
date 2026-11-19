@@ -39,9 +39,23 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
   - MVP completo hasta el grupo 5 (29 de 31).
   - Tarea 6.1 cerrada (adelantada del día 6): prueba E2E con Playwright del flujo de la demo, contra el build de producción. Pasó 3 veces seguidas en local y en el CI, donde corre en paralelo con la calidad. El despliegue ahora necesita los dos jobs en verde (30 de 31). Siguen la 6.2 (revisión visual) y el asistente RAG (día 5).
   - Propuestos, pendientes de decisión: un hook y un subagente revisor.
-- [ ] Día 4 (martes 17), siguiente: Aymer muestra el tema de la clase del lunes para ver si algo se aplica; luego la 6.2 (revisión visual), archivar el cambio del MVP y empezar el asistente RAG, un día antes de lo planeado.
-- [ ] Día 5
-- [ ] Día 6
+- [x] Día 4 (martes 17): el asistente RAG empezó un día antes. [Bitácora](docs/bitacora/2026-11-17-dia-4.md)
+  - Tema de la clase (Lab 14, CI/CD con GitHub Actions): el pipeline de Senda ya aplica lo central.
+  - Tareas RAG 1.1 (modelos de Workers AI) y 1.2 (índice Vectorize).
+  - Guía de revisión del RAG con los ajustes A1 a A5.
+  - La 6.2 y el archivado pasaron al jueves.
+- [x] Día 5 (miércoles 18): asistente RAG de 2 a 11 de 13 tareas, y de 251 a 356 pruebas. [Bitácora](docs/bitacora/2026-11-18-dia-5.md)
+  - Aprobación del cambio, base de conocimiento, herramientas y agente con validación de citas.
+  - Endpoint ajustado por una alucinación real.
+  - Tabla contadora del límite diario (decisión de Aymer) y pantalla del asistente.
+- [ ] Día 6 (jueves 19), en curso. [Bitácora](docs/bitacora/2026-11-19-dia-6.md)
+  - Mañana cerrada:
+    - evaluación del asistente: gpt-oss-20b con 96 % contra 88 % de llama, y ~31 neuronas por pregunta;
+    - el asistente en el E2E con el modelo simulado;
+    - revisión visual con el MCP de Playwright (4 correcciones);
+    - los dos cambios de OpenSpec archivados.
+  - **Todas las tareas hechas: MVP 31 de 31 y RAG 13 de 13, con 393 pruebas.**
+  - Sigue la tarde: probar el asistente en la URL pública, diapositivas, guion, video de respaldo y ensayo.
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
@@ -61,7 +75,8 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 
 - [ ] Proyecto corriendo en local y en la URL pública.
 - [ ] Pipeline y pruebas en verde.
-- [ ] `npm run eval:rag` con al menos 90 % de aciertos.
+- [x] `npm run eval:rag` con al menos 90 % de aciertos: 96 % con gpt-oss-20b el 19 de noviembre (RAG design.md D7).
+- [ ] El asistente probado en la URL pública con el modelo real (hasta el 19 a mediodía no se había usado allá).
 - [ ] La mañana del 20: seed recargado en la base remota (`npx wrangler d1 execute DB --remote --file db/seed/seed.sql`) para deshacer los cambios de los ensayos. El seed ya está generado con la fecha de la presentación (2026-11-20).
 - [ ] Confirmar con el profesor que el seed ficticio en la base real cumple el criterio 2.
 
