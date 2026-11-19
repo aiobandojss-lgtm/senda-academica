@@ -6,7 +6,7 @@ Aquí se aprueba **qué** hace el asistente Senda antes de programar su comporta
 
 ## Cómo leer (unos 30 minutos)
 
-1. Abre cada archivo en VS Code y presiona `Ctrl+Shift+V` para ver la vista previa. Todos están en `openspec/changes/asistente-academico-rag/`.
+1. Abre cada archivo en VS Code y presiona `Ctrl+Shift+V` para ver la vista previa. Todos están en `openspec/changes/asistente-academico-rag/` (archivado el 2026-11-19 en `openspec/changes/archive/2026-11-19-asistente-academico-rag/`; sus specs quedaron en `openspec/specs/`).
 2. Lee **los documentos**, no solo esta guía. La guía señala qué mirar y qué preguntarte, pero lo que se aprueba es lo que dicen las specs.
 3. Vocabulario: **SHALL / MUST** es obligatorio, **MUST NOT** está prohibido, y cada **Scenario (WHEN / THEN)** se convierte en una prueba automática.
 4. Respóndeme con el número de cada punto y **OK** o el **cambio** que quieres (por ejemplo: "1 OK, 6 cambiar: …, A4 OK"). Yo registro tus decisiones en este documento.

@@ -6,7 +6,7 @@ Aquí se aprueba **qué** hace el producto antes de programar sus reglas de nego
 
 ## Cómo leer (unos 50 minutos)
 
-1. Abre cada archivo en VS Code y presiona `Ctrl+Shift+V` para ver la vista previa. Todos están en `openspec/changes/mvp-plataforma-academica/`.
+1. Abre cada archivo en VS Code y presiona `Ctrl+Shift+V` para ver la vista previa. Todos están en `openspec/changes/mvp-plataforma-academica/` (archivado el 2026-11-19 en `openspec/changes/archive/2026-11-19-mvp-plataforma-academica/`; sus specs quedaron en `openspec/specs/`).
 2. **Vocabulario de las specs:**
    - **Requirement:** lo que el sistema debe hacer.
    - **SHALL / MUST:** obligatorio. **MUST NOT:** prohibido.

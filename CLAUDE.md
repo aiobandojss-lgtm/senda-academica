@@ -39,14 +39,17 @@ Como el criterio 6 evalúa que Aymer **entienda** lo construido, al cerrar cada 
 
 OpenSpec 2.0 está inicializado: `openspec/config.yaml` y 6 skills en `.agents/skills/` (convención compartida entre agentes), enlazadas desde `.claude/skills/`. Si al clonar en Windows los enlaces quedan como archivos de texto, ejecuta `openspec update`. Las specs son la fuente de verdad: si el código y la spec no coinciden, se corrige uno de los dos, nunca se ignora.
 
-Cambios planeados (validados con `openspec validate --all --strict`; ajustados el 2026-11-14 con mejoras de seguridad, Habeas Data y huecos funcionales):
+**Fuente de verdad del producto: `openspec/specs/`**, con 7 capacidades: `autenticacion`, `carreras-estudiantes`, `actividades-entregas`, `cartera`, `bloqueo-mora`, `base-conocimiento` y `asistente-academico`.
 
-1. `openspec/changes/mvp-plataforma-academica/` – capacidades `autenticacion`, `carreras-estudiantes`, `actividades-entregas`, `cartera`, `bloqueo-mora`. 31 tareas.
-2. `openspec/changes/asistente-academico-rag/` – capacidades `base-conocimiento`, `asistente-academico`. 13 tareas. Empieza cuando el MVP esté implementado.
+Los dos cambios del proyecto están **implementados y archivados** desde el 2026-11-19, con sus specs sincronizadas en `openspec/specs/`. Sus decisiones siguen en su `design.md` y el código las cita como "design.md Dn" (MVP) y "RAG design.md Dn":
 
-Flujo de trabajo (las skills se invocan como comandos):
+1. `openspec/changes/archive/2026-11-19-mvp-plataforma-academica/`: autenticación, carreras y estudiantes, actividades y entregas, cartera y bloqueo por mora. 31 tareas.
+2. `openspec/changes/archive/2026-11-19-asistente-academico-rag/`: base de conocimiento y asistente académico. 13 tareas.
 
-- Implementar: `/openspec-apply-change mvp-plataforma-academica`. Trabaja **una tarea a la vez**, en orden, y marca su checkbox en `tasks.md` solo cuando su verificación pase.
+Flujo de trabajo para lo que siga (las skills se invocan como comandos):
+
+- Un cambio nuevo empieza con `/openspec-propose`, que crea la propuesta, las specs delta, el design y las tareas, y lo revisa Aymer antes de programar.
+- Implementar: `/openspec-apply-change <nombre>`. Trabaja **una tarea a la vez**, en orden, y marca su checkbox en `tasks.md` solo cuando su verificación pase.
 - Si aparece un requisito nuevo o una spec está mal, primero actualiza el cambio (`/openspec-update-change`) y después el código.
 - Al terminar un cambio: `/openspec-archive-change <nombre>`.
 - Para revisar el estado: `openspec list`, `openspec status --change <nombre>` y `openspec validate --all --strict`.
