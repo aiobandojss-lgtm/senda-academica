@@ -9,8 +9,8 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 | 3 | Lun 16 | Talleres, entregas y calificación | MVP 4.x | 1, 4 |
 | 4 | Mar 17 | Cuotas, pagos, bloqueo por mora y excepciones | MVP 5.x | 1, 4 |
 | 5 | Mié 18 | Asistente RAG: ingesta, agente, pantalla | RAG 1.x – 3.x | 3 |
-| 6 | Jue 19 | Mañana: E2E completo, evaluación del RAG, revisión visual. Tarde: la nueva fecha en el seed y la documentación, y el guion | MVP 6.x, RAG 4.x | 3, 4, 6 |
-| 7 | Vie 20 | Evidencia de la metodología: trazabilidad de 100 de 100 escenarios con prueba, hook y subagente revisor | – | 4, 6 |
+| 6 | Jue 19 | Mañana: E2E completo, evaluación del RAG, revisión visual. Tarde: la nueva fecha en el seed y la documentación, el guion y, adelantados del viernes, la trazabilidad, los hooks y el subagente revisor | MVP 6.x, RAG 4.x | 3, 4, 6 |
+| 7 | Vie 20 | Probar en vivo los hooks y el subagente (después de recargar la ventana de Antigravity). Propuesta, pendiente del visto bueno de Aymer: adelantar lo del sábado | – | 4, 6 |
 | 8 | Sáb 21 | Diapositivas y la falla de "semana de parciales" con su evaluación. Decisión sobre el bonus de WhatsApp | – | 3, 6 |
 | 9 | Dom 22 | Video de respaldo de la demo, 2 ensayos cronometrados y preguntas esperadas. **Producto congelado a las 6 p. m.** | – | todos |
 | 10 | Lun 23 | Mañana: seed remoto recargado, checklist de "Antes de presentar" y ensayo final. **Presentación** | – | – |
@@ -62,17 +62,22 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
   - Asistente probado en la URL pública con el modelo real: nota mínima con su cita y "no tengo esa información" para la cafetería.
   - La presentación pasó al lunes 23: el seed tiene ahora la fecha de referencia 2026-11-23 (el Taller 3 de la demo vence el 26) y la ventana del E2E va del 6 al 26 de noviembre.
   - Tarde: el guion, primera versión ([docs/presentacion/guion.md](docs/presentacion/guion.md)), con la decisión técnica elegida por Aymer (las guardas contra la alucinación).
-- [ ] Día 7 (viernes 20), en curso:
-  - **Trazabilidad de 128 de 128:** cada escenario de `openspec/specs/` tiene una prueba que lleva su nombre. `npm run trazabilidad` lo comprueba, también en el CI.
-    - 51 pruebas renombradas, sin cambiar su lógica.
-    - 5 escenarios sin prueba automática quedaron cubiertos: la fuente "Entregas de talleres", las 3 negativas del asistente y el primer ingreso en el navegador, con un E2E nuevo.
-    - Dos pruebas de fuego confirmaron que tanto la prueba nueva como el verificador fallan cuando deben.
-  - **Hooks y subagente** (opciones elegidas por Aymer):
-    - El guardián de reglas bloquea `.dev.vars` y las migraciones versionadas.
-    - El detector de caracteres invisibles avisa después de cada edición.
-    - `revisor-spec` es un subagente revisor de solo lectura.
-    - Los hooks tienen 23 pruebas (`node .claude/hooks/probar-hooks.mjs`).
-    - Falta reiniciar Claude Code para que carguen los hooks y el subagente, y probarlos en vivo.
+  - Tarde, **adelantado del viernes:**
+    - **Trazabilidad de 128 de 128:** cada escenario de `openspec/specs/` tiene una prueba que lleva su nombre. `npm run trazabilidad` lo comprueba, también en el CI.
+      - 51 pruebas renombradas, sin cambiar su lógica.
+      - 5 escenarios sin prueba automática quedaron cubiertos: la fuente "Entregas de talleres", las 3 negativas del asistente y el primer ingreso en el navegador, con un E2E nuevo.
+      - Dos pruebas de fuego confirmaron que tanto la prueba nueva como el verificador fallan cuando deben.
+    - **Hooks y subagente** (opciones elegidas por Aymer):
+      - El guardián de reglas bloquea `.dev.vars` y las migraciones versionadas.
+      - El detector de caracteres invisibles avisa después de cada edición.
+      - `revisor-spec` es un subagente revisor de solo lectura.
+      - Los hooks tienen 23 pruebas (`node .claude/hooks/probar-hooks.mjs`).
+    - Todo está en GitHub (hasta el commit `57ee1e2`) con el pipeline en verde: 395 pruebas de Vitest y 3 E2E.
+- [ ] Día 7 (viernes 20), siguiente:
+  1. Recargar la ventana de Antigravity (`Ctrl+Shift+P` → "Developer: Reload Window") para que Claude Code cargue los hooks.
+  2. `/hooks` debe mostrar PreToolUse y PostToolUse con origen "project".
+  3. Probar en vivo el detector con un archivo de prueba y correr `revisor-spec` sobre los commits del jueves.
+  4. Propuesta: adelantar lo del sábado (diapositivas y la falla de "semana de parciales").
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
@@ -99,7 +104,7 @@ Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
 
 - [ ] **Antes de operar con la Fundación** (revisado el 16 de noviembre; no afecta la demo): crear el primer administrador en una base nueva, un requisito que **falta en las specs** porque hoy el único administrador sale del seed. Además: Workers Paid (ADR-003), R2 (ADR-002), el aviso de privacidad definitivo y validar con la Fundación los supuestos de las specs.
 - [ ] **Antes del 27 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 26 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
-- [ ] **Decisión de Aymer, "Cerrar sesión"** (encontrado al cruzar specs y pruebas el 20 de noviembre).
+- [ ] **Decisión de Aymer, "Cerrar sesión"** (encontrado al cruzar specs y pruebas el 19 de noviembre).
   - Hoy cerrar sesión borra la cookie del navegador, pero el token sigue siendo válido hasta que vence (8 horas): quien hubiera copiado la cookie antes podría seguir usándola. La spec dice "la sesión deja de ser válida".
   - Opción: aumentar `usuarios.sesion_version` al salir (D4). Revoca el token, pero también cierra las otras sesiones del usuario.
   - No afecta la demo.

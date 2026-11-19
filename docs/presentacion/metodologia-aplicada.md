@@ -4,8 +4,8 @@ Base para el guion de la presentación. Muestra qué prácticas del curso AI Age
 
 **Estado al 2026-11-19 (tarde):**
 - **Todas las tareas hechas:** MVP 31 de 31 y asistente RAG 13 de 13. Los dos cambios de OpenSpec están archivados.
-- 393 pruebas de Vitest y 2 pruebas E2E con Playwright (el flujo de la demo y el asistente), en verde.
-- Pipeline: 29 de 30 ejecuciones en verde. La única roja es la prueba de fuego del Lab 14 (día 4), que debía fallar.
+- 395 pruebas de Vitest y 3 pruebas E2E con Playwright (el flujo de la demo, el asistente y el primer ingreso), en verde.
+- Pipeline: 34 de 35 ejecuciones en verde. La única roja es la prueba de fuego del Lab 14 (día 4), que debía fallar.
 - En <https://senda.creativebycode.workers.dev>, los tres flujos de la demo:
   - el académico: el docente publica, el estudiante entrega desde el celular y ve su nota;
   - el de cartera: el estudiante en mora no entra; se registra el pago y entra;
@@ -45,7 +45,7 @@ El **límite de intentos de ingreso (tarea 2.3)** recorre todo el ciclo con un s
 4. **Mutación:** la versión original dejó pasar **10 de 10** intentos simultáneos; la elegida, exactamente **5**.
 5. **CI/CD y demo en vivo:** en la URL pública, el sexto intento responde 429 "Demasiados intentos".
 
-## Hooks y subagente (día 7)
+## Hooks y subagente (día 6, adelantados del viernes)
 
 Las dos prácticas que faltaban, elegidas por Aymer entre varias opciones, para que cada una resuelva un problema que de verdad pasó:
 

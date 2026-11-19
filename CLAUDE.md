@@ -71,7 +71,7 @@ Flujo de trabajo para lo que siga (las skills se invocan como comandos):
 ## Entorno
 
 - **VS Code y Claude Code se abren en esta carpeta (`proyecto/`, la raíz del repo)**, no en `Proyecto_Final/`. Claude Code solo carga `.mcp.json` y `.claude/settings.json` (hooks) desde la carpeta de la sesión, y así la configuración del agente queda versionada con el código (decisión del 2026-11-16, tarea 1.7).
-- **Hooks del proyecto** (`.claude/settings.json`, con los scripts en `.claude/hooks/`, decisión de Aymer del 2026-11-20):
+- **Hooks del proyecto** (`.claude/settings.json`, con los scripts en `.claude/hooks/`, decisión de Aymer del 2026-11-19):
   - **Guardián de reglas** (PreToolUse, en Read, Edit, Write, Grep y Bash): bloquea leer o editar `.dev.vars` y editar una migración que ya está en git. `permissions.deny` también niega `.dev.vars`.
   - **Detector de caracteres invisibles** (PostToolUse, en Edit y Write): avisa con línea y columna si un archivo quedó con espacios duros, BOM o tildes sueltas, el problema de los escapes `\u` de los días 3 y 6.
   - Pruebas: `node .claude/hooks/probar-hooks.mjs`. Si un hook bloquea algo legítimo, se corrige el hook con su prueba; nunca se esquiva.
