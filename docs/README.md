@@ -5,6 +5,7 @@
 | [rubrica.md](rubrica.md) | Rúbrica del proyecto final del curso |
 | [identidad-visual.md](identidad-visual.md) | Guía visual de Senda: concepto, paleta con contrastes medidos, tipografías, símbolo, componentes y tono. La guía viva está en `/guia` (solo en desarrollo) |
 | [decisiones/](decisiones/) | Registros de decisiones de arquitectura (ADR) |
+| [revision/](revision/) | Revisiones de Aymer a los cambios de OpenSpec ([MVP](revision/2026-11-15-revision-mvp.md), [asistente RAG](revision/2026-11-17-revision-rag.md)) y la [revisión visual de todas las pantallas](revision/2026-11-19-revision-visual.md) con el MCP de Playwright |
 | [bitacora/](bitacora/) | Diario de desarrollo: qué se hizo cada día, qué se aprendió y qué problemas hubo |
 | [operacion/](operacion/) | [Despliegue y credenciales del CI](operacion/despliegue.md); después: paso a producción, respaldos y Habeas Data |
 | [presentacion/](presentacion/) | [Metodología del curso aplicada](presentacion/metodologia-aplicada.md) (se actualiza con el avance), guion, checklist de la demo y preguntas esperadas |

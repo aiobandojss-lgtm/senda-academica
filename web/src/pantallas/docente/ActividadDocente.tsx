@@ -67,7 +67,7 @@ export default function ActividadDocente() {
             <TableHeader>
               <TableRow>
                 <TableHead>Estudiante</TableHead>
-                <TableHead>Estado</TableHead>
+                <TableHead className="hidden sm:table-cell">Estado</TableHead>
                 <TableHead className="hidden md:table-cell">Entregada</TableHead>
                 <TableHead className="text-right">
                   <span className="sr-only">Acciones</span>
@@ -79,8 +79,13 @@ export default function ActividadDocente() {
                 <TableRow key={f.estudiante.id}>
                   <TableCell className="font-medium whitespace-normal">
                     {f.estudiante.apellidos}, {f.estudiante.nombres}
+                    {/* En el celular el estado va debajo del nombre: con su propia columna, la tabla no cabía y el botón
+                        de calificar quedaba cortado (revisión visual, tarea 6.2) */}
+                    <div className="mt-1.5 sm:hidden">
+                      <EstadoEntrega entrega={f.entrega} />
+                    </div>
                   </TableCell>
-                  <TableCell className="whitespace-normal">
+                  <TableCell className="hidden whitespace-normal sm:table-cell">
                     <EstadoEntrega entrega={f.entrega} />
                   </TableCell>
                   <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
@@ -168,7 +173,7 @@ function FormularioNota({ estudiante, entrega, alTerminar }: { estudiante: strin
       <FieldGroup>
         <Campo id="nota" etiqueta="Nota" descripcion="De 0,0 a 5,0, con un decimal" error={errores.campos.nota}>
           {(control) => (
-            <Input {...control} inputMode="decimal" className="w-32 text-lg tabular-nums" value={valor} onChange={(e) => setValor(e.target.value)} placeholder="4,2" required />
+            <Input {...control} inputMode="decimal" className="w-32 text-lg tabular-nums" value={valor} onChange={(e) => setValor(e.target.value)} required />
           )}
         </Campo>
         <Campo id="comentario" etiqueta="Comentario (opcional)" error={errores.campos.comentario}>

@@ -9,6 +9,8 @@ export default defineConfig([
   globalIgnores([
     "dist",
     ".wrangler",
+    // Salida del MCP de Playwright (capturas y registros de la consola), fuera del repositorio
+    ".playwright-mcp",
     "coverage",
     "playwright-report",
     "test-results",

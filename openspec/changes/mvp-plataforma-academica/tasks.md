@@ -47,7 +47,7 @@
 ## 6. Integración de la demo (día 6)
 
 - [x] 6.1 Escribir la prueba E2E con Playwright del flujo de la demo: el estudiante al día ingresa y entrega un taller, el docente lo califica, el estudiante ve la nota, el estudiante en mora no puede ingresar y, tras registrar su pago, sí; verificar `npm run test:e2e` en verde local y en CI
-- [ ] 6.2 Revisar todas las pantallas contra `docs/identidad-visual.md` con el MCP de Playwright y corregir diferencias; verificar con capturas en 375 px y 1280 px
+- [x] 6.2 Revisar todas las pantallas contra `docs/identidad-visual.md` con el MCP de Playwright y corregir diferencias; verificar con capturas en 375 px y 1280 px
 
 ## Workflow follow-up
 

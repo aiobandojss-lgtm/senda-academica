@@ -20,18 +20,21 @@ function ListaCursosDocente() {
             <li key={c.id}>
               <Link to={`/docente/cursos/${c.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/60">
                 <BookOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />
-                <span className="min-w-0 flex-1">
-                  <span className="block font-medium">{c.nombre}</span>
-                  <span className="block text-sm text-muted-foreground">
-                    {c.carrera.codigo} · semestre {c.semestre} · {c.inscritos} estudiantes
+                {/* En el celular la etiqueta va debajo del texto: al lado lo partía en líneas muy cortas (tarea 6.2) */}
+                <span className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+                  <span className="min-w-0 sm:flex-1">
+                    <span className="block font-medium">{c.nombre}</span>
+                    <span className="block text-sm text-muted-foreground">
+                      {c.carrera.codigo} · semestre {c.semestre} · {c.inscritos} estudiantes
+                    </span>
                   </span>
+                  {c.porCalificar > 0 && (
+                    <Badge variant="alerta" className="self-start sm:self-auto">
+                      <ClipboardCheck aria-hidden="true" />
+                      {c.porCalificar} por calificar
+                    </Badge>
+                  )}
                 </span>
-                {c.porCalificar > 0 && (
-                  <Badge variant="alerta">
-                    <ClipboardCheck aria-hidden="true" />
-                    {c.porCalificar} por calificar
-                  </Badge>
-                )}
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               </Link>
             </li>

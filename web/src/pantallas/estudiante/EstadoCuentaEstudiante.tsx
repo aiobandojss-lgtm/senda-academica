@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
 import { EstadoCarteraBadge, EstadoConsulta, ListaVacia } from "@/components/admin/piezas";
 import { ListaCuotas } from "@/components/cartera/piezas";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mensajeCartera } from "@/lib/cartera";
 import { useEstadoCuentaPropio } from "@/lib/consultas";
@@ -61,10 +62,13 @@ export function TarjetaEstadoCuenta() {
       <CardContent className="space-y-3">
         <EstadoCarteraBadge estado={consulta.data.estadoCartera} />
         <p className="text-sm">{mensajeCartera(consulta.data, config.contactoFundacion, "tu")}</p>
-        <Link to="/estudiante/cuenta" className="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline">
-          Ver mis cuotas y pagos
-          <ChevronRight className="size-4" aria-hidden="true" />
-        </Link>
+        {/* Botón de 40 px y no un enlace de texto de 20 px: la guía pide objetivos táctiles de 40 a 44 px (tarea 6.2) */}
+        <Button variant="outline" asChild>
+          <Link to="/estudiante/cuenta">
+            Ver mis cuotas y pagos
+            <ChevronRight data-icon="inline-end" aria-hidden="true" />
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );
