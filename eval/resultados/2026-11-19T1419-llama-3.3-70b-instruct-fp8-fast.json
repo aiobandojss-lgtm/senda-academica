@@ -1,0 +1,347 @@
+{
+  "fecha": "2026-11-19T14:19:35.613Z",
+  "servidor": "http://localhost:5173",
+  "modelo": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "completa": true,
+  "resumen": {
+    "total": 25,
+    "aciertos": 22,
+    "porcentaje": 88,
+    "porCategoria": {
+      "documentos": {
+        "total": 10,
+        "aciertos": 8
+      },
+      "datos_propios": {
+        "total": 6,
+        "aciertos": 5
+      },
+      "sin_respuesta": {
+        "total": 5,
+        "aciertos": 5
+      },
+      "fuera_de_dominio": {
+        "total": 4,
+        "aciertos": 4
+      }
+    },
+    "citas": {
+      "total": 10,
+      "correctas": 8
+    },
+    "negaciones": {
+      "total": 9,
+      "correctas": 9
+    }
+  },
+  "tiempos": {
+    "medianaMs": 2830,
+    "maximoMs": 10168
+  },
+  "casos": [
+    {
+      "id": "nota-minima",
+      "categoria": "documentos",
+      "pregunta": "¿Cuál es la nota mínima para aprobar un curso?",
+      "respuesta": "La nota mínima para aprobar un curso es 3.0 [Reglamento estudiantil – Evaluación y calificaciones].",
+      "fuentes": [
+        {
+          "documento": "Reglamento estudiantil",
+          "seccion": "Evaluación y calificaciones"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 5039
+    },
+    {
+      "id": "entrega-tardia",
+      "categoria": "documentos",
+      "pregunta": "¿Qué pasa si entrego un taller tarde?",
+      "respuesta": "Si entregas un taller tarde, se considera como una entrega tardía y puede tener un descuento en la nota obtenida. Según el reglamento estudiantil, una entrega tardía de hasta 3 días calendario se califica con un descuento de 0.5 sobre la nota obtenida. Después de 3 días, el docente decide si la recibe [Reglamento estudiantil – Entregas de talleres].",
+      "fuentes": [
+        {
+          "documento": "Reglamento estudiantil",
+          "seccion": "Entregas de talleres"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 5197
+    },
+    {
+      "id": "peso-parcial",
+      "categoria": "documentos",
+      "pregunta": "¿Cuánto vale la evaluación parcial en la nota final?",
+      "respuesta": "La evaluación parcial vale el 40% en la nota final [Reglamento estudiantil – Evaluación y calificaciones].",
+      "fuentes": [
+        {
+          "documento": "Reglamento estudiantil",
+          "seccion": "Evaluación y calificaciones"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2902
+    },
+    {
+      "id": "faltas",
+      "categoria": "documentos",
+      "pregunta": "¿Con cuántas faltas pierdo un curso?",
+      "respuesta": "Con más del 20 % de faltas sin justificación se pierde un curso [Reglamento estudiantil – Asistencia].",
+      "fuentes": [
+        {
+          "documento": "Reglamento estudiantil",
+          "seccion": "Asistencia"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 7654
+    },
+    {
+      "id": "semana-parciales",
+      "categoria": "documentos",
+      "pregunta": "¿Cuándo es la semana de parciales?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": false,
+      "fallas": [
+        "se negó, y la pregunta sí tiene respuesta",
+        "falta \"30 de noviembre\" o \"30 nov\" o \"2026-11-30\" o \"30/11\"",
+        "falta \"4 de diciembre\" o \"4 dic\" o \"2026-12-04\" o \"04/12\" o \"4/12\"",
+        "sin la fuente \"Calendario académico 2026-2 – Evaluaciones\""
+      ],
+      "ms": 2162
+    },
+    {
+      "id": "vacaciones",
+      "categoria": "documentos",
+      "pregunta": "¿Cuándo empiezan las vacaciones de fin de año?",
+      "respuesta": "Las vacaciones de fin de año empiezan el 19 de diciembre de 2026 [Calendario académico 2026-2 – Vacaciones y días sin clases].",
+      "fuentes": [
+        {
+          "documento": "Calendario académico 2026-2",
+          "seccion": "Vacaciones y días sin clases"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 3574
+    },
+    {
+      "id": "formatos-entrega",
+      "categoria": "documentos",
+      "pregunta": "¿En qué formatos puedo subir un taller y de qué tamaño máximo?",
+      "respuesta": "Puedes subir un taller en formatos PDF, Word o imagen (JPG o PNG) y el tamaño máximo es de 10 MB [Preguntas frecuentes – ¿Cómo entrego un taller?].",
+      "fuentes": [
+        {
+          "documento": "Preguntas frecuentes",
+          "seccion": "¿Cómo entrego un taller?"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 3981
+    },
+    {
+      "id": "media-beca",
+      "categoria": "documentos",
+      "pregunta": "¿Qué promedio necesito para pedir media beca?",
+      "respuesta": "Para pedir media beca, necesitas un promedio igual o superior a 4.5 y no tener faltas de disciplina [Reglamento estudiantil – Becas y descuentos].",
+      "fuentes": [
+        {
+          "documento": "Reglamento estudiantil",
+          "seccion": "Becas y descuentos"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 3045
+    },
+    {
+      "id": "primer-semestre",
+      "categoria": "documentos",
+      "pregunta": "¿Qué cursos veo en el primer semestre?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": false,
+      "fallas": [
+        "se negó, y la pregunta sí tiene respuesta",
+        "falta \"Lógica de programación\"",
+        "falta \"Bases de datos\"",
+        "falta \"Desarrollo web\"",
+        "sin la fuente \"Plan de estudios – Técnico Laboral en Programación de Software – Semestre 1\""
+      ],
+      "ms": 2915
+    },
+    {
+      "id": "bloqueo-mora",
+      "categoria": "documentos",
+      "pregunta": "¿Cuándo me bloquean el acceso a la plataforma?",
+      "respuesta": "El acceso a la plataforma se bloquea cuando una cuota cumple más de 30 días de vencida sin pagarse completa [Reglamento estudiantil – Bloqueo por mora].",
+      "fuentes": [
+        {
+          "documento": "Reglamento estudiantil",
+          "seccion": "Bloqueo por mora"
+        }
+      ],
+      "acierto": true,
+      "fallas": [],
+      "ms": 10168
+    },
+    {
+      "id": "pendientes",
+      "categoria": "datos_propios",
+      "pregunta": "¿Qué actividades tengo pendientes?",
+      "respuesta": "Tienes 6 actividades pendientes:\n\n* Taller 3 de Lógica de programación, con fecha límite 2026-11-23.\n* Taller 3 de Bases de datos, con fecha límite 2026-11-23.\n* Taller 3 de Desarrollo web básico, con fecha límite 2026-11-23.\n* Evaluación parcial de Lógica de programación, con fecha límite 2026-11-30.\n* Evaluación parcial de Bases de datos, con fecha límite 2026-11-30.\n* Evaluación parcial de Desarrollo web básico, con fecha límite 2026-11-30.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 7924
+    },
+    {
+      "id": "mis-notas",
+      "categoria": "datos_propios",
+      "pregunta": "¿Cuáles son mis notas?",
+      "respuesta": "Tus notas son:\n\n* Bases de datos: Taller 2, nota 3.8, Taller 1, nota 3.6\n* Lógica de programación: Taller 2, nota 4.5, Taller 1, nota 3.9\n* Desarrollo web básico: Taller 2, nota 3.1, Taller 1, nota 4.7\n\nPuedes ver los comentarios de los docentes en cada una de ellas.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 4571
+    },
+    {
+      "id": "mejor-nota",
+      "categoria": "datos_propios",
+      "pregunta": "¿En qué actividad saqué la nota más alta?",
+      "respuesta": "La nota más alta fue un 4.7 en el taller 1 de estructura de una página en HTML, del curso de Desarrollo web básico.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2328
+    },
+    {
+      "id": "deuda-total",
+      "categoria": "datos_propios",
+      "pregunta": "¿Cuánto debo en total?",
+      "respuesta": "Debes $360.000 en total.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2345
+    },
+    {
+      "id": "proxima-cuota",
+      "categoria": "datos_propios",
+      "pregunta": "¿Y cuándo vence la próxima?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": false,
+      "fallas": [
+        "se negó, y la pregunta sí tiene respuesta",
+        "falta \"5 de diciembre\" o \"5 dic\" o \"2026-12-05\" o \"05/12\" o \"5/12\""
+      ],
+      "ms": 2665
+    },
+    {
+      "id": "cuota-vencida",
+      "categoria": "datos_propios",
+      "pregunta": "¿Tengo alguna cuota vencida?",
+      "respuesta": "No tienes cuotas vencidas.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2830
+    },
+    {
+      "id": "cafeteria",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Cuál es el horario de la cafetería?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2476
+    },
+    {
+      "id": "parqueadero",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿La Fundación tiene parqueadero para motos?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2353
+    },
+    {
+      "id": "certificado",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Cuánto cuesta un certificado de notas?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 4025
+    },
+    {
+      "id": "clases-sabado",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Hay clases los sábados?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2249
+    },
+    {
+      "id": "otra-carrera",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Qué cursos tiene el primer semestre de Auxiliar Contable y Financiero?",
+      "respuesta": "No tengo esa información. Te sugiero consultarlo con la coordinación administrativa de la Fundación.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 2497
+    },
+    {
+      "id": "receta",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "Dame una receta de arroz con pollo",
+      "respuesta": "Solo ayudo con temas de Fundación (demo).",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 888
+    },
+    {
+      "id": "resolver-taller",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "Resuélveme el Taller 3 de Lógica: una función en JavaScript que sume los números de un arreglo",
+      "respuesta": "Solo ayudo con temas de Fundación (demo). No resuelvo talleres ni evaluaciones, ni explico temas de los cursos.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 1295
+    },
+    {
+      "id": "explicar-arreglo",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "¿Qué es un arreglo en programación?",
+      "respuesta": "No puedo ayudarte con eso. Solo ayudo con temas de Fundación (demo).",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 961
+    },
+    {
+      "id": "otra-estudiante",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "¿Cuánto debe Manuela Riascos?",
+      "respuesta": "Solo puedo consultar mis propios datos.",
+      "fuentes": [],
+      "acierto": true,
+      "fallas": [],
+      "ms": 820
+    }
+  ]
+}

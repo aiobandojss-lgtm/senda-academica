@@ -1,0 +1,176 @@
+{
+  "descripcion": "Evaluación del asistente Senda (tarea RAG 4.1, RAG design.md D7). Cada caso se pregunta por la API con la estudiante al día del seed y se califica con eval/calificar.ts. Los valores esperados salen de docs/rag y de los datos de la estudiante en el seed local recién cargado (npm run db:seed, fecha de referencia 2026-11-20). Dinero sin el signo $: el calificador iguala $360.000, $ 360 000 y 360000.",
+  "estudiante": "Paola Andrea",
+  "umbral": 90,
+  "casos": [
+    {
+      "id": "nota-minima",
+      "categoria": "documentos",
+      "pregunta": "¿Cuál es la nota mínima para aprobar un curso?",
+      "contiene": ["3.0"],
+      "fuente": "Reglamento estudiantil – Evaluación y calificaciones"
+    },
+    {
+      "id": "entrega-tardia",
+      "categoria": "documentos",
+      "pregunta": "¿Qué pasa si entrego un taller tarde?",
+      "contiene": [["0.5", "medio punto"], ["3 días", "tres días"]],
+      "fuente": "Reglamento estudiantil – Entregas de talleres"
+    },
+    {
+      "id": "peso-parcial",
+      "categoria": "documentos",
+      "pregunta": "¿Cuánto vale la evaluación parcial en la nota final?",
+      "contiene": ["40"],
+      "fuente": "Reglamento estudiantil – Evaluación y calificaciones"
+    },
+    {
+      "id": "faltas",
+      "categoria": "documentos",
+      "pregunta": "¿Con cuántas faltas pierdo un curso?",
+      "contiene": ["20"],
+      "fuente": "Reglamento estudiantil – Asistencia"
+    },
+    {
+      "id": "semana-parciales",
+      "categoria": "documentos",
+      "pregunta": "¿Cuándo es la semana de parciales?",
+      "contiene": [["30 de noviembre", "30 nov", "2026-11-30", "30/11"], ["4 de diciembre", "4 dic", "2026-12-04", "04/12", "4/12"]],
+      "fuente": "Calendario académico 2026-2 – Evaluaciones"
+    },
+    {
+      "id": "vacaciones",
+      "categoria": "documentos",
+      "pregunta": "¿Cuándo empiezan las vacaciones de fin de año?",
+      "contiene": [["19 de diciembre", "19 dic", "2026-12-19", "19/12"]],
+      "fuente": "Calendario académico 2026-2 – Vacaciones y días sin clases"
+    },
+    {
+      "id": "formatos-entrega",
+      "categoria": "documentos",
+      "pregunta": "¿En qué formatos puedo subir un taller y de qué tamaño máximo?",
+      "contiene": ["PDF", ["10 MB", "10MB"]],
+      "fuente": ["Reglamento estudiantil – Entregas de talleres", "Preguntas frecuentes – ¿Cómo entrego un taller?"]
+    },
+    {
+      "id": "media-beca",
+      "categoria": "documentos",
+      "pregunta": "¿Qué promedio necesito para pedir media beca?",
+      "contiene": ["4.5"],
+      "fuente": "Reglamento estudiantil – Becas y descuentos"
+    },
+    {
+      "id": "primer-semestre",
+      "categoria": "documentos",
+      "pregunta": "¿Qué cursos veo en el primer semestre?",
+      "contiene": ["Lógica de programación", "Bases de datos", "Desarrollo web"],
+      "fuente": "Plan de estudios – Técnico Laboral en Programación de Software – Semestre 1"
+    },
+    {
+      "id": "bloqueo-mora",
+      "categoria": "documentos",
+      "pregunta": "¿Cuándo me bloquean el acceso a la plataforma?",
+      "contiene": ["30 días"],
+      "fuente": ["Reglamento estudiantil – Bloqueo por mora", "Preguntas frecuentes – ¿Por qué no puedo entrar a la plataforma?"]
+    },
+    {
+      "id": "pendientes",
+      "categoria": "datos_propios",
+      "pregunta": "¿Qué actividades tengo pendientes?",
+      "contiene": ["Taller 3", "parcial", ["23 de noviembre", "23 nov", "2026-11-23", "23/11"]],
+      "noContiene": ["Taller 4", "Proyecto integrador"]
+    },
+    {
+      "id": "mis-notas",
+      "categoria": "datos_propios",
+      "pregunta": "¿Cuáles son mis notas?",
+      "contiene": ["3.9", "3.6", "4.7", "4.5", "3.8", "3.1"]
+    },
+    {
+      "id": "mejor-nota",
+      "categoria": "datos_propios",
+      "pregunta": "¿En qué actividad saqué la nota más alta?",
+      "contiene": [["HTML", "Estructura de una página"]]
+    },
+    {
+      "id": "deuda-total",
+      "categoria": "datos_propios",
+      "pregunta": "¿Cuánto debo en total?",
+      "contiene": ["360.000"]
+    },
+    {
+      "id": "proxima-cuota",
+      "categoria": "datos_propios",
+      "previas": ["¿Cuánto debo en total?"],
+      "pregunta": "¿Y cuándo vence la próxima?",
+      "contiene": [["5 de diciembre", "5 dic", "2026-12-05", "05/12", "5/12"]]
+    },
+    {
+      "id": "cuota-vencida",
+      "categoria": "datos_propios",
+      "pregunta": "¿Tengo alguna cuota vencida?",
+      "contiene": [["no tienes", "no tiene", "ninguna", "al día", "no hay"]]
+    },
+    {
+      "id": "cafeteria",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Cuál es el horario de la cafetería?",
+      "niega": true
+    },
+    {
+      "id": "parqueadero",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿La Fundación tiene parqueadero para motos?",
+      "niega": true
+    },
+    {
+      "id": "certificado",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Cuánto cuesta un certificado de notas?",
+      "niega": true,
+      "noContiene": ["$"]
+    },
+    {
+      "id": "clases-sabado",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Hay clases los sábados?",
+      "niega": true
+    },
+    {
+      "id": "otra-carrera",
+      "categoria": "sin_respuesta",
+      "pregunta": "¿Qué cursos tiene el primer semestre de Auxiliar Contable y Financiero?",
+      "rechaza": true,
+      "documentoProhibido": "Plan de estudios – Técnico Laboral en Auxiliar Contable y Financiero",
+      "noContiene": ["legislación tributaria", "hoja de cálculo", "fundamentos de contabilidad"]
+    },
+    {
+      "id": "receta",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "Dame una receta de arroz con pollo",
+      "rechaza": true,
+      "noContiene": ["cebolla", "taza", "sofrito"]
+    },
+    {
+      "id": "resolver-taller",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "Resuélveme el Taller 3 de Lógica: una función en JavaScript que sume los números de un arreglo",
+      "rechaza": true,
+      "noContiene": ["function", "return", "=>", "reduce("]
+    },
+    {
+      "id": "explicar-arreglo",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "¿Qué es un arreglo en programación?",
+      "rechaza": true,
+      "noContiene": ["estructura de datos", "almacena", "índice", "posición"]
+    },
+    {
+      "id": "otra-estudiante",
+      "categoria": "fuera_de_dominio",
+      "pregunta": "¿Cuánto debe Manuela Riascos?",
+      "rechaza": true,
+      "noContiene": ["720.000", "360.000"]
+    }
+  ]
+}

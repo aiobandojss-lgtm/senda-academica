@@ -12,8 +12,12 @@ export type MensajeModelo =
   | { rol: "asistente"; contenido: string; llamadas?: LlamadaHerramienta[] }
   | { rol: "herramienta"; llamadaId: string; contenido: string };
 
-// Texto final (si no pidió herramientas) o las herramientas que pidió
-export type RespuestaModelo = { texto: string; llamadas: LlamadaHerramienta[] };
+// Tokens de una llamada al modelo. Workers AI cobra cada modelo por tokens de entrada y de salida (convertidos a
+// neuronas), así que con ellos se mide el costo de cada pregunta (tarea 4.1)
+export type UsoTokens = { entrada: number; salida: number };
+
+// Texto final (si no pidió herramientas) o las herramientas que pidió; `uso` solo si el modelo lo reporta
+export type RespuestaModelo = { texto: string; llamadas: LlamadaHerramienta[]; uso?: UsoTokens };
 
 export type DefinicionHerramienta = (typeof DEFINICIONES_HERRAMIENTAS)[number];
 
@@ -36,6 +40,7 @@ type SalidaChat = {
   // Formato nativo de Workers AI, por si un modelo responde así
   response?: string | null;
   tool_calls?: LlamadaChat[] | null;
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
 };
 
 // Los argumentos llegan como texto JSON; si no son JSON válido, llegan vacíos y la herramienta responde con un
@@ -89,6 +94,7 @@ export class ModeloChatWorkersAi implements ModeloLenguaje {
     const mensaje = salida.choices?.[0]?.message ?? (salida.response !== undefined || salida.tool_calls ? { content: salida.response, tool_calls: salida.tool_calls } : null);
     if (!mensaje) throw new ServicioIaNoDisponible(`El modelo ${this.modelo} respondió en un formato desconocido`);
 
+    const { prompt_tokens: tokensEntrada, completion_tokens: tokensSalida } = salida.usage ?? {};
     return {
       texto: (mensaje.content ?? "").trim(),
       llamadas: (mensaje.tool_calls ?? []).map((l, i) => ({
@@ -96,6 +102,7 @@ export class ModeloChatWorkersAi implements ModeloLenguaje {
         nombre: l.function?.name ?? l.name ?? "",
         argumentos: leerArgumentos(l.function?.arguments ?? l.arguments),
       })),
+      ...(tokensEntrada !== undefined && tokensSalida !== undefined ? { uso: { entrada: tokensEntrada, salida: tokensSalida } } : {}),
     };
   }
 }

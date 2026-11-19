@@ -13,6 +13,9 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 // `vite preview` con CLOUDFLARE_VITE_FORCE_LOCAL=true (playwright.config.ts). Es el mismo nombre que las
 // versiones nuevas del plugin leen por sí mismas; la 1.69 instalada solo entiende la opción `remoteBindings`.
 const soloLocal = process.env.CLOUDFLARE_VITE_FORCE_LOCAL === "true";
+// Para comparar modelos en desarrollo (tarea RAG 4.1): `MODELO_CHAT=<modelo> npm run dev` cambia el modelo del
+// asistente solo en ese servidor, sin editar wrangler.jsonc. El build que se despliega siempre usa el de wrangler.jsonc
+const modeloChat = process.env.MODELO_CHAT?.trim();
 
 export default defineConfig(({ command, isPreview }) => {
   // Solo `npm run dev` (vite serve), no `vite build` ni `vite preview`. El índice Vectorize es el real, el mismo de
@@ -20,6 +23,7 @@ export default defineConfig(({ command, isPreview }) => {
   // automático a propósito: si dependiera de editar .dev.vars, un olvido escribiría en el espacio de la demo.
   // El build que se despliega conserva "produccion" de wrangler.jsonc.
   const esDesarrollo = command === "serve" && !isPreview;
+  if (esDesarrollo && modeloChat) console.log(`Modelo del asistente en este servidor: ${modeloChat} (variable MODELO_CHAT)`);
 
   return {
     plugins: [
@@ -27,7 +31,9 @@ export default defineConfig(({ command, isPreview }) => {
       tailwindcss(),
       cloudflare({
         remoteBindings: !soloLocal,
-        ...(esDesarrollo ? { config: (worker) => ({ vars: { ...worker.vars, RAG_ESPACIO: "local" } }) } : {}),
+        ...(esDesarrollo
+          ? { config: (worker) => ({ vars: { ...worker.vars, RAG_ESPACIO: "local", ...(modeloChat ? { MODELO_CHAT: modeloChat } : {}) } }) }
+          : {}),
       }),
     ],
     resolve: {

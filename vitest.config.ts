@@ -37,8 +37,9 @@ export default defineConfig({
     })),
   ],
   test: {
-    // Pruebas de la API y funciones puras del frontend (sin DOM), todas en workerd
-    include: ["api/test/**/*.test.ts", "web/test/**/*.test.ts"],
+    // Pruebas de la API, de funciones puras del frontend (sin DOM) y del calificador de la evaluación del RAG, todas
+    // en workerd
+    include: ["api/test/**/*.test.ts", "web/test/**/*.test.ts", "eval/**/*.test.ts"],
     setupFiles: ["./api/test/aplicar-migraciones.ts"],
     // Cada ingreso calcula PBKDF2 con 100.000 iteraciones (lento a propósito, D5) y los archivos corren en
     // paralelo: con 23 archivos, algunas pruebas pasaban los 5 s por defecto por pura contención de CPU

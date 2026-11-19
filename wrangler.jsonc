@@ -43,7 +43,8 @@
     // Modelos de Workers AI del asistente (RAG design.md D2), verificados en el catálogo el 2026-11-17 (tarea 1.1).
     // Si cambia el de embeddings, hay que recrear el índice Vectorize (1024 dimensiones) y reindexar los documentos.
     "MODELO_EMBEDDINGS": "@cf/baai/bge-m3",
-    // Provisional: la evaluación (tarea 4.1) lo compara con @cf/meta/llama-3.3-70b-instruct-fp8-fast y deja aquí el ganador
+    // Elegido por la evaluación del 2026-11-19 (tarea 4.1): 96 % de aciertos contra 88 % de
+    // @cf/meta/llama-3.3-70b-instruct-fp8-fast, con la mitad del costo (~31 neuronas por pregunta). RAG design.md D2 y D7
     "MODELO_CHAT": "@cf/openai/gpt-oss-20b",
     // Espacio (namespace) de Vectorize de este entorno (RAG design.md D2). `npm run dev` usa el índice real, el mismo de
     // producción: vite.config.ts lo cambia a "local" solo en desarrollo para que las pruebas locales no toquen la demo

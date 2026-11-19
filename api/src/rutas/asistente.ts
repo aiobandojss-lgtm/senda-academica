@@ -112,13 +112,15 @@ asistente.post("/mensajes", validarJson(esquemaPregunta), async (c) => {
       )
       .bind(usuario.id, hoy),
   ]);
-  // Para revisar el comportamiento del agente en los registros de Cloudflare, sin el contenido de la conversación
+  // Para revisar el comportamiento del agente en los registros de Cloudflare, sin el contenido de la conversación.
+  // Los tokens dan el costo de cada pregunta en neuronas (tarea 4.1)
   console.log("Asistente respondió", {
     pasos: resultado.pasos,
     herramientas: resultado.herramientas,
     reemplazada: resultado.reemplazada,
     motivo: resultado.motivo,
     citasInvalidas: resultado.citasInvalidas,
+    tokens: resultado.tokens,
   });
 
   return c.json({ respuesta: resultado.respuesta, fuentes: resultado.fuentes, preguntasRestantes: LIMITE_DIARIO - usadas - 1 });

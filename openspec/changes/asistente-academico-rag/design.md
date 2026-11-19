@@ -34,8 +34,11 @@ Todo queda en Cloudflare, sin llaves externas ni costo para la Fundación (plan 
   - Se descartaron los modelos con fecha de retiro anunciada y los que exigen plan pago.
   - En la 1.1 se probó gpt-oss con el formato Responses (`input` y elementos `function_call`) y llama con el formato de chat (`tool_calls`). En la tarea 3.2 se probó un ciclo real de dos pasos (el modelo pide la herramienta, recibe el resultado con `role: "tool"` y responde): **los dos aceptan el formato de chat compatible con OpenAI**. Por eso hay un solo adaptador, `ModeloChatWorkersAi`, para ambos. La interfaz `ModeloLenguaje` (D1) se mantiene para cambiar de proveedor y para el modelo simulado de las pruebas y del E2E.
   - En esa prueba, llama citó `[Documento – Evaluación y calificaciones]`: copió la palabra "Documento" del ejemplo de las instrucciones. Por eso cada resultado de `buscar_documentos` trae la cita ya armada (`fuente`), las instrucciones piden copiarla tal cual, y la validación de citas (D5) reemplaza la respuesta si aun así la cita no corresponde a un fragmento recuperado.
-  - La evaluación (D7, tarea 4.1) compara los dos y deja el ganador en `MODELO_CHAT`.
-- La cuota gratuita es de 10.000 neuronas diarias para toda la cuenta y se reinicia a las 00:00 UTC (7:00 p. m. en Colombia). El costo real de una pregunta, con documentos e historial, se mide en la tarea 4.1.
+  - **Elegido: gpt-oss-20b**, por la evaluación del 2026-11-19 (D7, tarea 4.1): 96 % de aciertos contra 88 % de llama, con el mismo tiempo de respuesta y la mitad del costo. Para probar otro modelo solo en desarrollo: `MODELO_CHAT=<modelo> npm run dev` (lo aplica `vite.config.ts`; el build que se despliega usa el de `wrangler.jsonc`).
+- La cuota gratuita es de 10.000 neuronas diarias para toda la cuenta y se reinicia a las 00:00 UTC (7:00 p. m. en Colombia). **Costo medido en la tarea 4.1** con los tokens que reporta Workers AI (el registro "Asistente respondió" los incluye, sin contenido) y los precios por modelo de la documentación de Cloudflare:
+  - gpt-oss-20b: ~1.440 tokens de entrada y ~175 de salida por pregunta (dos pasos del agente) = **~31 neuronas**. La cuota alcanza para unas **320 preguntas diarias** en toda la cuenta.
+  - llama-3.3-70b: ~1.920 de entrada y ~50 de salida = ~62 neuronas (su salida es mucho más cara): unas 160 preguntas diarias.
+  - Los embeddings de la búsqueda cuestan menos de 0,1 neuronas por pregunta.
 - Workers AI y Vectorize no tienen simulador local. `npm run dev` usa los servicios reales (bindings remotos). Vitest y el E2E corren sin bindings remotos, con dobles de prueba, y no necesitan credenciales de Cloudflare.
 - **Un espacio por entorno en el mismo índice** (decisión de Aymer, 2026-11-18).
   - El problema: `npm run dev` usa la D1 local pero el índice Vectorize real, el mismo de producción, y el id de un vector es único en todo el índice. Sin separación, cargar documentos en local sobrescribiría vectores de producción, y reemplazar uno en local borraría vectores que la URL pública sigue usando.
@@ -82,6 +85,26 @@ El contexto enviado al modelo solo incluye nombre de pila, carrera y resultados 
 ### D7. Evaluación
 `eval/preguntas.json` con ~25 preguntas: respondibles (con fuente esperada), de datos propios (con usuario del seed y respuesta esperada), sin respuesta (debe negarse) y fuera de dominio. `npm run eval:rag` las ejecuta contra el entorno local y reporta aciertos, citas correctas y negaciones correctas. Se corre a mano antes de la demo (consume cuota de Workers AI), no en cada push.
 
+Cómo quedó (tarea 4.1):
+- `npm run eval:rag` hace cada pregunta por la API de `npm run dev`, como la estudiante al día del seed (Paola), con el seed local recién cargado. Antes de cada caso borra la conversación, para que una pregunta no influya en la siguiente; el caso de seguimiento hace primero su pregunta previa. Son 25 casos y 26 preguntas: caben en el límite diario de una estudiante (una prueba lo verifica).
+- **Calificación por reglas, sin un modelo como juez** (`eval/calificar.ts`, con pruebas): textos que la respuesta debe y no debe decir, la fuente que debe citar, el documento que no puede usar y si debe negarse. Así el resultado no cambia entre corridas, no gasta cuota y cada falla se explica en una línea. El calificador iguala las formas de escribir un valor ($360.000, $ 360 000 y 360000).
+- `--recalificar <reporte>` vuelve a calificar las respuestas de un reporte guardado con las reglas actuales, sin llamar al modelo. Los reportes quedan en `eval/resultados/` como evidencia (datos ficticios del seed).
+
+Resultado del 2026-11-19, los dos modelos con las mismas reglas:
+
+| | gpt-oss-20b | llama-3.3-70b |
+|---|---|---|
+| Aciertos | **24 de 25 (96 %)** | 22 de 25 (88 %) |
+| Citas correctas | 9 de 10 | 8 de 10 |
+| Negaciones correctas | 9 de 9 | 9 de 9 |
+| Tiempo por respuesta (mediana) | 2,9 s | 2,8 s |
+| Neuronas por pregunta | ~31 | ~62 |
+
+- Después de la primera corrida se corrigieron dos reglas del calificador que rechazaban respuestas correctas: la fecha escrita "23 nov 2026" y la nota 4.7, que la pregunta "¿en qué actividad saqué la nota más alta?" no pedía. Con eso gpt-oss pasó de 22 a 24 aciertos (reporte original y recalificado en `eval/resultados/`); llama se corrió ya con las reglas corregidas.
+- La falla de los dos modelos: "¿Cuándo es la semana de parciales?" terminó en "no tengo esa información" con el motivo `sin_cita`. La guarda D5 hizo su trabajo (no salió nada sin fuente), pero se perdió una respuesta que sí está en el calendario. El motivo no distingue si la búsqueda no superó el umbral o si el modelo respondió sin citar.
+- En las preguntas sin respuesta el registro también dice `sin_cita`: la respuesta final es la misma negativa, la escriba el modelo o la guarda.
+- llama falló además en el plan de estudios (`sin_cita`) y en la pregunta de seguimiento sobre la próxima cuota (`cita_invalida`).
+
 ### D8. Historial de la conversación en D1
 Tabla `asistente_mensajes (id, usuario_id, rol ('usuario'|'asistente'), contenido, fuentes_json, creado_en)` en `migrations/0002_base_conocimiento.sql`. El endpoint recibe solo la pregunta nueva; el historial (los últimos 6 turnos del estudiante) se lee de la tabla. Así un cliente no puede inyectar turnos falsos del asistente y queda trazabilidad para revisar respuestas dudosas. Alternativa: que el navegador envíe el historial; descartada por la inyección de turnos.
 
@@ -101,7 +124,7 @@ Un Cron Trigger diario del mismo Worker (el plan Free permite 5 por cuenta), a l
 ## Risks / Trade-offs
 
 - [Modelos abiertos menos precisos en español que los comerciales] → Guardas de D5 y evaluación; si el resultado es pobre, cambiar `MODELO_CHAT` sin tocar el resto.
-- [Cuota diaria del plan gratuito de Workers AI, compartida por todos los estudiantes] → Límite de 30 preguntas por estudiante por día (D9), evaluación fuera del CI y mensaje de "no disponible" si se agota (D11). Con el costo medido en la tarea 4.1 se calcula cuántas preguntas diarias aguanta la Fundación.
+- [Cuota diaria del plan gratuito de Workers AI, compartida por todos los estudiantes] → Límite de 30 preguntas por estudiante por día (D9), evaluación fuera del CI y mensaje de "no disponible" si se agota (D11). Con el costo medido en la tarea 4.1 (~31 neuronas por pregunta con gpt-oss, D2), la cuota gratuita aguanta unas 320 preguntas diarias en toda la cuenta; con más uso, el plan pago cuesta USD 0,011 por cada 1.000 neuronas adicionales (unos USD 0,34 por cada 1.000 preguntas).
 - [Vectorize es eventualmente consistente] → El texto vive en D1 y cada resultado se cruza con D1 (D3).
 - [El estudiante escribe datos personales en una pregunta, y eso sí llega al modelo] → La pantalla del chat le recuerda no escribir su documento ni su celular (spec `asistente-academico`, privacidad).
 - [Mensajes con datos personales guardados] → Retención de 30 días, borrado a pedido del estudiante (D10) y nunca se registran en logs.

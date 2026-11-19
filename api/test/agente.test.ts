@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { MAXIMO_PASOS, responderPregunta, type EntradaAgente } from "../src/rag/agente";
 import type { ContextoHerramientas } from "../src/rag/herramientas";
+import type { RespuestaModelo } from "../src/rag/modelo";
 import { EmbeddingsWorkersAi, IndiceVectorize, ServicioIaNoDisponible } from "../src/rag/servicios";
 import { hashContrasena } from "../src/seguridad/contrasenas";
 import { AiFalsa, dice, direccion, ModeloGuionado, pide, VectorizeFalso } from "./ia-falsa";
@@ -247,5 +248,27 @@ describe("Lo que recibe el modelo", () => {
   it("si el modelo falla, el error ServicioIaNoDisponible llega a quien llamó (para responder 503, D11)", async () => {
     const modelo = new ModeloGuionado([new ServicioIaNoDisponible("sin cuota")]);
     await expect(preguntar(modelo, "¿Nota mínima?")).rejects.toBeInstanceOf(ServicioIaNoDisponible);
+  });
+});
+
+// Tarea 4.1: el costo de una pregunta es la suma de todos sus pasos (cada paso envía otra vez todo el contexto)
+describe("Tokens de cada pregunta", () => {
+  const conUso = (respuesta: RespuestaModelo, entrada: number, salida: number): RespuestaModelo => ({ ...respuesta, uso: { entrada, salida } });
+
+  it("suma los tokens de todos los pasos", async () => {
+    const modelo = new ModeloGuionado([conUso(pide("mi_estado_de_cuenta"), 800, 40), conUso(dice("Debes $ 180.000."), 1500, 120)]);
+    const resultado = await preguntar(modelo, "¿Cuánto debo?");
+    expect(resultado).toMatchObject({ reemplazada: false, tokens: { entrada: 2300, salida: 160 } });
+  });
+
+  it("también cuenta los tokens cuando la respuesta se reemplaza: el modelo igual los gastó", async () => {
+    const modelo = new ModeloGuionado([conUso(pide("buscar_documentos", { consulta: NOTA_MINIMA }), 700, 30), conUso(dice("La nota mínima es 3.0."), 1400, 50)]);
+    const resultado = await preguntar(modelo, "¿Nota mínima?");
+    expect(resultado).toMatchObject({ reemplazada: true, motivo: "sin_cita", tokens: { entrada: 2100, salida: 80 } });
+  });
+
+  it("un paso sin dato de tokens suma cero", async () => {
+    const modelo = new ModeloGuionado([pide("mi_estado_de_cuenta"), conUso(dice("Debes $ 180.000."), 1500, 120)]);
+    expect((await preguntar(modelo, "¿Cuánto debo?")).tokens).toEqual({ entrada: 1500, salida: 120 });
   });
 });

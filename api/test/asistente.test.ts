@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { hoyEnBogota } from "../src/dominio/mora";
 import { hashContrasena } from "../src/seguridad/contrasenas";
 import { AiFalsa, chatDice, chatPide, direccion, pedirConIa, VectorizeFalso } from "./ia-falsa";
@@ -120,6 +120,25 @@ describe("POST /api/asistente/mensajes", () => {
         fuentes_json: JSON.stringify([{ documento: "Reglamento estudiantil", seccion: "Evaluación y calificaciones" }]),
       },
     ]);
+  });
+
+  it("el registro de cada respuesta lleva pasos, herramientas y tokens, pero nunca la pregunta ni la respuesta (Habeas Data)", async () => {
+    const registro = vi.spyOn(console, "log").mockImplementation(() => {});
+    try {
+      ai.guionChat = [
+        { ...chatPide("mi_estado_de_cuenta"), usage: { prompt_tokens: 900, completion_tokens: 30 } },
+        { ...chatDice("Debes $ 180.000."), usage: { prompt_tokens: 1100, completion_tokens: 25 } },
+      ];
+
+      await preguntar(paola, { pregunta: "¿Cuánto debo? Mi celular es 3001234567" });
+
+      const llamada = registro.mock.calls.find(([mensaje]) => mensaje === "Asistente respondió");
+      expect(llamada?.[1]).toMatchObject({ pasos: 2, herramientas: ["mi_estado_de_cuenta"], reemplazada: false, tokens: { entrada: 2000, salida: 55 } });
+      expect(JSON.stringify(llamada)).not.toContain("3001234567");
+      expect(JSON.stringify(llamada)).not.toContain("180.000");
+    } finally {
+      registro.mockRestore();
+    }
   });
 
   it("usa el modelo de MODELO_CHAT y presenta a Senda con el nombre de pila", async () => {

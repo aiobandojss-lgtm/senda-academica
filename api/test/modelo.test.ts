@@ -71,6 +71,19 @@ describe("ModeloChatWorkersAi", () => {
     expect(respuesta.llamadas).toEqual([{ id: expect.any(String), nombre: "mis_notas", argumentos: {} }]);
   });
 
+  // Tarea 4.1: con los tokens se calcula el costo de cada pregunta en neuronas (el precio de cada modelo es por tokens)
+  it("devuelve los tokens de entrada y de salida que reporta Workers AI", async () => {
+    const ai = new AiQueResponde({ ...respuestaChat({ content: "Listo" }), usage: { prompt_tokens: 812, completion_tokens: 95, total_tokens: 907 } });
+    const respuesta = await adaptador(ai).responder([{ rol: "usuario", contenido: "x" }], DEFINICIONES_HERRAMIENTAS);
+    expect(respuesta.uso).toEqual({ entrada: 812, salida: 95 });
+  });
+
+  it("si el modelo no reporta tokens, el uso queda sin dato en lugar de cero", async () => {
+    const ai = new AiQueResponde(respuestaChat({ content: "Listo" }));
+    const respuesta = await adaptador(ai).responder([{ rol: "usuario", contenido: "x" }], DEFINICIONES_HERRAMIENTAS);
+    expect(respuesta).not.toHaveProperty("uso");
+  });
+
   it("si Workers AI falla (por ejemplo, sin cuota), lanza ServicioIaNoDisponible", async () => {
     const ai = new AiQueResponde(() => {
       throw new Error("AiError: 4006: you have used up your daily free allocation of 10,000 neurons");

@@ -1,6 +1,6 @@
 import { hoyEnBogota } from "../dominio/mora";
 import { citaDe, DEFINICIONES_HERRAMIENTAS, ejecutarHerramienta, type ContextoHerramientas } from "./herramientas";
-import type { MensajeModelo, ModeloLenguaje } from "./modelo";
+import type { MensajeModelo, ModeloLenguaje, UsoTokens } from "./modelo";
 
 // Agente del asistente Senda (spec `asistente-academico`; RAG design.md D4 a D6). Es un ciclo de function calling:
 // el modelo pide herramientas, el agente las ejecuta con el contexto de la sesión y le devuelve los resultados,
@@ -38,6 +38,8 @@ export type ResultadoAgente = {
   citasInvalidas?: string[];
   pasos: number;
   herramientas: string[];
+  // Suma de todos los pasos, también si la respuesta se reemplazó: es el costo de la pregunta (tarea 4.1)
+  tokens: UsoTokens;
 };
 
 // Guarda 2 de D5: instrucciones estrictas. Sin ejemplos de citas: en la prueba real, llama copió la palabra
@@ -88,6 +90,8 @@ export async function responderPregunta(entrada: EntradaAgente): Promise<Resulta
   const usadas: string[] = [];
   let buscoDocumentos = false;
   let consultoDatos = false;
+  // Cada paso envía otra vez todo el contexto: el costo de la pregunta es la suma de los pasos
+  const tokens: UsoTokens = { entrada: 0, salida: 0 };
 
   const noSe = (pasos: number, motivo: MotivoReemplazo, citasInvalidas?: string[]): ResultadoAgente => ({
     respuesta: respuestaNoSe(config.contacto),
@@ -97,10 +101,13 @@ export async function responderPregunta(entrada: EntradaAgente): Promise<Resulta
     ...(citasInvalidas ? { citasInvalidas } : {}),
     pasos,
     herramientas: [...new Set(usadas)],
+    tokens,
   });
 
   for (let paso = 1; paso <= MAXIMO_PASOS; paso++) {
-    const { texto, llamadas } = await modelo.responder(mensajes, DEFINICIONES_HERRAMIENTAS);
+    const { texto, llamadas, uso } = await modelo.responder(mensajes, DEFINICIONES_HERRAMIENTAS);
+    tokens.entrada += uso?.entrada ?? 0;
+    tokens.salida += uso?.salida ?? 0;
 
     if (llamadas.length === 0) {
       // Guarda 3 de D5: validación de la respuesta
@@ -114,7 +121,7 @@ export async function responderPregunta(entrada: EntradaAgente): Promise<Resulta
       const fuentes = [...new Set(citas.map(normalizar))].map((c) => recuperadas.get(c)!);
       // Buscó en los documentos y no consultó datos propios: sin cita válida, la respuesta no tiene fundamento
       if (buscoDocumentos && !consultoDatos && fuentes.length === 0) return noSe(paso, "sin_cita");
-      return { respuesta: texto, fuentes, reemplazada: false, pasos: paso, herramientas: [...new Set(usadas)] };
+      return { respuesta: texto, fuentes, reemplazada: false, pasos: paso, herramientas: [...new Set(usadas)], tokens };
     }
 
     mensajes.push({ rol: "asistente", contenido: texto, llamadas });
