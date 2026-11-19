@@ -102,7 +102,7 @@ describe("Respuestas basadas en documentos, con cita", () => {
 });
 
 describe("Guardas contra alucinaciones (D5)", () => {
-  it("sin resultados: si el modelo inventa una respuesta, se reemplaza por 'no tengo esa información' con el contacto", async () => {
+  it("Pregunta sin respuesta en los documentos: si el modelo inventa una respuesta, se reemplaza por 'no tengo esa información' con el contacto", async () => {
     const modelo = new ModeloGuionado([pide("buscar_documentos", { consulta: CAFETERIA }), dice("La cafetería abre a las 7:00 a. m.")]);
 
     const resultado = await preguntar(modelo, "¿A qué hora abre la cafetería?");
@@ -212,7 +212,7 @@ describe("Datos propios", () => {
 });
 
 describe("Lo que recibe el modelo", () => {
-  it("las instrucciones presentan a Senda con el nombre de pila y la carrera, nunca con documento, correo, celular ni apellidos", async () => {
+  it("Revisión de lo enviado al modelo: las instrucciones presentan a Senda con el nombre de pila y la carrera, nunca con documento, correo, celular ni apellidos", async () => {
     const modelo = new ModeloGuionado([pide("mi_estado_de_cuenta"), dice("Debes $ 180.000.")]);
     await preguntar(modelo, "¿Cuánto debo?");
 
@@ -227,6 +227,21 @@ describe("Lo que recibe el modelo", () => {
     expect(sistema.contenido).toMatch(/no uses tablas/i);
     const todo = JSON.stringify(modelo.recibidos);
     for (const dato of [ANA.documento, `${ANA.documento}@correo.test`, ANA.celular, "Ríos", "María"]) expect(todo).not.toContain(dato);
+  });
+
+  // Estos tres escenarios dependen de que el modelo obedezca. Aquí se verifica lo que el código controla: la regla
+  // está en las instrucciones y una negativa pasa la validación. Con el modelo real lo mide npm run eval:rag
+  // (casos receta, resolver-taller y explicar-arreglo)
+  it("Pregunta ajena / Pedir que resuelva el taller / Pedir que explique un tema de un curso: las instrucciones se lo prohíben al modelo y su negativa pasa la validación", async () => {
+    const negativa = `Solo ayudo con temas de ${env.FUNDACION_NOMBRE}.`;
+    const modelo = new ModeloGuionado([dice(negativa)]);
+
+    const resultado = await preguntar(modelo, "Dame una receta de arroz con pollo");
+
+    const [sistema] = modelo.recibidos[0];
+    expect(sistema.contenido).toContain(`responde que solo ayudas con temas de ${env.FUNDACION_NOMBRE}`);
+    expect(sistema.contenido).toContain("No resuelvas talleres ni evaluaciones, ni expliques temas de los cursos");
+    expect(resultado).toMatchObject({ respuesta: negativa, reemplazada: false });
   });
 
   it("el historial guardado va antes de la pregunta nueva, en orden", async () => {

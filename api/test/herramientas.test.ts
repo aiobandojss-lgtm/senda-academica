@@ -106,7 +106,7 @@ beforeEach(async () => {
 });
 
 describe("Herramientas de datos propios", () => {
-  it("mis_actividades_pendientes: solo las publicadas sin entrega de la estudiante, con la fecha límite en hora de Colombia", async () => {
+  it("¿Qué tengo pendiente?: mis_actividades_pendientes da solo las publicadas sin entrega de la estudiante, con la fecha límite en hora de Colombia", async () => {
     const resultado = (await ejecutarHerramienta("mis_actividades_pendientes", {}, deAna())) as { pendientes: object[] };
     expect(resultado.pendientes).toEqual([
       { curso: "Lógica de programación", actividad: "Taller 1", tipo: "taller", fechaLimite: "2026-11-30 23:59 (hora de Colombia)", vencida: false },
@@ -120,7 +120,7 @@ describe("Herramientas de datos propios", () => {
     ]);
   });
 
-  it("mi_estado_de_cuenta: el total y las cuotas de la estudiante, sin las de otro estudiante", async () => {
+  it("¿Cuánto debo?: mi_estado_de_cuenta da el total y las cuotas de la estudiante, sin las de otro estudiante", async () => {
     const resultado = (await ejecutarHerramienta("mi_estado_de_cuenta", {}, deAna())) as {
       totalAdeudado: number;
       cuotas: { saldo: number; estado: string }[];
@@ -129,7 +129,7 @@ describe("Herramientas de datos propios", () => {
     expect(resultado.cuotas).toEqual([expect.objectContaining({ saldo: 180_000, estado: "vencida" })]);
   });
 
-  it("los argumentos del modelo no cambian de estudiante: pedir los datos de otro devuelve los propios", async () => {
+  it("Pregunta por otro estudiante: los argumentos del modelo no cambian de estudiante; pedir los datos de otro devuelve los propios", async () => {
     const intento = { estudiante_id: betoId, estudianteId: betoId, documento: BETO.documento };
     const notas = JSON.stringify(await ejecutarHerramienta("mis_notas", intento, deAna()));
     const cuenta = JSON.stringify(await ejecutarHerramienta("mi_estado_de_cuenta", intento, deAna()));
@@ -150,7 +150,7 @@ describe("Herramientas de datos propios", () => {
 });
 
 describe("buscar_documentos", () => {
-  it("busca en el espacio del entorno y filtra con carrera_id en [0, carrera de la estudiante]", async () => {
+  it("Documento de una carrera: busca en el espacio del entorno y filtra con carrera_id en [0, carrera de la estudiante]", async () => {
     ai.fijarVector(CONSULTA, direccion({ 0: 1 }));
     await ejecutarHerramienta("buscar_documentos", { consulta: CONSULTA }, deAna());
     expect(vectores.consultas[0]).toMatchObject({ namespace: "produccion", filter: { carrera_id: { $in: [0, carreraA] } } });

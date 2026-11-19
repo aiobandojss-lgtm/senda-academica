@@ -62,7 +62,7 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 
 | Práctica | Qué dices | Qué muestras |
 |---|---|---|
-| **OpenSpec** (desarrollo guiado por specs) | "Nada se programó sin una spec aprobada por mí: proponer, revisar, implementar y archivar. Hoy el producto está descrito en 7 capacidades, con 55 requisitos y 128 escenarios." | `openspec/specs/` y un escenario WHEN/THEN |
+| **OpenSpec** (desarrollo guiado por specs) | "Nada se programó sin una spec aprobada por mí: proponer, revisar, implementar y archivar. Hoy el producto está descrito en 7 capacidades, con 55 requisitos y 128 escenarios, y cada escenario tiene una prueba que lleva su nombre: un comando lo verifica en cada push." | `openspec/specs/` y `npm run trazabilidad`: "Escenarios con prueba: 128 de 128" |
 | **Pruebas y CI/CD** | "393 pruebas automáticas y 2 E2E con Playwright. Si el flujo de la demo se rompe, el pipeline no despliega. Y lo comprobé: dañé a propósito la regla de mora, de 30 a 29 días, escribí antes qué debía fallar y el pipeline lo atrapó tal cual. Es la única ejecución en rojo de toda la historia." | GitHub Actions en verde, y el pull request #1, "Prueba de fuego", en rojo |
 | **El agente con contexto** | "Claude Code trabajó con un `CLAUDE.md` de reglas que no se negocian, skills de OpenSpec y TDD, y MCP: Playwright para revisar las 50 capturas de las pantallas, y context7 para la documentación vigente." | `CLAUDE.md` y el [informe de la revisión visual](../revision/2026-11-19-revision-visual.md) |
 | **Humano en el bucle** | "Las decisiones las tomé yo: los secretos los cargo yo y las specs las apruebo yo. El agente presenta opciones con pros y contras." | Una revisión aprobada en `docs/revision/` |

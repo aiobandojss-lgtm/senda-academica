@@ -34,6 +34,9 @@ jobs:
         run: npm run typecheck
       - name: Pruebas de la API (workerd, D1 y KV locales)
         run: npm test
+      # Cada escenario de openspec/specs/ debe tener una prueba con su nombre: un escenario nuevo sin prueba no pasa
+      - name: Trazabilidad entre las specs y las pruebas
+        run: npm run trazabilidad
       - name: Build de producción
         run: npm run build
 

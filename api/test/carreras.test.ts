@@ -33,7 +33,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/carreras", () => {
-  it("crea la carrera con el código en mayúsculas y la devuelve", async () => {
+  it("Crear carrera: la crea con el código en mayúsculas y la devuelve", async () => {
     const respuesta = await llamar(admin, "POST", "/carreras", {
       codigo: " tl-mus ",
       nombre: "Técnico Laboral en Música",
@@ -115,7 +115,7 @@ describe("PATCH /api/carreras/:id", () => {
     expect(await respuesta.json()).toMatchObject({ id, nombre: "Nombre nuevo", duracionSemestres: 6 });
   });
 
-  it("desactiva una carrera con estudiantes: sus estudiantes conservan su información", async () => {
+  it("Desactivar carrera con estudiantes: sus estudiantes conservan su información", async () => {
     const id = await crearCarrera("TL-DESAC");
     await crearEstudiante({ documento: "7310000201", carreraId: id, semestre: 1 }, hash);
 

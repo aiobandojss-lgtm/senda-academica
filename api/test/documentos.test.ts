@@ -77,7 +77,7 @@ beforeEach(async () => {
 });
 
 describe("Solo el administrador gestiona la base", () => {
-  it("un estudiante que intenta cargar un documento recibe acceso denegado y no se guarda nada", async () => {
+  it("Estudiante intenta cargar un documento: recibe acceso denegado y no se guarda nada", async () => {
     const respuesta = await pedir(estudiante, "PUT", "/documentos/reglamento", { titulo: "R", tipo: "reglamento", contenido: REGLAMENTO });
     expect(respuesta.status).toBe(403);
     expect(await respuesta.json()).toMatchObject({ codigo: "ACCESO_DENEGADO" });
@@ -97,7 +97,7 @@ describe("Solo el administrador gestiona la base", () => {
 });
 
 describe("PUT /api/documentos/:clave: carga e indexación", () => {
-  it("carga el reglamento como documento general: guarda los fragmentos por sección y responde cuántos se indexaron", async () => {
+  it("Cargar reglamento: como documento general guarda los fragmentos por sección y responde cuántos se indexaron", async () => {
     const respuesta = await cargar("reglamento-estudiantil", { titulo: "Reglamento estudiantil", tipo: "reglamento", contenido: REGLAMENTO });
 
     expect(respuesta.status).toBe(201);
@@ -181,7 +181,7 @@ describe("PUT /api/documentos/:clave: carga e indexación", () => {
 });
 
 describe("Reemplazar y retirar", () => {
-  it("reemplazar el calendario elimina los fragmentos y vectores anteriores y deja solo los nuevos", async () => {
+  it("Reemplazar calendario: elimina los fragmentos y vectores anteriores y deja solo los nuevos", async () => {
     await cargar("calendario", { titulo: "Calendario", tipo: "calendario", contenido: CALENDARIO_VIEJO });
     const viejos = await fragmentosDe("calendario");
 
@@ -232,7 +232,7 @@ describe("Reemplazar y retirar", () => {
 });
 
 describe("GET /api/documentos", () => {
-  it("lista los documentos con su carrera y el número de fragmentos indexados", async () => {
+  it("Documento indexado: lista los documentos con su carrera y el número de fragmentos indexados", async () => {
     await cargar("reglamento", { titulo: "Reglamento estudiantil", tipo: "reglamento", contenido: REGLAMENTO });
     await cargar("plan-tl-doc", { titulo: "Plan de estudios", tipo: "plan_estudios", carreraId, contenido: "## Semestre 1\n\nCursos." });
 

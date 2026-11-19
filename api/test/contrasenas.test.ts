@@ -76,7 +76,7 @@ describe("validarContrasenaNueva (spec `autenticacion`, tarea 2.5)", () => {
     expect(validarContrasenaNueva("12345678", datos)).toBeNull();
   });
 
-  it("rechaza menos de 8 caracteres e indica el mínimo", () => {
+  it("Contraseña nueva muy corta: rechaza menos de 8 caracteres e indica el mínimo", () => {
     expect(validarContrasenaNueva("Corta12", datos)).toEqual({
       codigo: "CONTRASENA_CORTA",
       mensaje: "La contraseña nueva debe tener al menos 8 caracteres",
@@ -88,7 +88,7 @@ describe("validarContrasenaNueva (spec `autenticacion`, tarea 2.5)", () => {
     expect(validarContrasenaNueva("Senda🌱1", datos)?.codigo).toBe("CONTRASENA_CORTA");
   });
 
-  it("rechaza el número de documento, también con espacios alrededor", () => {
+  it("Contraseña igual al documento: rechaza el número de documento, también con espacios alrededor", () => {
     for (const nueva of ["1000123456", " 1000123456 "]) {
       expect(validarContrasenaNueva(nueva, datos)).toEqual({
         codigo: "CONTRASENA_IGUAL_DOCUMENTO",
@@ -97,7 +97,7 @@ describe("validarContrasenaNueva (spec `autenticacion`, tarea 2.5)", () => {
     }
   });
 
-  it("rechaza la misma contraseña actual (por ejemplo, la temporal que entregó el administrador)", () => {
+  it("Contraseña nueva igual a la temporal: rechaza la misma contraseña actual (por ejemplo, la temporal que entregó el administrador)", () => {
     expect(validarContrasenaNueva("Kp7mRt2xQa", datos)).toEqual({
       codigo: "CONTRASENA_IGUAL_ACTUAL",
       mensaje: "La contraseña nueva debe ser distinta de la actual",

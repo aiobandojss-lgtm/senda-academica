@@ -140,7 +140,7 @@ describe("PUT /api/entregas/:id/calificacion", () => {
     expect((await subirArchivo(tokenAutor, `/actividades/${actividadId}/entrega`, "otra.pdf", BYTES.pdf)).status).toBe(409);
   });
 
-  it("solo califica el docente del curso", async () => {
+  it("Docente intenta calificar un curso ajeno: solo califica el docente del curso", async () => {
     expect((await calificar({ nota: 3 }, tokenOtroDocente)).status).toBe(403);
     expect((await calificar({ nota: 5 }, tokenAutor)).status).toBe(403);
     expect((await calificar({ nota: 5 }, admin)).status).toBe(403);
@@ -148,7 +148,7 @@ describe("PUT /api/entregas/:id/calificacion", () => {
 });
 
 describe("GET /api/archivos/apoyos/:actividadId", () => {
-  it("lo descargan los estudiantes del curso, pero no uno de otro curso", async () => {
+  it("Estudiante de otro curso pide un archivo de apoyo: lo descargan los estudiantes del curso, pero no uno de otro curso", async () => {
     await subirArchivo(tokenDocente, `/actividades/${actividadId}/apoyo`, "enunciado.pdf", BYTES.pdf, "PUT");
 
     const delCurso = await llamar(tokenCompanero, "GET", `/archivos/apoyos/${actividadId}`);

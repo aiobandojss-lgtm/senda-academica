@@ -88,7 +88,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/estudiantes", () => {
-  it("registra al estudiante con contraseña temporal y lo inscribe en los cursos activos de su semestre", async () => {
+  it("Registrar estudiante nuevo / Estudiante de primer semestre: registra al estudiante con contraseña temporal y lo inscribe en los cursos activos de su semestre", async () => {
     const { respuesta, cuerpo } = await registrar(nuevo("7340000101", { celular: "310 555 0101" }));
 
     expect(respuesta.status).toBe(201);
@@ -120,7 +120,7 @@ describe("POST /api/estudiantes", () => {
     expect((await ingresar("7340000101", cuerpo.contrasenaTemporal)).status).toBe(200);
   });
 
-  it("rechaza un documento ya registrado e indica cuál", async () => {
+  it("Documento duplicado: rechaza un documento ya registrado e indica cuál", async () => {
     const { respuesta } = await registrar(nuevo("7340000002"));
 
     expect(respuesta.status).toBe(409);
@@ -194,7 +194,7 @@ describe("PATCH /api/estudiantes/:id", () => {
 });
 
 describe("GET /api/estudiantes: búsqueda y filtros", () => {
-  it("busca por número de documento", async () => {
+  it("Buscar por documento: busca por número de documento", async () => {
     await registrar(nuevo("7340000301"));
 
     const lista = await (await llamar(admin, "GET", "/estudiantes?q=7340000301")).json<Estudiante[]>();
@@ -219,7 +219,7 @@ describe("GET /api/estudiantes: búsqueda y filtros", () => {
     expect(lista.map((e) => e.documento)).toEqual(["7340000303"]);
   });
 
-  it("filtra por estado de cartera: bloqueado, con excepción, en riesgo y al día", async () => {
+  it("Filtrar bloqueados / Filtrar con excepción: filtra por estado de cartera (bloqueado, con excepción, en riesgo y al día)", async () => {
     const cartera = await crearCarrera("TL-CARTERA");
     const bloqueado = await crearEstudiante({ documento: "7340000401", carreraId: cartera, semestre: 1 }, hash);
     const conExcepcion = await crearEstudiante({ documento: "7340000402", carreraId: cartera, semestre: 1 }, hash);
@@ -268,7 +268,7 @@ describe("desactivar y reactivar un estudiante", () => {
     expect(await inscritosEn(cursos.primeroA)).toContain(id);
   });
 
-  it("al reactivarlo queda inscrito en los cursos creados mientras estaba inactivo", async () => {
+  it("Reactivar estudiante / Estudiante desactivado fuera de las inscripciones automáticas: no lo inscriben en un curso creado mientras está inactivo; al reactivarlo queda inscrito y vuelve a ingresar", async () => {
     const { cuerpo } = await registrar(nuevo("7340000502", { semestre: 3 }));
     const id = cuerpo.estudiante.id;
     await llamar(admin, "POST", `/usuarios/${id}/desactivar`);
@@ -280,11 +280,13 @@ describe("desactivar y reactivar un estudiante", () => {
 
     expect(respuesta.status).toBe(200);
     expect(await inscritosEn(nuevoCurso)).toContain(id);
+    // Y vuelve a ingresar con su contraseña (la temporal, porque todavía no la ha cambiado)
+    expect((await ingresar("7340000502", cuerpo.contrasenaTemporal)).status).toBe(200);
   });
 });
 
 describe("GET /api/cursos/:id/estudiantes", () => {
-  it("el docente del curso recibe nombres y apellidos, sin documento, correo ni celular (D18)", async () => {
+  it("Docente consulta sus estudiantes: recibe nombres y apellidos, sin documento, correo ni celular (D18)", async () => {
     await registrar(nuevo("7340000601", { celular: "3005550601" }));
 
     const respuesta = await llamar(tokenDocenteA, "GET", `/cursos/${cursos.primeroA}/estudiantes`);

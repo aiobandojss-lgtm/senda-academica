@@ -47,7 +47,7 @@ async function tokenFirmado(usuarioId: number, rol: Rol, version = 0): Promise<s
 }
 
 describe("negar por defecto", () => {
-  it("sin sesión, una ruta que nadie declaró pública responde 401 NO_AUTENTICADO aunque todavía no exista", async () => {
+  it("Petición sin sesión: una ruta que nadie declaró pública responde 401 NO_AUTENTICADO aunque todavía no exista", async () => {
     for (const method of ["GET", "POST"]) {
       const respuesta = await pedir(RUTA_NO_DECLARADA, { method });
 
@@ -84,7 +84,7 @@ describe("sesiones revocadas (D4)", () => {
     expect(await respuesta.json()).toMatchObject({ codigo: "NO_AUTENTICADO" });
   });
 
-  it("un usuario desactivado con la sesión abierta recibe 401 en su siguiente petición", async () => {
+  it("Usuario desactivado con sesión abierta: recibe 401 en su siguiente petición", async () => {
     const token = await sesionDe(DESACTIVADO.documento, CONTRASENA);
     await env.DB.prepare("UPDATE usuarios SET activo = 0 WHERE id = ?").bind(ids[DESACTIVADO.documento]).run();
 
@@ -102,7 +102,7 @@ describe("sesiones revocadas (D4)", () => {
 });
 
 describe("compuertas de primer ingreso (D16)", () => {
-  it("con contraseña temporal solo permite las rutas de D16; cualquier otra responde 403 DEBE_CAMBIAR_PASSWORD", async () => {
+  it("Llamada directa a la API con contraseña temporal: solo permite las rutas de D16; cualquier otra responde 403 DEBE_CAMBIAR_PASSWORD", async () => {
     const token = await sesionDe(TEMPORAL.documento, CONTRASENA);
 
     // Permitidas: consultar el perfil (el frontend decide qué pantalla mostrar) y cerrar sesión
@@ -117,7 +117,7 @@ describe("compuertas de primer ingreso (D16)", () => {
     });
   });
 
-  it("sin aceptar la versión vigente del aviso de privacidad responde 403 DEBE_ACEPTAR_AVISO", async () => {
+  it("No acepta el aviso: sin aceptar la versión vigente del aviso de privacidad responde 403 DEBE_ACEPTAR_AVISO", async () => {
     const token = await sesionDe(AVISO_VIEJO.documento, CONTRASENA);
 
     expect((await pedir("/auth/yo", conCookie(token))).status).toBe(200);

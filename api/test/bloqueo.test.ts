@@ -61,13 +61,13 @@ describe("al ingresar", () => {
     expect((await ingresar(documento, CONTRASENA)).status).toBe(200);
   });
 
-  it("en riesgo (cuota vencida hace 10 días) y con 30 días exactos todavía ingresa", async () => {
+  it("Estudiante en riesgo: con la cuota vencida hace 10 días, y con 30 días exactos, todavía ingresa", async () => {
     expect((await ingresar((await estudianteConMora(10)).documento, CONTRASENA)).status).toBe(200);
     expect((await ingresar((await estudianteConMora(30)).documento, CONTRASENA)).status).toBe(200);
     expect((await ingresar((await estudianteConMora(31)).documento, CONTRASENA)).status).toBe(403);
   });
 
-  it("el bloqueo solo aplica a estudiantes: el docente ingresa sin evaluar la mora", async () => {
+  it("Docente sin cuotas: el bloqueo solo aplica a estudiantes y el docente ingresa sin evaluar la mora", async () => {
     expect((await ingresar("7400000002", CONTRASENA)).status).toBe(200);
   });
 });

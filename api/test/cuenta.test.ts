@@ -82,7 +82,7 @@ describe("POST /api/auth/contrasena: cambio obligatorio (primer ingreso)", () =>
     expect((await ingresar(TEMPORAL.documento, CONTRASENA)).status).toBe(401);
   });
 
-  it("la base guarda solo el hash de la nueva, nunca el texto", async () => {
+  it("Revisión de la base de datos: la base guarda solo el hash de la nueva, nunca el texto", async () => {
     const fila = await filaDe(ids[TEMPORAL.documento]);
 
     expect(fila?.password_hash).toMatch(/^pbkdf2_sha256\$100000\$/);
@@ -142,7 +142,7 @@ describe("POST /api/auth/contrasena: cambio obligatorio (primer ingreso)", () =>
 });
 
 describe("POST /api/auth/contrasena: cambio voluntario", () => {
-  it("la sesión actual sigue abierta y la del otro equipo responde no autenticado", async () => {
+  it("Cambio con la contraseña actual correcta / Cambio de contraseña desde otro equipo: la sesión actual sigue abierta y la del otro equipo responde no autenticado", async () => {
     const equipoA = await sesionDe(VOLUNTARIO.documento, CONTRASENA);
     const equipoB = await sesionDe(VOLUNTARIO.documento, CONTRASENA);
 
@@ -187,7 +187,7 @@ describe("POST /api/auth/aviso", () => {
 });
 
 describe("POST /api/usuarios/:id/restablecer-contrasena", () => {
-  it("genera una temporal que se muestra una sola vez, obliga a cambiarla y cierra la sesión abierta del usuario", async () => {
+  it("Estudiante olvidó su contraseña / Restablecimiento con sesión abierta: genera una temporal que se muestra una sola vez, obliga a cambiarla y cierra la sesión abierta del usuario", async () => {
     const sesionEstudiante = await sesionDe(OLVIDADIZO.documento, CONTRASENA);
     const admin = await sesionDe(ADMIN.documento, CONTRASENA);
 

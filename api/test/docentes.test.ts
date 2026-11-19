@@ -43,7 +43,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/docentes", () => {
-  it("registra al docente con una contraseña temporal que se muestra una sola vez", async () => {
+  it("Registrar docente: queda con una contraseña temporal que se muestra una sola vez y puede ingresar", async () => {
     const respuesta = await llamar(admin, "POST", "/docentes", nuevoDocente("7330000101", { celular: "300 123 4567" }));
 
     expect(respuesta.status).toBe(201);

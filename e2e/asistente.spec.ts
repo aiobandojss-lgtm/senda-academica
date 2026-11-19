@@ -15,7 +15,7 @@ test("asistente: responde con su fuente visible y reconoce cuando no tiene la in
   const pagina = await contexto.newPage();
   const conversacion = pagina.getByRole("log", { name: /Conversación con/ });
 
-  await test.step("la estudiante al día abre el asistente", async () => {
+  await test.step("Aviso de no escribir datos personales: la estudiante al día abre el asistente y la pantalla se lo recuerda", async () => {
     await pagina.goto("/ingresar");
     await pagina.getByLabel("Número de documento").fill(ESTUDIANTE);
     await pagina.getByLabel("Contraseña", { exact: true }).fill(CONTRASENA);

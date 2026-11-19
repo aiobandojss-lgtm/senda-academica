@@ -61,7 +61,13 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
   - **Todas las tareas hechas: MVP 31 de 31 y RAG 13 de 13, con 393 pruebas.**
   - Asistente probado en la URL pública con el modelo real: nota mínima con su cita y "no tengo esa información" para la cafetería.
   - La presentación pasó al lunes 23: el seed tiene ahora la fecha de referencia 2026-11-23 (el Taller 3 de la demo vence el 26) y la ventana del E2E va del 6 al 26 de noviembre.
-  - Sigue la tarde: el guion.
+  - Tarde: el guion, primera versión ([docs/presentacion/guion.md](docs/presentacion/guion.md)), con la decisión técnica elegida por Aymer (las guardas contra la alucinación).
+- [ ] Día 7 (viernes 20), en curso:
+  - **Trazabilidad de 128 de 128:** cada escenario de `openspec/specs/` tiene una prueba que lleva su nombre. `npm run trazabilidad` lo comprueba, también en el CI.
+    - 51 pruebas renombradas, sin cambiar su lógica.
+    - 5 escenarios sin prueba automática quedaron cubiertos: la fuente "Entregas de talleres", las 3 negativas del asistente y el primer ingreso en el navegador, con un E2E nuevo.
+    - Dos pruebas de fuego confirmaron que tanto la prueba nueva como el verificador fallan cuando deben.
+  - Siguen: el hook y el subagente revisor.
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
@@ -88,5 +94,9 @@ Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
 
 - [ ] **Antes de operar con la Fundación** (revisado el 16 de noviembre; no afecta la demo): crear el primer administrador en una base nueva, un requisito que **falta en las specs** porque hoy el único administrador sale del seed. Además: Workers Paid (ADR-003), R2 (ADR-002), el aviso de privacidad definitivo y validar con la Fundación los supuestos de las specs.
 - [ ] **Antes del 27 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 26 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
+- [ ] **Decisión de Aymer, "Cerrar sesión"** (encontrado al cruzar specs y pruebas el 20 de noviembre).
+  - Hoy cerrar sesión borra la cookie del navegador, pero el token sigue siendo válido hasta que vence (8 horas): quien hubiera copiado la cookie antes podría seguir usándola. La spec dice "la sesión deja de ser válida".
+  - Opción: aumentar `usuarios.sesion_version` al salir (D4). Revoca el token, pero también cierra las otras sesiones del usuario.
+  - No afecta la demo.
 - [ ] Pantalla de administración de los documentos del asistente (cargar, reemplazar y retirar). Para la demo bastan la API y `npm run rag:indexar`; decisión de Aymer en la revisión del RAG del 18 de noviembre.
 - [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).

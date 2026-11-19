@@ -33,7 +33,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/estudiantes/:id/excepciones", () => {
-  it("acuerdo de pago: el estudiante en mora ingresa y aparece con estado con excepción", async () => {
+  it("Estudiante en mora con excepción (acuerdo de pago): el estudiante en mora ingresa y aparece con estado con excepción", async () => {
     const { id, documento } = await bloqueado();
     expect((await ingresar(documento, CONTRASENA)).status).toBe(403);
 

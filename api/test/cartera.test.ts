@@ -218,7 +218,7 @@ describe("pagos", () => {
 });
 
 describe("los triggers de D13 rechazan los cambios aunque se intenten directo en SQL", () => {
-  it("PAGO_SUPERA_SALDO, PAGO_INMUTABLE y CUOTA_CON_PAGOS", async () => {
+  it("Intentar modificar un pago: los triggers PAGO_SUPERA_SALDO, PAGO_INMUTABLE y CUOTA_CON_PAGOS rechazan el cambio aunque sea directo en SQL", async () => {
     const cuota = await crearCuota(await nuevoEstudiante());
     const pago = await (await pagar(cuota.id, { valor: 100_000 })).json<Pago>();
     const sql = (consulta: string, ...valores: unknown[]) => env.DB.prepare(consulta).bind(...valores).run();
@@ -255,7 +255,7 @@ describe("estado de cuenta", () => {
     expect(estado.cuotas[1].pagos.map((p) => p.anulado)).toEqual([false]);
   });
 
-  it("estudiante intenta ver el estado de cuenta de otro: acceso denegado", async () => {
+  it("Estudiante intenta ver datos de otro / Estudiante intenta ver el estado de cuenta de otro: acceso denegado", async () => {
     expect((await llamar(tokenEstudiante, "GET", `/estudiantes/${estudianteId}/estado-cuenta`)).status).toBe(403);
   });
 });

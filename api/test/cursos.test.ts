@@ -118,7 +118,7 @@ describe("POST /api/cursos", () => {
 });
 
 describe("asignar docente", () => {
-  it("el curso aparece en la lista del docente asignado, y al reasignarlo pasa al otro", async () => {
+  it("Asignar docente a un curso: el curso aparece en la lista del docente asignado, y al reasignarlo pasa al otro", async () => {
     const curso = await (await crearCurso({ nombre: "Asignado a Ana", semestre: 2 })).json<CursoAdmin>();
 
     const deAna = await (await llamar(tokenDocenteA, "GET", "/cursos")).json<{ id: number }[]>();
@@ -153,7 +153,7 @@ describe("asignar docente", () => {
 });
 
 describe("PATCH /api/cursos/:id", () => {
-  it("no permite cambiar el semestre ni la carrera de un curso creado", async () => {
+  it("Cambiar el semestre de un curso: no permite cambiar el semestre ni la carrera de un curso creado", async () => {
     const curso = await (await crearCurso({ nombre: "Semestre fijo" })).json<CursoAdmin>();
 
     const semestre = await llamar(admin, "PATCH", `/cursos/${curso.id}`, { semestre: 2 });

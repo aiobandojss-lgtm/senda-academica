@@ -73,7 +73,7 @@ describe("POST /api/actividades/:id/entrega", () => {
     expect(await llavesEnKV(`entregas/${actividad.id}/`)).toEqual([fila?.archivo_key]);
   });
 
-  it("rechaza un archivo de más de 10 MB e indica el límite", async () => {
+  it("Archivo demasiado grande: rechaza un archivo de más de 10 MB e indica el límite", async () => {
     const actividad = await crearActividad();
     const grande = new Uint8Array(10 * 1024 * 1024 + 1);
     grande.set(BYTES.pdf);
@@ -86,7 +86,7 @@ describe("POST /api/actividades/:id/entrega", () => {
     expect(error.mensaje).toContain("10 MB");
   });
 
-  it("rechaza otro formato e indica los permitidos", async () => {
+  it("Formato no permitido: rechaza otro formato e indica los permitidos", async () => {
     const actividad = await crearActividad();
 
     const respuesta = await entregar(actividad.id, "notas.txt", BYTES.texto);

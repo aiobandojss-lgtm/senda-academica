@@ -34,7 +34,7 @@ beforeEach(async () => {
 });
 
 describe("Depuración diaria del asistente (D10)", () => {
-  it("borra los mensajes de más de 30 días y conserva los recientes", async () => {
+  it("Mensajes antiguos: la depuración borra los mensajes de más de 30 días y conserva los recientes", async () => {
     await sembrarMensaje("hace 30 días y un segundo", "2026-12-01T07:59:59Z");
     await sembrarMensaje("hace 30 días justos", "2026-12-01T08:00:00Z");
     await sembrarMensaje("de ayer", "2026-12-30T15:00:00Z");

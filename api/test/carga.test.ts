@@ -61,7 +61,7 @@ describe("GET /api/estudiantes/plantilla.csv", () => {
 });
 
 describe("POST /api/estudiantes/carga", () => {
-  it("archivo válido: crea a todos, los inscribe y entrega las credenciales una sola vez", async () => {
+  it("Archivo válido / Archivo de credenciales no recuperable: crea a todos, los inscribe y entrega las credenciales una sola vez (la base solo guarda hashes)", async () => {
     const texto = `\uFEFF${COLUMNAS}\r\n${fila("7350000101", { celular: "311 555 0101" })}\r\n${fila("7350000102", { nombres: '"Ana; María"' })}\r\n${fila("7350000103", { semestre: "2" })}\r\n`;
 
     const respuesta = await subir(texto);

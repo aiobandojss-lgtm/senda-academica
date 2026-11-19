@@ -102,7 +102,7 @@ describe("POST /api/auth/ingresar", () => {
     expect(await respuesta.json()).toMatchObject({ codigo: "CREDENCIALES_INVALIDAS" });
   });
 
-  it("informa las compuertas de primer ingreso (D16): contraseña temporal y aviso sin aceptar o de otra versión", async () => {
+  it("Nueva versión del aviso: informa las compuertas de primer ingreso (D16), contraseña temporal y aviso sin aceptar o de otra versión", async () => {
     expect(await (await ingresar(TEMPORAL.documento, CONTRASENA)).json()).toMatchObject({
       debeCambiarPassword: true,
       debeAceptarAviso: true,
@@ -201,7 +201,7 @@ describe("configuración insegura", () => {
 });
 
 describe("POST /api/auth/salir", () => {
-  it("borra la cookie de sesión", async () => {
+  it("Cerrar sesión: borra la cookie de sesión", async () => {
     const respuesta = await pedir("/auth/salir", { method: "POST" });
 
     expect(respuesta.status).toBe(204);
