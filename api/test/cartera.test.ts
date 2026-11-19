@@ -124,7 +124,7 @@ describe("plan de cuotas y cuotas individuales", () => {
     expect(estado.totalAdeudado).toBe(0);
   });
 
-  it("eliminar cuota con pagos, aunque estén anulados: se rechaza", async () => {
+  it("Eliminar cuota con pagos: se rechaza, aunque los pagos estén anulados", async () => {
     const cuota = await crearCuota(await nuevoEstudiante());
     const pago = await (await pagar(cuota.id)).json<Pago>();
     await llamar(admin, "POST", `/pagos/${pago.id}/anular`, { motivo: "valor errado" });

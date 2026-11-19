@@ -193,7 +193,7 @@ describe("buscar_documentos", () => {
     expect(resultado.resultados.map((r) => r.contenido)).toEqual(["Fecha nueva."]);
   });
 
-  it("nunca devuelve un documento de otra carrera, aunque sus metadatos en Vectorize estén mal (doble verificación en D1)", async () => {
+  it("Plan de estudios de otra carrera: nunca devuelve un documento de otra carrera, aunque sus metadatos en Vectorize estén mal (doble verificación en D1)", async () => {
     ai.fijarVector(CONSULTA, direccion({ 0: 1 }));
     const id = await sembrarFragmento({ clave: "plan-hb", titulo: "Plan TL-HB", carreraId: carreraB, seccion: "Semestre 1", contenido: "Contabilidad.", vector: direccion({ 0: 1 }) });
     vectores.vectores.get(`produccion:${id}`)!.metadata = { carrera_id: 0 };

@@ -21,6 +21,7 @@ const BLOQUEADO = { documento: "7200000007" };
 const ADMIN = { documento: "7200000008", rol: "admin" as const };
 const DOCENTE = { documento: "7200000009", rol: "docente" as const };
 const ESTUDIANTE = { documento: "7200000010" };
+const NUNCA_ACEPTO = { documento: "7200000011" };
 
 const ids: Record<string, number> = {};
 
@@ -38,6 +39,8 @@ beforeAll(async () => {
   ids[AVISO_VIEJO.documento] = await crearUsuario({ ...AVISO_VIEJO, avisoVersion: "2025-01" }, hash);
   // Como la cuenta de primer ingreso del seed: contraseña temporal y aviso nunca aceptado
   ids[SIN_NADA.documento] = await crearUsuario({ ...SIN_NADA, debeCambiarPassword: 1 }, hash);
+  // Escenario "Primer ingreso": nunca aceptó el aviso, pero no tiene contraseña temporal (esa compuerta va primero)
+  ids[NUNCA_ACEPTO.documento] = await crearUsuario(NUNCA_ACEPTO, hash);
 });
 
 const cambiarContrasena = (token: string, actual: string, nueva: string) =>
@@ -110,7 +113,7 @@ describe("POST /api/auth/contrasena: cambio obligatorio (primer ingreso)", () =>
     expect((await pedir(RUTA_NO_DECLARADA, conCookie(token))).status).toBe(403);
   });
 
-  it("con la contraseña actual incorrecta rechaza el cambio y no cambia nada", async () => {
+  it("Contraseña actual incorrecta: rechaza el cambio y no cambia nada", async () => {
     const token = await sesionDe(REGLAS.documento, CONTRASENA);
     const antes = await filaDe(ids[REGLAS.documento]);
 
@@ -155,6 +158,21 @@ describe("POST /api/auth/contrasena: cambio voluntario", () => {
 });
 
 describe("POST /api/auth/aviso", () => {
+  it("Primer ingreso: quien nunca aceptó el aviso ingresa con la compuerta del aviso y no pasa de ahí hasta aceptarlo", async () => {
+    const ingreso = await ingresar(NUNCA_ACEPTO.documento, CONTRASENA);
+    expect(ingreso.status).toBe(200);
+    // El frontend lee esta compuerta y muestra el aviso (web/src/sesion/destino.ts)
+    expect(await ingreso.json()).toMatchObject({ debeCambiarPassword: false, debeAceptarAviso: true });
+
+    const token = await sesionDe(NUNCA_ACEPTO.documento, CONTRASENA);
+    const sinAceptar = await pedir(RUTA_NO_DECLARADA, conCookie(token));
+    expect(sinAceptar.status).toBe(403);
+    expect(await sinAceptar.json()).toMatchObject({ codigo: "DEBE_ACEPTAR_AVISO" });
+
+    expect((await aceptarAviso(token)).status).toBe(200);
+    expect((await pedir(RUTA_NO_DECLARADA, conCookie(token))).status).toBe(404);
+  });
+
   it("guarda la versión vigente y la fecha de aceptación, y abre la compuerta del aviso", async () => {
     const token = await sesionDe(AVISO_VIEJO.documento, CONTRASENA);
 
@@ -216,7 +234,7 @@ describe("POST /api/usuarios/:id/restablecer-contrasena", () => {
     expect((await ingresar(OLVIDADIZO.documento, CONTRASENA)).status).toBe(401);
   });
 
-  it("un estudiante bloqueado por intentos fallidos puede ingresar de inmediato con la temporal", async () => {
+  it("Estudiante bloqueado por intentos fallidos: con la contraseña temporal que le da el administrador ingresa de inmediato, sin esperar 15 minutos", async () => {
     for (let i = 0; i < 5; i++) await ingresar(BLOQUEADO.documento, "Incorrecta2026");
     expect((await ingresar(BLOQUEADO.documento, CONTRASENA)).status).toBe(429);
 

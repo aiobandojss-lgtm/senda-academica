@@ -71,7 +71,7 @@ describe("POST /api/cursos", () => {
     expect(await inscritosEn(curso.id)).toEqual([estudiantes.primeroA, estudiantes.primeroB]);
   });
 
-  it("rechaza un semestre fuera de la carrera e indica los válidos", async () => {
+  it("Semestre fuera de la carrera: rechaza el curso e indica los semestres válidos", async () => {
     const respuesta = await crearCurso({ semestre: 6 });
 
     expect(respuesta.status).toBe(400);
@@ -80,7 +80,7 @@ describe("POST /api/cursos", () => {
     expect(error.mensaje).toContain("1 al 4");
   });
 
-  it("rechaza una carrera desactivada", async () => {
+  it("Carrera desactivada: rechaza el curso e indica que la carrera no está activa", async () => {
     const inactiva = await crearCarrera("TL-INACT", { activa: 0 });
 
     const respuesta = await crearCurso({ carreraId: inactiva });
@@ -96,7 +96,7 @@ describe("POST /api/cursos", () => {
     expect(await respuesta.json()).toMatchObject({ codigo: "CARRERA_NO_ENCONTRADA" });
   });
 
-  it("rechaza un docente desactivado", async () => {
+  it("Docente desactivado: rechaza el curso e indica que el docente no está activo", async () => {
     const respuesta = await crearCurso({ docenteId: docenteInactivo });
 
     expect(respuesta.status).toBe(409);

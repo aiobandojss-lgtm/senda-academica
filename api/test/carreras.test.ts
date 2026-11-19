@@ -55,7 +55,7 @@ describe("POST /api/carreras", () => {
     expect(carrera.id).toBeGreaterThan(0);
   });
 
-  it("rechaza un código repetido, aunque cambien las mayúsculas, e indica el código", async () => {
+  it("Código repetido: rechaza la carrera, aunque cambien las mayúsculas, e indica que el código existe", async () => {
     await crearCarrera("TL-REP");
 
     const respuesta = await llamar(admin, "POST", "/carreras", { codigo: "tl-rep", nombre: "Otra", duracionSemestres: 2 });

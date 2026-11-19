@@ -33,7 +33,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/estudiantes/:id/excepciones", () => {
-  it("Estudiante en mora con excepción (acuerdo de pago): el estudiante en mora ingresa y aparece con estado con excepción", async () => {
+  it("Estudiante en mora con excepción: con un acuerdo de pago vigente, el estudiante en mora ingresa y aparece con estado con excepción", async () => {
     const { id, documento } = await bloqueado();
     expect((await ingresar(documento, CONTRASENA)).status).toBe(403);
 
@@ -49,7 +49,7 @@ describe("POST /api/estudiantes/:id/excepciones", () => {
     expect(cuenta.excepciones).toHaveLength(1);
   });
 
-  it("vale hasta su fecha final inclusive: con fecha de hoy, ingresa", async () => {
+  it("Acuerdo de pago: vale hasta su fecha final inclusive; con fecha de hoy, el estudiante ingresa", async () => {
     const { id, documento } = await bloqueado();
 
     expect((await excepcion(id, { motivo: "acuerdo de pago", hasta: fechaDesdeHoy(0) })).status).toBe(201);

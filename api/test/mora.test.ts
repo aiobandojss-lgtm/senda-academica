@@ -16,7 +16,7 @@ describe("calcularEstadoMora: regla de bloqueo", () => {
     expect(calcularEstadoMora([cuota("2026-10-06")], [], HOY)).toBe("en_riesgo");
   });
 
-  it("un pago parcial no desbloquea: la cuota de hace 40 días todavía tiene saldo", () => {
+  it("Pago parcial no desbloquea: la cuota de hace 40 días todavía tiene saldo", () => {
     expect(calcularEstadoMora([cuota("2026-09-26", 50_000)], [], HOY)).toBe("bloqueado");
   });
 

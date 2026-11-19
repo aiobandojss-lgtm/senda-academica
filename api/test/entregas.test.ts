@@ -147,7 +147,7 @@ describe("POST /api/actividades/:id/entrega", () => {
     );
   });
 
-  it("entrega fuera de plazo: queda marcada como tardía; si el docente amplía el plazo, deja de serlo (D20)", async () => {
+  it("Entrega fuera de plazo / El docente amplía el plazo: queda marcada como tardía y, si el docente amplía el plazo, deja de serlo (D20)", async () => {
     const actividad = await crearActividad({ fechaLimite: "2026-01-10T23:59" });
 
     const respuesta = await entregar(actividad.id, "tarde.pdf", BYTES.pdf);

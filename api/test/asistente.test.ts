@@ -141,7 +141,9 @@ describe("POST /api/asistente/mensajes", () => {
   });
 
   it("el registro de cada respuesta lleva pasos, herramientas y tokens, pero nunca la pregunta ni la respuesta (Habeas Data)", async () => {
-    const registro = vi.spyOn(console, "log").mockImplementation(() => {});
+    // Todas las salidas de la consola, no solo el registro esperado: un console.warn o console.error nuevo en la
+    // ruta tampoco puede llevar la pregunta, la respuesta ni el documento
+    const registros = (["log", "info", "warn", "error"] as const).map((nivel) => vi.spyOn(console, nivel).mockImplementation(() => {}));
     try {
       ai.guionChat = [
         { ...chatPide("mi_estado_de_cuenta"), usage: { prompt_tokens: 900, completion_tokens: 30 } },
@@ -150,12 +152,12 @@ describe("POST /api/asistente/mensajes", () => {
 
       await preguntar(paola, { pregunta: "¿Cuánto debo? Mi celular es 3001234567" });
 
-      const llamada = registro.mock.calls.find(([mensaje]) => mensaje === "Asistente respondió");
+      const llamada = registros[0].mock.calls.find(([mensaje]) => mensaje === "Asistente respondió");
       expect(llamada?.[1]).toMatchObject({ pasos: 2, herramientas: ["mi_estado_de_cuenta"], reemplazada: false, tokens: { entrada: 2000, salida: 55 } });
-      expect(JSON.stringify(llamada)).not.toContain("3001234567");
-      expect(JSON.stringify(llamada)).not.toContain("180.000");
+      const todo = JSON.stringify(registros.map((r) => r.mock.calls));
+      for (const dato of ["3001234567", "Cuánto debo", "180.000", "8330000031"]) expect(todo).not.toContain(dato);
     } finally {
-      registro.mockRestore();
+      for (const r of registros) r.mockRestore();
     }
   });
 

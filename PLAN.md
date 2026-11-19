@@ -108,5 +108,7 @@ Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
   - Hoy cerrar sesión borra la cookie del navegador, pero el token sigue siendo válido hasta que vence (8 horas): quien hubiera copiado la cookie antes podría seguir usándola. La spec dice "la sesión deja de ser válida".
   - Opción: aumentar `usuarios.sesion_version` al salir (D4). Revoca el token, pero también cierra las otras sesiones del usuario.
   - No afecta la demo.
+  - **Decidido el 19 de noviembre, después de la revisión del subagente:** opción de revocar al salir. Se adelanta antes de la presentación con un cambio de OpenSpec pequeño.
+- [ ] **Reintento del E2E del asistente en el CI** (hallazgo del subagente revisor, 19 de noviembre). Con `retries: 1`, si la primera corrida falla, el reintento también falla: la conversación y el contador de preguntas de la estudiante ya cambiaron. No oculta errores (el pipeline queda en rojo igual), pero un fallo intermitente no se puede rescatar. Solución: recargar el estado de la estudiante al inicio de la prueba, no solo en `e2e/preparar.ts`.
 - [ ] Pantalla de administración de los documentos del asistente (cargar, reemplazar y retirar). Para la demo bastan la API y `npm run rag:indexar`; decisión de Aymer en la revisión del RAG del 18 de noviembre.
 - [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).

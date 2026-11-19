@@ -83,7 +83,7 @@ describe("POST /api/auth/ingresar", () => {
     expect(inexistente.headers.get("Set-Cookie")).toBeNull();
   });
 
-  it("usuario inactivo con la contraseña correcta: no inicia sesión y le indica que su cuenta está inactiva", async () => {
+  it("Usuario inactivo: con la contraseña correcta no inicia sesión y le indica que su cuenta está inactiva", async () => {
     const respuesta = await ingresar(INACTIVO.documento, CONTRASENA);
 
     expect(respuesta.status).toBe(403);
@@ -161,7 +161,7 @@ describe("GET /api/auth/yo", () => {
     expect((await pedir("/auth/yo", conCookie(falso))).status).toBe(401);
   });
 
-  it("con una sesión iniciada hace más de 8 horas responde 401 (sesión vencida)", async () => {
+  it("Sesión vencida: con una sesión iniciada hace más de 8 horas responde 401 y pide ingresar de nuevo", async () => {
     const hace9Horas = ahora() - 9 * 60 * 60;
     const vencido = await sign(
       { sub: String(idActivo), rol: "estudiante", ver: 3, iat: hace9Horas, exp: hace9Horas + OCHO_HORAS },
@@ -169,7 +169,9 @@ describe("GET /api/auth/yo", () => {
       "HS256",
     );
 
-    expect((await pedir("/auth/yo", conCookie(vencido))).status).toBe(401);
+    const respuesta = await pedir("/auth/yo", conCookie(vencido));
+    expect(respuesta.status).toBe(401);
+    expect(await respuesta.json()).toEqual({ codigo: "NO_AUTENTICADO", mensaje: "Tu sesión terminó. Ingresa de nuevo" });
   });
 
   it("con algo que no es un JWT en la cookie responde 401", async () => {

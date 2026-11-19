@@ -61,7 +61,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/cursos/:id/actividades", () => {
-  it("el docente del curso crea un taller en borrador, con la fecha límite de Colombia guardada en UTC", async () => {
+  it("Fecha límite en hora de Colombia: el docente crea un taller con fecha límite el 23 de noviembre a las 11:59 p. m. y queda guardada como las 4:59 a. m. del 24 en UTC", async () => {
     const respuesta = await crear();
 
     expect(respuesta.status).toBe(201);

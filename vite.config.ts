@@ -29,7 +29,11 @@ export default defineConfig(({ command, isPreview }) => {
   if (esDesarrollo && modeloChat) console.log(`Modelo del asistente en este servidor: ${modeloChat} (variable MODELO_CHAT)`);
   if (simulado) console.log("MODELO_SIMULADO=1: el asistente usa el modelo simulado de la prueba E2E");
 
-  // Variables que cambian en este comando; el build que se despliega no cambia ninguna
+  // Variables que cambian en este comando. MODELO_SIMULADO va también en el build, a propósito: `vite preview` usa las
+  // variables del build (dist/senda/wrangler.json), así que el build de `npm run test:e2e` queda con MODELO_SIMULADO=1.
+  // Ese dist no se despliega: `npm run deploy` y el CI vuelven a construir sin la variable. Y si se desplegara por
+  // error (un `npx wrangler deploy` suelto después del E2E), el Worker ignora la simulación fuera de localhost y lo
+  // registra como error (api/src/rag/simulado.ts)
   const variables: Record<string, string> = {
     ...(esDesarrollo ? { RAG_ESPACIO: "local" } : {}),
     ...(esDesarrollo && modeloChat ? { MODELO_CHAT: modeloChat } : {}),

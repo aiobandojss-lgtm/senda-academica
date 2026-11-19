@@ -4,29 +4,23 @@
 //   npm run trazabilidad               -> resumen por capacidad; falla si algún escenario no tiene prueba
 //   npm run trazabilidad -- --detalle  -> además, qué prueba cubre cada escenario (archivo:línea)
 //
-// La convención: el nombre de la prueba empieza con el nombre del escenario, por ejemplo
+// La convención: el nombre de la prueba empieza con el nombre EXACTO del escenario, seguido de dos puntos:
 //   it("Archivo demasiado grande: rechaza un archivo de más de 10 MB e indica el límite", ...)
 // Una prueba que verifica dos escenarios los nombra a los dos: "Escenario A / Escenario B: ...".
-// Se compara sin mayúsculas, tildes ni signos. Si dos capacidades tienen un escenario con el mismo nombre
+// Se compara sin mayúsculas, tildes ni signos, pero no basta con que el nombre contenga el escenario (la regla y
+// sus pruebas están en scripts/regla-trazabilidad.ts). Si dos capacidades tienen un escenario con el mismo nombre
 // (por ejemplo, "Petición sin sesión"), hacen falta pruebas en archivos distintos, una por capacidad.
-// Corre en el CI: un escenario nuevo sin su prueba no pasa.
+// Tampoco se aceptan pruebas o grupos saltados (.skip, .only). Corre en el CI: un escenario sin su prueba no pasa.
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { parseArgs } from "node:util";
+import { cubre, normalizar, pruebasDelTexto, saltadasDelTexto } from "./regla-trazabilidad.ts";
 
 const { values: opciones } = parseArgs({ options: { detalle: { type: "boolean", default: false } } });
 
 const RAIZ_SPECS = "openspec/specs";
 const CARPETAS_DE_PRUEBAS = ["api/test", "web/test", "eval", "e2e"];
-
-const normalizar = (texto) =>
-  texto
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
 
 // Escenarios: "#### Scenario: <nombre>" en la spec principal de cada capacidad
 const escenarios = [];
@@ -47,12 +41,12 @@ const recorrer = (carpeta) => {
 for (const carpeta of CARPETAS_DE_PRUEBAS) recorrer(carpeta);
 
 const pruebas = [];
+const saltadas = [];
 for (const archivo of archivos) {
   const texto = readFileSync(archivo, "utf8");
-  for (const m of texto.matchAll(/\b(?:it|test|test\.step)\(\s*(["'`])((?:\\.|(?!\1).)*)\1/g)) {
-    const linea = texto.slice(0, m.index).split("\n").length;
-    pruebas.push({ archivo: relative(".", archivo).replaceAll("\\", "/"), linea, nombre: m[2], normalizado: normalizar(m[2]) });
-  }
+  const ruta = relative(".", archivo).replaceAll("\\", "/");
+  for (const p of pruebasDelTexto(texto)) pruebas.push({ archivo: ruta, ...p });
+  for (const linea of saltadasDelTexto(texto)) saltadas.push(`${ruta}:${linea}`);
 }
 
 // Cuántas capacidades comparten cada nombre de escenario
@@ -61,7 +55,7 @@ for (const e of escenarios) repeticiones.set(normalizar(e.nombre), (repeticiones
 
 const resultados = escenarios.map((e) => {
   const buscado = normalizar(e.nombre);
-  const cubren = pruebas.filter((p) => p.normalizado.includes(buscado));
+  const cubren = pruebas.filter((p) => cubre(p.nombre, e.nombre));
   const archivosDistintos = new Set(cubren.map((p) => p.archivo)).size;
   return { ...e, cubren, cubierto: cubren.length > 0 && archivosDistintos >= repeticiones.get(buscado) };
 });
@@ -91,5 +85,10 @@ console.log(`\nEscenarios con prueba: ${total - faltan.length} de ${total}`);
 if (faltan.length > 0) {
   console.error("\nSin prueba que lleve su nombre:");
   for (const r of faltan) console.error(`  [${r.capacidad}] ${r.nombre}`);
+  process.exitCode = 1;
+}
+if (saltadas.length > 0) {
+  console.error("\nPruebas o grupos saltados (.skip o .only): no corren, así que no pueden cubrir un escenario:");
+  for (const s of saltadas) console.error(`  ${s}`);
   process.exitCode = 1;
 }

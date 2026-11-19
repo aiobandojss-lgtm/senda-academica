@@ -1,6 +1,6 @@
 {
-  // Pruebas de la API (api/test), de funciones puras del frontend sin DOM (web/test) y la evaluación del RAG (eval:
-  // el calificador y sus pruebas). Separado de tsconfig.worker.json para que el código de producción no vea los
+  // Pruebas de la API (api/test), de funciones puras del frontend sin DOM (web/test), la evaluación del RAG (eval:
+  // el calificador y sus pruebas) y la regla de trazabilidad (scripts/*.ts; los .mjs no entran). Separado de tsconfig.worker.json para que el código de producción no vea los
   // tipos de "cloudflare:test", que solo existen dentro de Vitest
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
@@ -24,5 +24,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["api/test", "web/test", "eval"]
+  "include": ["api/test", "web/test", "eval", "scripts"]
 }

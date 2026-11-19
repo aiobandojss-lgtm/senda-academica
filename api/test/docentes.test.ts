@@ -43,7 +43,7 @@ beforeAll(async () => {
 });
 
 describe("POST /api/docentes", () => {
-  it("Registrar docente: queda con una contraseña temporal que se muestra una sola vez y puede ingresar", async () => {
+  it("Registrar docente: queda con una contraseña temporal que se muestra una sola vez, puede ingresar y ser asignado a cursos", async () => {
     const respuesta = await llamar(admin, "POST", "/docentes", nuevoDocente("7330000101", { celular: "300 123 4567" }));
 
     expect(respuesta.status).toBe(201);
@@ -72,6 +72,12 @@ describe("POST /api/docentes", () => {
     const ingreso = await ingresar("7330000101", contrasenaTemporal);
     expect(ingreso.status).toBe(200);
     expect(await ingreso.json()).toMatchObject({ rol: "docente", debeCambiarPassword: true });
+
+    // Y se le puede asignar un curso
+    const carreraId = await crearCarrera("TL-REG");
+    const curso = await llamar(admin, "POST", "/cursos", { carreraId, nombre: "Primer curso", semestre: 1, docenteId: docente.id });
+    expect(curso.status).toBe(201);
+    expect(await curso.json()).toMatchObject({ docente: { id: docente.id } });
   });
 
   it("rechaza un documento ya registrado por cualquier usuario e indica cuál", async () => {

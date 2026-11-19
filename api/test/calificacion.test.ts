@@ -148,7 +148,7 @@ describe("PUT /api/entregas/:id/calificacion", () => {
 });
 
 describe("GET /api/archivos/apoyos/:actividadId", () => {
-  it("Estudiante de otro curso pide un archivo de apoyo: lo descargan los estudiantes del curso, pero no uno de otro curso", async () => {
+  it("Archivo de apoyo / Estudiante de otro curso pide un archivo de apoyo: lo descargan los estudiantes del curso, pero no uno de otro curso", async () => {
     await subirArchivo(tokenDocente, `/actividades/${actividadId}/apoyo`, "enunciado.pdf", BYTES.pdf, "PUT");
 
     const delCurso = await llamar(tokenCompanero, "GET", `/archivos/apoyos/${actividadId}`);

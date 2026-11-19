@@ -198,7 +198,7 @@ describe("Reemplazar y retirar", () => {
     expect(count).toBe(1);
   });
 
-  it("retirar un documento borra sus fragmentos y sus vectores; retirarlo otra vez responde que no existe", async () => {
+  it("Retirar documento: borra sus fragmentos y sus vectores, así que ninguna búsqueda posterior lo encuentra; retirarlo otra vez responde que no existe", async () => {
     await cargar("faq", { titulo: "Preguntas frecuentes", tipo: "preguntas_frecuentes", contenido: "## ¿Hay app?\n\nNo, es web." });
 
     const respuesta = await pedir(admin, "DELETE", "/documentos/faq");
