@@ -31,14 +31,18 @@ const mensajesDe = async (usuarioId: number) =>
       .all<{ rol: string; contenido: string; fuentes_json: string | null }>()
   ).results;
 
-// Preguntas guardadas directamente en D1, con la hora de creación que quiera la prueba
-async function sembrarPreguntas(usuarioId: number, cantidad: number, creadoEn: string) {
-  for (let i = 0; i < cantidad; i++) {
-    await env.DB.prepare("INSERT INTO asistente_mensajes (usuario_id, rol, contenido, creado_en) VALUES (?, 'usuario', ?, ?)")
-      .bind(usuarioId, `Pregunta ${i}`, creadoEn)
-      .run();
-  }
+// Preguntas ya hechas en un día de Colombia: el contador del límite diario (D9), escrito directo en D1
+async function sembrarPreguntas(usuarioId: number, cantidad: number, fecha: string) {
+  await env.DB.prepare("INSERT INTO asistente_uso (usuario_id, fecha, preguntas) VALUES (?, ?, ?)").bind(usuarioId, fecha, cantidad).run();
 }
+const preguntasDelDia = async (usuarioId: number, fecha: string) =>
+  (await env.DB.prepare("SELECT preguntas FROM asistente_uso WHERE usuario_id = ? AND fecha = ?").bind(usuarioId, fecha).first<number>("preguntas")) ?? 0;
+// Un mensaje guardado directo en D1, sin pasar por el modelo
+const sembrarMensaje = (usuarioId: number, contenido: string) =>
+  env.DB.prepare("INSERT INTO asistente_mensajes (usuario_id, rol, contenido) VALUES (?, 'usuario', ?)").bind(usuarioId, contenido).run();
+// Ayer en Colombia
+const ayerEnBogota = () => hoyEnBogota(new Date(Date.now() - 24 * 60 * 60 * 1000));
+const borrarHistorial = (token: string | null) => pedirConIa({ ai, vectores }, token, "DELETE", "/asistente/mensajes");
 
 beforeAll(async () => {
   const hash = await hashContrasena(CONTRASENA);
@@ -67,7 +71,7 @@ beforeEach(async () => {
     metadata: { carrera_id: 0, tipo: "reglamento" },
   });
   ai.fijarVector(NOTA_MINIMA, direccion({ 0: 1 }));
-  await env.DB.prepare("DELETE FROM asistente_mensajes").run();
+  await env.DB.batch([env.DB.prepare("DELETE FROM asistente_mensajes"), env.DB.prepare("DELETE FROM asistente_uso")]);
 });
 
 describe("Disponible solo para estudiantes con acceso", () => {
@@ -157,10 +161,10 @@ describe("POST /api/asistente/mensajes", () => {
   });
 
   it("el historial de otro estudiante nunca llega al modelo", async () => {
-    await sembrarPreguntas(tomasId, 1, `${hoyEnBogota()}T15:00:00Z`);
+    await sembrarMensaje(tomasId, "Pregunta de Tomás");
     ai.guionChat = [chatDice("Hola.")];
     await preguntar(paola, { pregunta: "Hola" });
-    expect(JSON.stringify(ai.mensajesChat)).not.toContain("Pregunta 0");
+    expect(JSON.stringify(ai.mensajesChat)).not.toContain("Pregunta de Tomás");
   });
 
   it("valida la pregunta: vacía o de más de 500 caracteres se rechaza sin llamar al modelo", async () => {
@@ -171,8 +175,17 @@ describe("POST /api/asistente/mensajes", () => {
 });
 
 describe("Límite diario de preguntas (D9)", () => {
+  it("cada pregunta respondida suma una al contador del día de Colombia", async () => {
+    ai.guionChat = [chatDice("Hola.")];
+
+    const respuesta = await preguntar(paola, { pregunta: "Hola" });
+
+    expect((await respuesta.json<{ preguntasRestantes: number }>()).preguntasRestantes).toBe(29);
+    expect(await preguntasDelDia(paolaId, hoyEnBogota())).toBe(1);
+  });
+
   it("con 30 preguntas hoy (hora de Colombia), la 31 no llama al modelo e indica que podrá preguntar mañana", async () => {
-    await sembrarPreguntas(paolaId, 30, `${hoyEnBogota()}T05:00:00Z`);
+    await sembrarPreguntas(paolaId, 30, hoyEnBogota());
 
     const respuesta = await preguntar(paola, { pregunta: "¿Una más?" });
 
@@ -181,9 +194,8 @@ describe("Límite diario de preguntas (D9)", () => {
     expect(ai.llamadas).toHaveLength(0);
   });
 
-  it("las preguntas de ayer en Colombia no cuentan, aunque en UTC ya sea hoy", async () => {
-    // 04:59:59 UTC de hoy = 11:59:59 p. m. de ayer en Colombia
-    await sembrarPreguntas(paolaId, 30, `${hoyEnBogota()}T04:59:59Z`);
+  it("las preguntas de ayer en Colombia no cuentan", async () => {
+    await sembrarPreguntas(paolaId, 30, ayerEnBogota());
     ai.guionChat = [chatDice("Hola.")];
 
     const respuesta = await preguntar(paola, { pregunta: "Hola" });
@@ -193,9 +205,43 @@ describe("Límite diario de preguntas (D9)", () => {
   });
 
   it("el límite es por estudiante: las preguntas de otro no cuentan", async () => {
-    await sembrarPreguntas(tomasId, 30, `${hoyEnBogota()}T15:00:00Z`);
+    await sembrarPreguntas(tomasId, 30, hoyEnBogota());
     ai.guionChat = [chatDice("Hola.")];
     expect((await preguntar(paola, { pregunta: "Hola" })).status).toBe(200);
+  });
+
+  it("borrar el historial no reinicia el límite: la pregunta 31 sigue sin llamar al modelo", async () => {
+    await sembrarPreguntas(paolaId, 30, hoyEnBogota());
+    await sembrarMensaje(paolaId, "Una pregunta de hoy");
+
+    expect((await borrarHistorial(paola)).status).toBe(204);
+    const respuesta = await preguntar(paola, { pregunta: "¿Y ahora?" });
+
+    expect(respuesta.status).toBe(429);
+    expect(ai.llamadas).toHaveLength(0);
+  });
+});
+
+describe("DELETE /api/asistente/mensajes (D10)", () => {
+  it("borra solo el historial del estudiante que lo pide y conserva su contador del día", async () => {
+    ai.guionChat = [chatPide("buscar_documentos", { consulta: NOTA_MINIMA }), chatDice(`Es 3.0 ${CITA}.`)];
+    await preguntar(paola, { pregunta: "¿Nota mínima?" });
+    await sembrarMensaje(tomasId, "Pregunta de Tomás");
+
+    const respuesta = await borrarHistorial(paola);
+
+    expect(respuesta.status).toBe(204);
+    expect(await mensajesDe(paolaId)).toEqual([]);
+    expect(await mensajesDe(tomasId)).toHaveLength(1);
+    // La conversación empieza de nuevo, pero la pregunta de hoy sigue contando
+    const cuerpo = await (await historial(paola)).json<{ mensajes: unknown[]; preguntasRestantes: number }>();
+    expect(cuerpo).toEqual({ mensajes: [], preguntasRestantes: 29 });
+  });
+
+  it("sin sesión responde no autenticado y un docente no puede usarlo", async () => {
+    expect((await borrarHistorial(null)).status).toBe(401);
+    const docente = await sesionDe("8330000033", CONTRASENA);
+    expect((await borrarHistorial(docente)).status).toBe(403);
   });
 });
 
@@ -208,6 +254,7 @@ describe("Servicio de IA no disponible (D11)", () => {
     expect(respuesta.status).toBe(503);
     expect(await respuesta.json()).toMatchObject({ codigo: "ASISTENTE_NO_DISPONIBLE", mensaje: expect.stringContaining("más tarde") });
     expect(await mensajesDe(paolaId)).toEqual([]);
+    expect(await preguntasDelDia(paolaId, hoyEnBogota())).toBe(0);
   });
 
   it("si falla la búsqueda en los documentos, también responde 503 sin guardar nada", async () => {
@@ -225,7 +272,8 @@ describe("GET /api/asistente/mensajes", () => {
   it("devuelve la conversación del estudiante en orden, con sus fuentes, y cuántas preguntas le quedan hoy", async () => {
     ai.guionChat = [chatPide("buscar_documentos", { consulta: NOTA_MINIMA }), chatDice(`Es 3.0 ${CITA}.`)];
     await preguntar(paola, { pregunta: "¿Nota mínima?" });
-    await sembrarPreguntas(tomasId, 1, `${hoyEnBogota()}T15:00:00Z`);
+    await sembrarPreguntas(tomasId, 1, hoyEnBogota());
+    await sembrarMensaje(tomasId, "Pregunta de Tomás");
 
     const respuesta = await historial(paola);
 

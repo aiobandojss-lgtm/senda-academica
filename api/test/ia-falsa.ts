@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import app from "../src/index";
+import { app } from "../src/index";
 import type { MensajeModelo, ModeloLenguaje, RespuestaModelo } from "../src/rag/modelo";
 import { conCookie, JSON_HEADERS } from "./utilidades";
 

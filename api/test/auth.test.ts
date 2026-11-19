@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { decode, sign } from "hono/jwt";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import app from "../src/index";
+import { app } from "../src/index";
 import { hashContrasena } from "../src/seguridad/contrasenas";
 import { conCookie, crearUsuario, ingresar, JSON_HEADERS, pedir, tokenDe } from "./utilidades";
 

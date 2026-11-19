@@ -9,7 +9,7 @@ import { requiereRol } from "../seguridad/permisos";
 import type { AppEnv } from "../tipos";
 import { texto } from "../validacion";
 
-// Asistente Senda para estudiantes (spec `asistente-academico`; RAG design.md D8, D9 y D11). La sesión y el bloqueo
+// Asistente Senda para estudiantes (spec `asistente-academico`; RAG design.md D8 a D11). La sesión y el bloqueo
 // por mora los aplica requiereSesion en cada petición, como en el resto de la plataforma.
 export const asistente = new Hono<AppEnv>();
 asistente.use("*", requiereRol("estudiante"));
@@ -24,15 +24,11 @@ const MENSAJES_EN_PANTALLA = 60;
 // modelo, así nadie puede fabricar un mensaje falso del asistente (prompt injection, D8)
 const esquemaPregunta = z.object({ pregunta: texto("Escribe tu pregunta", 500, "La pregunta") });
 
-// Las 00:00 de hoy en Colombia, en UTC (Colombia está siempre en UTC−5): el día del límite es el de Colombia (D9)
-const inicioDelDiaUtc = (hoy: string) => `${hoy}T05:00:00Z`;
-
-async function preguntasDeHoy(db: D1Database, usuarioId: number) {
-  const fila = await db
-    .prepare("SELECT COUNT(*) AS total FROM asistente_mensajes WHERE usuario_id = ? AND rol = 'usuario' AND creado_en >= ?")
-    .bind(usuarioId, inicioDelDiaUtc(hoyEnBogota()))
-    .first<{ total: number }>();
-  return fila?.total ?? 0;
+// Preguntas respondidas hoy (día de Colombia). El contador vive en asistente_uso y no en las filas del historial:
+// así borrar el historial (D10) no reinicia el límite (D9)
+async function preguntasDeHoy(db: D1Database, usuarioId: number, hoy: string) {
+  const preguntas = await db.prepare("SELECT preguntas FROM asistente_uso WHERE usuario_id = ? AND fecha = ?").bind(usuarioId, hoy).first<number>("preguntas");
+  return preguntas ?? 0;
 }
 
 type FilaMensaje = { id: number; rol: "usuario" | "asistente"; contenido: string; fuentes_json: string | null; creado_en: string };
@@ -47,7 +43,7 @@ asistente.get("/mensajes", async (c) => {
     )
       .bind(usuario.id, MENSAJES_EN_PANTALLA)
       .all<FilaMensaje>(),
-    preguntasDeHoy(c.env.DB, usuario.id),
+    preguntasDeHoy(c.env.DB, usuario.id, hoyEnBogota()),
   ]);
   return c.json({
     mensajes: results.map((m) => ({
@@ -66,8 +62,10 @@ asistente.post("/mensajes", validarJson(esquemaPregunta), async (c) => {
   const { pregunta } = c.req.valid("json");
   const db = c.env.DB;
 
-  // Antes de llamar al modelo: protege la cuota gratuita, que es de toda la cuenta (D9)
-  const usadas = await preguntasDeHoy(db, usuario.id);
+  // Antes de llamar al modelo: protege la cuota gratuita, que es de toda la cuenta (D9). El mismo "hoy" se usa
+  // al sumar la pregunta, aunque la respuesta termine después de la medianoche
+  const hoy = hoyEnBogota();
+  const usadas = await preguntasDeHoy(db, usuario.id, hoy);
   if (usadas >= LIMITE_DIARIO) {
     return responderError(c, 429, "LIMITE_DIARIO", `Llegaste al límite de ${LIMITE_DIARIO} preguntas de hoy. Podrás preguntar de nuevo mañana.`);
   }
@@ -93,6 +91,7 @@ asistente.post("/mensajes", validarJson(esquemaPregunta), async (c) => {
       config: { producto: c.env.PRODUCTO_NOMBRE, fundacion: c.env.FUNDACION_NOMBRE, contacto: c.env.CONTACTO_FUNDACION },
       historial: (anteriores.results as TurnoHistorial[]).reverse(),
       pregunta,
+      hoy,
     });
   } catch (error) {
     if (!(error instanceof ServicioIaNoDisponible)) throw error;
@@ -106,6 +105,12 @@ asistente.post("/mensajes", validarJson(esquemaPregunta), async (c) => {
     db
       .prepare("INSERT INTO asistente_mensajes (usuario_id, rol, contenido, fuentes_json) VALUES (?, 'asistente', ?, ?)")
       .bind(usuario.id, resultado.respuesta, JSON.stringify(resultado.fuentes)),
+    // En el mismo batch (una transacción): solo cuenta la pregunta que de verdad se respondió (D11)
+    db
+      .prepare(
+        "INSERT INTO asistente_uso (usuario_id, fecha, preguntas) VALUES (?, ?, 1) ON CONFLICT (usuario_id, fecha) DO UPDATE SET preguntas = preguntas + 1",
+      )
+      .bind(usuario.id, hoy),
   ]);
   // Para revisar el comportamiento del agente en los registros de Cloudflare, sin el contenido de la conversación
   console.log("Asistente respondió", {
@@ -117,4 +122,10 @@ asistente.post("/mensajes", validarJson(esquemaPregunta), async (c) => {
   });
 
   return c.json({ respuesta: resultado.respuesta, fuentes: resultado.fuentes, preguntasRestantes: LIMITE_DIARIO - usadas - 1 });
+});
+
+// Borrar la conversación (D10): solo la del estudiante de la sesión. El contador del día queda intacto (D9)
+asistente.delete("/mensajes", async (c) => {
+  await c.env.DB.prepare("DELETE FROM asistente_mensajes WHERE usuario_id = ?").bind(c.var.usuario.id).run();
+  return c.body(null, 204);
 });

@@ -12,6 +12,7 @@ DELETE FROM inscripciones;
 DELETE FROM cursos;
 DELETE FROM estudiantes;
 DELETE FROM asistente_mensajes;
+DELETE FROM asistente_uso;
 DELETE FROM intentos_fallidos;
 DELETE FROM usuarios;
 DELETE FROM carreras;

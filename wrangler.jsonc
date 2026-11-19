@@ -13,6 +13,11 @@
   "observability": {
     "enabled": true
   },
+  // Cron Trigger diario a las 08:00 UTC (3:00 a. m. de Colombia): depura las conversaciones del asistente de más
+  // de 30 días (RAG design.md D10). El plan Free permite 5 por cuenta
+  "triggers": {
+    "crons": ["0 8 * * *"]
+  },
   "upload_source_maps": true,
   "assets": {
     // Con el plugin de Vite el directorio real lo define el build (dist/client)

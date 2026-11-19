@@ -83,18 +83,20 @@ El contexto enviado al modelo solo incluye nombre de pila, carrera y resultados 
 `eval/preguntas.json` con ~25 preguntas: respondibles (con fuente esperada), de datos propios (con usuario del seed y respuesta esperada), sin respuesta (debe negarse) y fuera de dominio. `npm run eval:rag` las ejecuta contra el entorno local y reporta aciertos, citas correctas y negaciones correctas. Se corre a mano antes de la demo (consume cuota de Workers AI), no en cada push.
 
 ### D8. Historial de la conversación en D1
-Tabla `asistente_mensajes (id, usuario_id, rol ('usuario'|'asistente'), contenido, fuentes_json, creado_en)` en `migrations/0002_base_conocimiento.sql`. El endpoint recibe solo la pregunta nueva; el historial (los últimos 6 turnos del estudiante) se lee de la tabla. Así un cliente no puede inyectar turnos falsos del asistente, se puede contar el límite diario y queda trazabilidad para revisar respuestas dudosas. Alternativa: que el navegador envíe el historial; descartada por la inyección de turnos y porque el límite diario no se podría contar de forma confiable.
+Tabla `asistente_mensajes (id, usuario_id, rol ('usuario'|'asistente'), contenido, fuentes_json, creado_en)` en `migrations/0002_base_conocimiento.sql`. El endpoint recibe solo la pregunta nueva; el historial (los últimos 6 turnos del estudiante) se lee de la tabla. Así un cliente no puede inyectar turnos falsos del asistente y queda trazabilidad para revisar respuestas dudosas. Alternativa: que el navegador envíe el historial; descartada por la inyección de turnos.
 
 ### D9. Límite diario
-Antes de llamar al modelo se cuentan los mensajes con `rol = 'usuario'` del estudiante desde las 00:00 de hoy en America/Bogota (convertido a UTC). Con 30 o más, se responde sin llamar al modelo. Protege la cuota gratuita de Workers AI (10.000 neuronas diarias). Es una cuota de toda la cuenta: el límite por estudiante evita que uno solo la agote para los demás.
+La tabla `asistente_uso (usuario_id, fecha, preguntas)` de `migrations/0003_asistente_uso.sql` cuenta las preguntas respondidas de cada estudiante en cada día de Colombia (`fecha` en YYYY-MM-DD, America/Bogota). Antes de llamar al modelo se lee el contador de hoy; con 30 o más, se responde 429 `LIMITE_DIARIO` sin llamar al modelo. El contador sube en el mismo batch que guarda la pregunta y la respuesta, así que una pregunta que falló (D11) no cuenta. Protege la cuota gratuita de Workers AI (10.000 neuronas diarias). Es una cuota de toda la cuenta: el límite por estudiante evita que uno solo la agote para los demás.
+
+Por qué una tabla aparte y no contar las filas de `asistente_mensajes`, como se hizo en la tarea 3.3: el estudiante puede borrar su historial (D10), y con las filas se borraba el conteo; borrando una y otra vez, una sola persona podría agotar la cuota de toda la cuenta. El contador no guarda contenido, solo números. El hueco apareció al construir la pantalla (tarea 3.4) y la tabla fue decisión de Aymer el 2026-11-18. Dos preguntas simultáneas del mismo estudiante podrían pasar de 30 a 31; a esta escala no importa.
 
 ### D11. Falla del servicio de IA
 Workers AI o Vectorize pueden fallar: por ejemplo, porque se agotó la cuota del día o porque el servicio no responde. En ese caso la API responde 503 con `{ codigo: "ASISTENTE_NO_DISPONIBLE", mensaje }` y la pantalla muestra que el asistente no está disponible por ahora y que lo intente más tarde.
 
-Nunca se arma una respuesta con resultados parciales. La pregunta no se guarda en `asistente_mensajes`, así que no cuenta para el límite diario (D9) ni ensucia el historial (D8). Alternativa: un error genérico 500, descartada porque en la demo en vivo un mensaje claro es mucho mejor que una pantalla de error. La decisión sale del ajuste A4 de la revisión del 2026-11-18.
+Nunca se arma una respuesta con resultados parciales. La pregunta no se guarda en `asistente_mensajes` ni sube el contador de `asistente_uso`, así que no cuenta para el límite diario (D9) ni ensucia el historial (D8). Alternativa: un error genérico 500, descartada porque en la demo en vivo un mensaje claro es mucho mejor que una pantalla de error. La decisión sale del ajuste A4 de la revisión del 2026-11-18.
 
 ### D10. Retención de 30 días
-Un Cron Trigger diario del mismo Worker (el plan Free permite 5 por cuenta) borra los mensajes de más de 30 días; además, `DELETE /api/asistente/mensajes` borra el historial del estudiante que lo pide. Los mensajes pueden contener datos personales que el estudiante escribe, así que no se guardan más de lo necesario (Ley 1581: finalidad y temporalidad).
+Un Cron Trigger diario del mismo Worker (el plan Free permite 5 por cuenta), a las 3:00 a. m. de Colombia, borra los mensajes de más de 30 días y los contadores de `asistente_uso` de más de 30 días. Además, `DELETE /api/asistente/mensajes` borra el historial del estudiante que lo pide; no toca su contador del día (D9). Los mensajes pueden contener datos personales que el estudiante escribe, así que no se guardan más de lo necesario (Ley 1581: finalidad y temporalidad).
 
 ## Risks / Trade-offs
 
@@ -108,7 +110,7 @@ Un Cron Trigger diario del mismo Worker (el plan Free permite 5 por cuenta) borr
 ## Migration Plan
 
 1. Crear el índice Vectorize (`wrangler vectorize create fundacion-docs --dimensions=1024 --metric=cosine`) y los índices de metadatos `carrera_id` y `tipo`, antes de cargar cualquier vector (hecho el 2026-11-17, tarea 1.2).
-2. Aplicar `migrations/0002_base_conocimiento.sql`.
+2. Aplicar `migrations/0002_base_conocimiento.sql` y `migrations/0003_asistente_uso.sql` (en remoto las aplica el CI antes de desplegar).
 3. Ejecutar `npm run rag:indexar` para cargar los documentos de `docs/rag/`.
 
 ## Open Questions

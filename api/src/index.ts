@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { responderError } from "./errores";
+import { depurarAsistente } from "./rag/depuracion";
 import { actividades, actividadesDeCurso } from "./rutas/actividades";
 import { archivos } from "./rutas/archivos";
 import { asistente } from "./rutas/asistente";
@@ -21,7 +22,7 @@ import type { AppEnv } from "./tipos";
 
 // API de Senda. Todas las rutas cuelgan de /api: en wrangler.jsonc, run_worker_first
 // envía solo /api/* al Worker; el resto lo sirven los archivos estáticos de React.
-const app = new Hono<AppEnv>().basePath("/api");
+export const app = new Hono<AppEnv>().basePath("/api");
 
 // Negar por defecto: toda ruta de /api exige sesión, salvo las que se declaran aquí como públicas.
 // Una ruta nueva que nadie agregue a esta lista queda cerrada, nunca abierta.
@@ -82,4 +83,13 @@ app.onError((error, c) => {
   return responderError(c, 500, "ERROR_INTERNO", "Ocurrió un error inesperado. Intenta de nuevo en unos minutos");
 });
 
-export default app;
+// El Worker: las peticiones van a Hono y el Cron Trigger diario de wrangler.jsonc (3:00 a. m. de Colombia)
+// depura las conversaciones del asistente de más de 30 días (RAG design.md D10)
+export default {
+  fetch: app.fetch,
+  async scheduled(controlador, env, contexto) {
+    contexto.waitUntil(
+      depurarAsistente(env.DB, new Date(controlador.scheduledTime)).then((borrados) => console.log("Depuración del asistente", borrados)),
+    );
+  },
+} satisfies ExportedHandler<Env>;

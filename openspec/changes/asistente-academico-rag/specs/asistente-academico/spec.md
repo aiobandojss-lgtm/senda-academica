@@ -101,6 +101,10 @@ El sistema SHALL permitir a cada estudiante un máximo de 30 preguntas por día,
 - **WHEN** un estudiante que ya hizo 30 preguntas hoy hace otra
 - **THEN** el sistema no consulta el modelo e indica que podrá preguntar de nuevo mañana
 
+#### Scenario: Borrar el historial no reinicia el límite
+- **WHEN** un estudiante que ya hizo 30 preguntas hoy borra su historial y hace otra pregunta
+- **THEN** el sistema no consulta el modelo e indica que podrá preguntar de nuevo mañana
+
 ### Requirement: Servicio de IA no disponible
 Si el modelo de lenguaje o la búsqueda de documentos fallan, por ejemplo porque se agotó la cuota del día, el sistema SHALL indicar al estudiante que el asistente no está disponible por ahora y que lo intente más tarde. El sistema MUST NOT inventar ni completar una respuesta, y MUST NOT contar esa pregunta para el límite diario.
 
