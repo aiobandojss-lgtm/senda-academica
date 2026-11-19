@@ -3,7 +3,7 @@ import { decode, sign } from "hono/jwt";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { app } from "../src/index";
 import { hashContrasena } from "../src/seguridad/contrasenas";
-import { conCookie, crearUsuario, ingresar, JSON_HEADERS, pedir, tokenDe } from "./utilidades";
+import { conCookie, crearUsuario, ingresar, JSON_HEADERS, pedir, sesionDe, tokenDe } from "./utilidades";
 
 // Escenarios de la spec `autenticacion` (inicio, cierre y expiración de sesión) con usuarios propios
 // de la prueba: el código no debe depender de los datos del seed.
@@ -203,8 +203,35 @@ describe("configuración insegura", () => {
 });
 
 describe("POST /api/auth/salir", () => {
-  it("Cerrar sesión: borra la cookie de sesión", async () => {
-    const respuesta = await pedir("/auth/salir", { method: "POST" });
+  // Usuarios propios: cerrar sesión sube su versión de sesión (cambio cerrar-sesion-y-temas-de-cursos, design.md D1)
+  const SALE = { documento: "7000000010" };
+  const DOS_EQUIPOS = { documento: "7000000011" };
+  const REVOCADO = { documento: "7000000012" };
+  const idsSalir: Record<string, number> = {};
+
+  beforeAll(async () => {
+    const hash = await hashContrasena(CONTRASENA);
+    for (const u of [SALE, DOS_EQUIPOS, REVOCADO]) {
+      idsSalir[u.documento] = await crearUsuario({ ...u, avisoVersion: env.AVISO_PRIVACIDAD_VERSION }, hash);
+    }
+  });
+
+  const salir = (token?: string) => pedir("/auth/salir", token ? conCookie(token, { method: "POST" }) : { method: "POST" });
+  const yo = (token: string) => pedir("/auth/yo", conCookie(token));
+  // La sesión del mismo usuario en otro equipo: mismo usuario y versión, otra hora de ingreso. Dos ingresos en el
+  // mismo segundo dan el mismo JWT, y la prueba no distinguiría "revoca este token" de "revoca todas sus sesiones"
+  const enOtroEquipo = async (token: string) => {
+    const { payload } = decode(token);
+    const iat = Number(payload.iat) - 60;
+    return sign({ ...payload, iat, exp: iat + OCHO_HORAS }, env.JWT_SECRET, "HS256");
+  };
+
+  it("Cerrar sesión: borra la cookie y el token deja de servir en el servidor, aunque alguien lo hubiera copiado antes", async () => {
+    // Lo que tendría quien copió la cookie antes de que el usuario saliera
+    const copia = await sesionDe(SALE.documento, CONTRASENA);
+    expect((await yo(copia)).status).toBe(200);
+
+    const respuesta = await salir(copia);
 
     expect(respuesta.status).toBe(204);
     const cookie = respuesta.headers.get("Set-Cookie");
@@ -212,5 +239,38 @@ describe("POST /api/auth/salir", () => {
     for (const atributo of ["Max-Age=0", "Path=/", "Secure", "HttpOnly"]) {
       expect(cookie).toContain(atributo);
     }
+    const despues = await yo(copia);
+    expect(despues.status).toBe(401);
+    expect(await despues.json()).toMatchObject({ codigo: "NO_AUTENTICADO" });
+  });
+
+  it("sin sesión también responde 204 y borra la cookie, sin revelar nada", async () => {
+    const respuesta = await salir();
+
+    expect(respuesta.status).toBe(204);
+    expect(respuesta.headers.get("Set-Cookie")).toMatch(/^__Host-sesion=;/);
+  });
+
+  it("Cierre de sesión desde otro equipo: con dos sesiones abiertas, cerrar una deja a la otra sin validez", async () => {
+    const computador = await sesionDe(DOS_EQUIPOS.documento, CONTRASENA);
+    const celular = await enOtroEquipo(computador);
+    expect(celular).not.toBe(computador);
+    expect((await yo(celular)).status).toBe(200);
+
+    expect((await salir(computador)).status).toBe(204);
+
+    expect((await yo(celular)).status).toBe(401);
+  });
+
+  it("Cierre con una sesión que ya no es válida: responde 204 y la sesión vigente del usuario sigue funcionando", async () => {
+    const vieja = await sesionDe(REVOCADO.documento, CONTRASENA);
+    // Como un restablecimiento de contraseña: la sesión vieja queda revocada y el usuario vuelve a ingresar
+    await env.DB.prepare("UPDATE usuarios SET sesion_version = sesion_version + 1 WHERE id = ?").bind(idsSalir[REVOCADO.documento]).run();
+    const vigente = await sesionDe(REVOCADO.documento, CONTRASENA);
+    expect((await yo(vieja)).status).toBe(401);
+
+    expect((await salir(vieja)).status).toBe(204);
+
+    expect((await yo(vigente)).status).toBe(200);
   });
 });

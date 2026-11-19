@@ -5,7 +5,7 @@ import { responderError, validarJson } from "../errores";
 import { HASH_SIMULADO, hashContrasena, validarContrasenaNueva, verificarContrasena } from "../seguridad/contrasenas";
 import { limpiarIntentos, registrarIntento } from "../seguridad/intentos";
 import { accesoSuspendido, type FilaUsuarioSesion, noAutenticado, usuarioSesion } from "../seguridad/permisos";
-import { abrirSesion, cerrarSesion } from "../seguridad/sesion";
+import { abrirSesion, cerrarSesion, leerSesion } from "../seguridad/sesion";
 import type { AppEnv, UsuarioSesion } from "../tipos";
 
 // Ingreso, cierre de sesión y perfil de la sesión actual (spec `autenticacion`)
@@ -71,9 +71,18 @@ auth.post("/ingresar", validarJson(esquemaIngreso, "Escribe tu documento y tu co
   return c.json(perfil(usuarioSesion(usuario, c.env.AVISO_PRIVACIDAD_VERSION)));
 });
 
-// Siempre responde 204 y borra la cookie, haya o no sesión. Es POST para que un enlace o una imagen
-// de otro sitio no puedan cerrar la sesión de nadie.
-auth.post("/salir", (c) => {
+// Siempre responde 204 y borra la cookie, haya o no sesión: no revela si un token sirve. Es POST para que un enlace o
+// una imagen de otro sitio no puedan cerrar la sesión de nadie (con SameSite=Lax, otro sitio no envía la cookie en un POST).
+// Con un token vigente, además lo revoca en el servidor (cambio cerrar-sesion-y-temas-de-cursos, design.md D1): sube la
+// versión de sesión, así que esa cookie, aunque alguien la haya copiado, y las sesiones del usuario en otros equipos
+// dejan de servir. La condición sobre la versión impide que un token ya revocado cierre las sesiones vigentes.
+auth.post("/salir", async (c) => {
+  const sesion = await leerSesion(c);
+  if (sesion) {
+    await c.env.DB.prepare("UPDATE usuarios SET sesion_version = sesion_version + 1 WHERE id = ? AND sesion_version = ?")
+      .bind(sesion.usuarioId, sesion.version)
+      .run();
+  }
   cerrarSesion(c);
   return c.body(null, 204);
 });

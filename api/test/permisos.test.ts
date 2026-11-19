@@ -105,9 +105,8 @@ describe("compuertas de primer ingreso (D16)", () => {
   it("Llamada directa a la API con contraseña temporal: solo permite las rutas de D16; cualquier otra responde 403 DEBE_CAMBIAR_PASSWORD", async () => {
     const token = await sesionDe(TEMPORAL.documento, CONTRASENA);
 
-    // Permitidas: consultar el perfil (el frontend decide qué pantalla mostrar) y cerrar sesión
+    // Permitida: consultar el perfil (el frontend decide qué pantalla mostrar)
     expect((await pedir("/auth/yo", conCookie(token))).status).toBe(200);
-    expect((await pedir("/auth/salir", conCookie(token, { method: "POST" }))).status).toBe(204);
 
     const respuesta = await pedir(RUTA_NO_DECLARADA, conCookie(token));
     expect(respuesta.status).toBe(403);
@@ -115,6 +114,9 @@ describe("compuertas de primer ingreso (D16)", () => {
       codigo: "DEBE_CAMBIAR_PASSWORD",
       mensaje: "Debes cambiar tu contraseña antes de continuar",
     });
+
+    // Permitida también: cerrar sesión. Va al final porque revoca el token (cambio cerrar-sesion-y-temas-de-cursos)
+    expect((await pedir("/auth/salir", conCookie(token, { method: "POST" }))).status).toBe(204);
   });
 
   it("No acepta el aviso: sin aceptar la versión vigente del aviso de privacidad responde 403 DEBE_ACEPTAR_AVISO", async () => {

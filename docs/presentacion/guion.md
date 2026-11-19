@@ -75,7 +75,7 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 
 ## Preparación antes de empezar
 
-- **Navegadores separados:** cada sesión vive en una cookie, así que cada persona va en su propio navegador o perfil.
+- **Navegadores separados:** cada sesión vive en una cookie, así que cada persona va en su propio navegador o perfil. **Cerrar sesión cierra a esa persona en todos los equipos** (desde el 19 de noviembre). Si en un ensayo abres a Paola en el celular y en el computador, cerrarla en uno la saca también del otro: vuelve a ingresar antes de la demo.
   - **Celular:** Paola, con la pantalla de ingreso abierta.
   - **Escritorio, perfil 1:** Liliana, la docente (`9900000103`).
   - **Escritorio, perfil 2:** administración (`9900000001`).
