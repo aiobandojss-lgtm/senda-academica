@@ -1,4 +1,4 @@
-# Plan de trabajo – presentación el viernes 20 de noviembre de 2026
+# Plan de trabajo – presentación el lunes 23 de noviembre de 2026
 
 Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la URL pública actualizada.
 
@@ -9,13 +9,17 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 | 3 | Lun 16 | Talleres, entregas y calificación | MVP 4.x | 1, 4 |
 | 4 | Mar 17 | Cuotas, pagos, bloqueo por mora y excepciones | MVP 5.x | 1, 4 |
 | 5 | Mié 18 | Asistente RAG: ingesta, agente, pantalla | RAG 1.x – 3.x | 3 |
-| 6 | Jue 19 | Mañana: E2E completo, evaluación del RAG, revisión visual. Tarde: diapositivas, guion, video de respaldo de la demo y ensayo cronometrado | MVP 6.x, RAG 4.x | 3, 4, 6 |
-| 7 | Vie 20 | Mañana: checklist de "Antes de presentar". **Presentación** | – | – |
+| 6 | Jue 19 | Mañana: E2E completo, evaluación del RAG, revisión visual. Tarde: la nueva fecha en el seed y la documentación, y el guion | MVP 6.x, RAG 4.x | 3, 4, 6 |
+| 7 | Vie 20 | Evidencia de la metodología: trazabilidad de 100 de 100 escenarios con prueba, hook y subagente revisor | – | 4, 6 |
+| 8 | Sáb 21 | Diapositivas y la falla de "semana de parciales" con su evaluación. Decisión sobre el bonus de WhatsApp | – | 3, 6 |
+| 9 | Dom 22 | Video de respaldo de la demo, 2 ensayos cronometrados y preguntas esperadas. **Producto congelado a las 6 p. m.** | – | todos |
+| 10 | Lun 23 | Mañana: seed remoto recargado, checklist de "Antes de presentar" y ensayo final. **Presentación** | – | – |
 
-**Sin día de colchón** (la presentación pasó del sábado 21 al viernes 20, y se perdió el día de colchón). Reglas de recorte:
-- Si el miércoles 18 en la noche el MVP (tareas 1.x a 5.x) no está completo, el asistente RAG se reduce a lo que pide el criterio 3: respuesta con cita del reglamento, "no sé" cuando no hay información y consulta del estado de cuenta.
-- Las pantallas secundarias (por ejemplo, el resumen de cartera del administrador) van después del flujo de la demo.
-- El bonus de WhatsApp queda fuera, salvo que todo esté en verde el jueves al mediodía.
+La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **lunes 23** (confirmado). Todas las tareas de OpenSpec estaban hechas el jueves 19 a mediodía, así que los días extra son para reducir riesgo y fortalecer la evidencia, no para agregar funciones. Reglas:
+- **Producto congelado desde el domingo 22 a las 6 p. m.:** después solo hay ensayos. El mayor riesgo de una demo en vivo es un cambio de última hora.
+- Hasta entonces solo entran mejoras que suban la nota, cada una con sus pruebas y el pipeline en verde.
+- El bonus de WhatsApp con n8n se decide el sábado 21, solo si todo lo demás está listo, y con un máximo de un día.
+- El día de la presentación no se corre `npm run eval:rag`, para no gastar la cuota de Workers AI.
 
 ## Avance
 
@@ -55,7 +59,9 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
     - revisión visual con el MCP de Playwright (4 correcciones);
     - los dos cambios de OpenSpec archivados.
   - **Todas las tareas hechas: MVP 31 de 31 y RAG 13 de 13, con 393 pruebas.**
-  - Sigue la tarde: probar el asistente en la URL pública, diapositivas, guion, video de respaldo y ensayo.
+  - Asistente probado en la URL pública con el modelo real: nota mínima con su cita y "no tengo esa información" para la cafetería.
+  - La presentación pasó al lunes 23: el seed tiene ahora la fecha de referencia 2026-11-23 (el Taller 3 de la demo vence el 26) y la ventana del E2E va del 6 al 26 de noviembre.
+  - Sigue la tarde: el guion.
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
@@ -76,13 +82,13 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 - [ ] Proyecto corriendo en local y en la URL pública.
 - [ ] Pipeline y pruebas en verde.
 - [x] `npm run eval:rag` con al menos 90 % de aciertos: 96 % con gpt-oss-20b el 19 de noviembre (RAG design.md D7).
-- [ ] El asistente probado en la URL pública con el modelo real (hasta el 19 a mediodía no se había usado allá).
-- [ ] La mañana del 20: seed recargado en la base remota (`npx wrangler d1 execute DB --remote --file db/seed/seed.sql`) para deshacer los cambios de los ensayos. El seed ya está generado con la fecha de la presentación (2026-11-20).
+- [x] El asistente probado en la URL pública con el modelo real (19 de noviembre, desde el celular de Aymer): la nota mínima con su cita y "no tengo esa información" para la cafetería.
+- [ ] La mañana del 23: seed recargado en la base remota (`npx wrangler d1 execute DB --remote --file db/seed/seed.sql`) para deshacer los cambios de los ensayos. El seed ya está generado con la fecha de la presentación (2026-11-23). La recarga borra también las conversaciones y los contadores del asistente, y no toca la base de conocimiento.
 - [ ] Confirmar con el profesor que el seed ficticio en la base real cumple el criterio 2.
 
 ## Después de la presentación
 
 - [ ] **Antes de operar con la Fundación** (revisado el 16 de noviembre; no afecta la demo): crear el primer administrador en una base nueva, un requisito que **falta en las specs** porque hoy el único administrador sale del seed. Además: Workers Paid (ADR-003), R2 (ADR-002), el aviso de privacidad definitivo y validar con la Fundación los supuestos de las specs.
-- [ ] **Antes del 30 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 29 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
+- [ ] **Antes del 27 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 26 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
 - [ ] Pantalla de administración de los documentos del asistente (cargar, reemplazar y retirar). Para la demo bastan la API y `npm run rag:indexar`; decisión de Aymer en la revisión del RAG del 18 de noviembre.
 - [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).

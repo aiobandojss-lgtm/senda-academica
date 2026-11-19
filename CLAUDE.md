@@ -15,7 +15,7 @@ Contexto para Claude Code. Léelo completo al iniciar cada sesión.
 **Senda** (nombre genérico del producto, independiente de la Fundación; configurable). Un mismo producto con dos objetivos:
 
 1. **MVP para una fundación educativa** que está comenzando y no tiene dinero: estudiantes por carrera, usuario y contraseña, talleres y evaluaciones con entregas, cuotas y pagos, y **bloqueo de acceso por mora de más de 30 días**. Web responsiva, sin app.
-2. **Proyecto final del curso AI Agentic Engineer (Datapath)**, presentación en vivo el **viernes 20 de noviembre de 2026**. Encima del MVP va el **asistente académico Senda con RAG** que responde con documentos oficiales y datos reales del estudiante, sin alucinar.
+2. **Proyecto final del curso AI Agentic Engineer (Datapath)**, presentación en vivo el **lunes 23 de noviembre de 2026** (pasó del viernes 20; confirmado el 19 de noviembre). Encima del MVP va el **asistente académico Senda con RAG** que responde con documentos oficiales y datos reales del estudiante, sin alucinar.
 
 Prioridad: primero el flujo de la demo funcionando de punta a punta; luego lo demás.
 
@@ -58,7 +58,7 @@ Flujo de trabajo para lo que siga (las skills se invocan como comandos):
 
 - **Cloudflare Workers** (Worker `senda`) con **Hono** para la API (`/api/*`) y **React + Vite + Tailwind + shadcn/ui** con **React Router 8** (modo declarativo) y **TanStack Query** (`web/src/lib/consultas.ts`) servido como static assets del mismo Worker. Un solo `wrangler deploy`.
 - **D1** (SQLite) para datos; migraciones en `migrations/` con `wrangler d1 migrations`. Las reglas críticas también viven en la base como triggers que abortan con códigos (`PAGO_SUPERA_SALDO`, `PAGO_INMUTABLE`, `CUOTA_CON_PAGOS`, `ENTREGA_CALIFICADA`); la API los traduce a mensajes en español (D13).
-- **Archivos** (entregas y soportes) detrás de la interfaz `AlmacenArchivos`: **Workers KV** hasta después de la presentación (20 de noviembre) (R2 exige medio de pago) y **R2** en producción; lo elige la variable `ALMACEN_ARCHIVOS` (D7, ADR-002). Nunca URLs públicas: la descarga pasa por la API con permisos.
+- **Archivos** (entregas y soportes) detrás de la interfaz `AlmacenArchivos`: **Workers KV** hasta después de la presentación (23 de noviembre) (R2 exige medio de pago) y **R2** en producción; lo elige la variable `ALMACEN_ARCHIVOS` (D7, ADR-002). Nunca URLs públicas: la descarga pasa por la API con permisos.
 - **Sesión**: JWT HS256 en la cookie `__Host-sesion` (HttpOnly, Secure, SameSite=Lax), 8 horas desde el ingreso (`JWT_SECRET` como secreto de Wrangler), **revocable** con `usuarios.sesion_version` (D4). Compuertas de primer ingreso: contraseña temporal y aviso de privacidad (D16). Errores de la API siempre como `{ codigo, mensaje }` (`api/src/errores.ts`); validación de cuerpos con zod (`validarJson`).
 - **Contraseñas**: PBKDF2-SHA256, 100.000 iteraciones, formato `pbkdf2_sha256$100000$<sal_b64>$<hash_b64>` (el seed usa el mismo formato). Límite de 5 intentos fallidos por documento en 15 minutos (D14). ⚠️ El plan Free de Workers da 10 ms de CPU por petición: se mide en la tarea 1.8.
 - **Mora**: se calcula al vuelo con la función pura `calcularEstadoMora(cuotas, excepciones, hoy)` → `al_dia | en_riesgo | bloqueado | con_excepcion`; "hoy" siempre en America/Bogota. Bloqueado si alguna cuota con saldo > 0 tiene **más de 30 días** de vencida (31 o más), salvo excepción vigente. Se aplica en el login y en cada petición de un estudiante.
@@ -66,7 +66,7 @@ Flujo de trabajo para lo que siga (las skills se invocan como comandos):
 - **Pruebas**: Vitest **^4.1** con `@cloudflare/vitest-plugin` (el antiguo `@cloudflare/vitest-pool-workers`, que Cloudflare renombró y marcó como obsoleto en octubre de 2026) y Playwright para E2E. Las pruebas de la API corren en workerd con D1 y KV locales y efímeros (`remoteBindings: false` en `vitest.config.ts`); viven en `api/test/` y se tipan con `tsconfig.test.json`. Las funciones puras del frontend (sin DOM, como el intérprete de respuestas del asistente) se prueban igual, en `web/test/`. El calificador de la evaluación del RAG y la revisión de sus casos están en `eval/`.
 - **Fechas**: `YYYY-MM-DD` para fechas de negocio, `YYYY-MM-DDTHH:MM:SSZ` (UTC) para fecha-hora. **Dinero**: enteros en pesos. **Notas**: 0.0 a 5.0 con un decimal. "Tardía" se calcula, no se guarda (D20).
 - **Variables del Worker**: `PRODUCTO_NOMBRE` (Senda), `FUNDACION_NOMBRE` (la Fundación se llama **Funafrocol**, pero la demo pública muestra "Fundación (demo)" hasta que autoricen por escrito), `CONTACTO_FUNDACION`, `AVISO_PRIVACIDAD_VERSION` (`2026-11`, igual que el seed), `ALMACEN_ARCHIVOS` (`kv` | `r2`). Ningún nombre queda quemado en el código.
-- **Cloudflare**: subdominio `creativebycode` → demo en `senda.creativebycode.workers.dev`. **Sin medio de pago hasta después de la presentación (20 de noviembre)**: todo debe funcionar en el plan Free sin tarjeta. Producción irá en un dominio propio de la Fundación.
+- **Cloudflare**: subdominio `creativebycode` → demo en `senda.creativebycode.workers.dev`. **Sin medio de pago hasta después de la presentación (23 de noviembre)**: todo debe funcionar en el plan Free sin tarjeta. Producción irá en un dominio propio de la Fundación.
 
 ## Entorno
 
@@ -100,7 +100,7 @@ Reglas de diseño:
 ## Datos
 
 - `migrations/0001_inicial.sql` – esquema del MVP (vista `v_saldo_cuotas`, tabla `intentos_fallidos` y 5 triggers). **Aplicada en local y en remoto el 2026-11-14 (tarea 1.3): está congelada**: cualquier cambio de esquema va en una migración nueva.
-- `db/seed/generar-seed.mjs` – genera datos **ficticios** deterministas: 5 carreras, 15 cursos, 5 docentes, 60 estudiantes, actividades, entregas, cuotas y pagos, con perfiles de cartera para la demo y una cuenta de primer ingreso. Fecha de referencia por defecto: 2026-11-20 (día de la presentación). Se usa la misma toda la semana: los estados de cartera no cambian entre el 6 y el 29 de noviembre (las cuotas vencen el día 5 y la excepción de la demo vence el 29; verificado con SQL) y el Taller 3 de la demo queda abierto hasta el 23.
+- `db/seed/generar-seed.mjs` – genera datos **ficticios** deterministas: 5 carreras, 15 cursos, 5 docentes, 60 estudiantes, actividades, entregas, cuotas y pagos, con perfiles de cartera para la demo y una cuenta de primer ingreso. Fecha de referencia por defecto: 2026-11-23 (día de la presentación). Se usa la misma todos los días hasta la presentación: los estados de cartera no cambian entre el 6 de noviembre y el 2 de diciembre (las cuotas vencen el día 5 y el acuerdo de pago de la demo vence el 2 de diciembre) y el Taller 3 de la demo queda abierto hasta el 26.
 - `db/seed/seed.sql` – resultado ya generado (empieza borrando las tablas: sirve para reiniciar la base). `db/seed/CUENTAS-DEMO.md` – cuentas para la demo (contraseña `Demo2026*`).
 - `db/seed/placeholder.pdf` – archivo que se sube al almacén de archivos con la llave `seed/placeholder.pdf` para que las entregas del seed se puedan descargar.
 - `docs/rag/` – documentos ficticios para el RAG (reglamento, calendario, preguntas frecuentes, 2 planes de estudio).
@@ -158,7 +158,7 @@ npm run typecheck      # tsc -b (web, api y configuración)
 npm run cf-typegen     # regenera api/worker-configuration.d.ts tras cambiar wrangler.jsonc
 npm run deploy         # build + wrangler deploy
 npm test               # Vitest: pruebas de la API en workerd (npm run test:watch para modo interactivo)
-npm run test:e2e       # Playwright: flujo de la demo y el asistente (con el modelo simulado) contra el build de producción (vite preview, puerto 4173); recarga el seed local antes y lo deja como al final de la demo (después: npm run db:seed). Solo sirve del 6 al 29 de noviembre de 2026 (ver PLAN.md)
+npm run test:e2e       # Playwright: flujo de la demo y el asistente (con el modelo simulado) contra el build de producción (vite preview, puerto 4173); recarga el seed local antes y lo deja como al final de la demo (después: npm run db:seed). Solo sirve del 6 al 26 de noviembre de 2026 (ver PLAN.md)
 npm run db:migrate     # aplica las migraciones pendientes en la D1 local
 npm run db:seed        # regenera el seed (determinista), lo carga en la D1 local y sube el PDF de ejemplo al KV local
 npm run eval:rag       # evaluación del asistente (tarea RAG 4.1): pregunta eval/preguntas.json por la API (con npm run dev arriba y el seed local recién cargado) como la estudiante al día y califica con reglas fijas. Pide su cuenta (o SENDA_ESTUDIANTE_DOCUMENTO y SENDA_ESTUDIANTE_CONTRASENA). Gasta ~800 neuronas y 26 de las 30 preguntas diarias de la estudiante. --casos a,b repite solo esos casos; --recalificar <reporte> vuelve a calificar un reporte guardado sin gastar cuota
@@ -177,6 +177,6 @@ npx wrangler kv key put seed/placeholder.pdf --path db/seed/placeholder.pdf --bi
 
 Para detener un servidor de desarrollo lanzado en segundo plano desde Git Bash: buscar el PID con `netstat -ano | grep ":5173 " | grep LISTENING` y terminar el árbol con `taskkill //PID <pid> //T //F`.
 
-## Plan de los 7 días (del sábado 14 al viernes 20 de noviembre, sin día de colchón)
+## Plan de trabajo (del sábado 14 al lunes 23 de noviembre)
 
 Ver `PLAN.md`. Hoy toca lo que esté marcado como siguiente en ese archivo.

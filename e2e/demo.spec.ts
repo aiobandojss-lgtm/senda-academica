@@ -4,8 +4,8 @@ import { type Browser, devices, expect, type Page, test } from "@playwright/test
 // de db/seed/CUENTAS-DEMO.md. Los elementos se buscan por su rol y su etiqueta accesible, como los encuentra
 // un lector de pantalla: si una etiqueta se pierde, esta prueba falla.
 //
-// Depende de la fecha: el seed se diseñó para la semana de la presentación (los estados de cartera no cambian
-// entre el 6 y el 29 de noviembre de 2026, y el Taller 3 está abierto hasta el 23).
+// Depende de la fecha: el seed se diseñó para la semana de la presentación, el lunes 23 (los estados de cartera
+// no cambian entre el 6 de noviembre y el 2 de diciembre de 2026, y el Taller 3 está abierto hasta el 26).
 
 const CONTRASENA = "Demo2026*";
 const CUENTAS = {

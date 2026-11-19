@@ -5,11 +5,14 @@ import { execSync } from "node:child_process";
 // vacía (de ahí las migraciones); en tu equipo, el seed deshace lo que cambió la corrida anterior.
 // Solo toca la base LOCAL: las operaciones remotas no tienen script a propósito (CLAUDE.md).
 
-// El seed usa la fecha de referencia 2026-11-20 y la mora se calcula con la fecha REAL del servidor: los
-// estados de cartera que espera la prueba (Manuela bloqueada; al pagar octubre, "en riesgo") solo se cumplen
-// en esta ventana (verificada con SQL al generar el seed). Fuera de ella la prueba fallaría con un mensaje
-// confuso; mejor fallar aquí con uno claro. Pendiente para después de la presentación: seed relativo a hoy.
-const VENTANA = { desde: "2026-11-06", hasta: "2026-11-29" };
+// El seed usa la fecha de referencia 2026-11-23 (el día de la presentación) y la mora se calcula con la fecha
+// REAL del servidor. La prueba espera que Manuela esté bloqueada y que, al pagar octubre, quede "en riesgo", y que
+// la estudiante entregue el Taller 3 antes de su fecha límite. Eso solo se cumple en esta ventana:
+// - desde el 6 de noviembre: la cuota del 5 ya venció;
+// - hasta el 26: el Taller 3 cierra ese día (el acuerdo de pago de la demo dura hasta el 2 de diciembre).
+// Fuera de ella la prueba fallaría con un mensaje confuso; mejor fallar aquí con uno claro. Pendiente para después
+// de la presentación: seed relativo a hoy.
+const VENTANA = { desde: "2026-11-06", hasta: "2026-11-26" };
 
 // Cuenta de administrador del seed (db/seed/CUENTAS-DEMO.md, datos ficticios), la misma de e2e/demo.spec.ts
 const ADMIN = { documento: "9900000001", contrasena: "Demo2026*" };

@@ -1,6 +1,6 @@
 # Cuentas de demostración
 
-Datos ficticios generados con fecha de referencia **2026-11-20**. Contraseña de todas las cuentas: `Demo2026*`
+Datos ficticios generados con fecha de referencia **2026-11-23**. Contraseña de todas las cuentas: `Demo2026*`
 
 | Documento (usuario) | Rol | Nombre | Para qué sirve en la demo |
 |---|---|---|---|
@@ -17,4 +17,4 @@ Resumen de los 60 estudiantes en la fecha de referencia: 45 al día, 5 en riesgo
 
 Todas las cuentas ya aceptaron la versión `2026-11` del aviso de privacidad, excepto la de primer ingreso (la variable `AVISO_PRIVACIDAD_VERSION` del Worker debe tener ese mismo valor). La cuenta de primer ingreso usa `Demo2026*` como contraseña temporal: después de cambiarla, regenera y recarga el seed para repetir la demo.
 
-Para la demo en vivo, el estudiante al día tiene pendiente el "Taller 3" de Lógica de programación, con fecha límite 2026-11-23.
+Para la demo en vivo, el estudiante al día tiene pendiente el "Taller 3" de Lógica de programación, con fecha límite 2026-11-26.
