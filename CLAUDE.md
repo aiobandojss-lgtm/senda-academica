@@ -71,6 +71,11 @@ Flujo de trabajo para lo que siga (las skills se invocan como comandos):
 ## Entorno
 
 - **VS Code y Claude Code se abren en esta carpeta (`proyecto/`, la raíz del repo)**, no en `Proyecto_Final/`. Claude Code solo carga `.mcp.json` y `.claude/settings.json` (hooks) desde la carpeta de la sesión, y así la configuración del agente queda versionada con el código (decisión del 2026-11-16, tarea 1.7).
+- **Hooks del proyecto** (`.claude/settings.json`, con los scripts en `.claude/hooks/`, decisión de Aymer del 2026-11-20):
+  - **Guardián de reglas** (PreToolUse, en Read, Edit, Write, Grep y Bash): bloquea leer o editar `.dev.vars` y editar una migración que ya está en git. `permissions.deny` también niega `.dev.vars`.
+  - **Detector de caracteres invisibles** (PostToolUse, en Edit y Write): avisa con línea y columna si un archivo quedó con espacios duros, BOM o tildes sueltas, el problema de los escapes `\u` de los días 3 y 6.
+  - Pruebas: `node .claude/hooks/probar-hooks.mjs`. Si un hook bloquea algo legítimo, se corrige el hook con su prueba; nunca se esquiva.
+- **Subagente `revisor-spec`** (`.claude/agents/revisor-spec.md`): revisor independiente y de solo lectura. Úsalo al cerrar cada tarea: revisa el diff contra los escenarios de `openspec/specs/` y las reglas que no se negocian, y reporta hallazgos con archivo y línea, sin corregir nada.
 - **Node 24** con fnm (`.node-version`). En PowerShell fnm cambia de versión solo al entrar a la carpeta.
 - En la herramienta Bash de Claude Code (Git Bash), antepone a cada comando de Node/npm: `eval "$(fnm env --shell bash)" && fnm use --silent-if-unchanged`. Sin eso se usa el Node 20 del sistema, que es demasiado viejo para wrangler, OpenSpec 2 y vitest.
 - Finales de línea: `.gitattributes` fija LF y marca los binarios (no quitarlo: protege `placeholder.pdf`).

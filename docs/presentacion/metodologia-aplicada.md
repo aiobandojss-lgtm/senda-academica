@@ -45,12 +45,14 @@ El **límite de intentos de ingreso (tarea 2.3)** recorre todo el ciclo con un s
 4. **Mutación:** la versión original dejó pasar **10 de 10** intentos simultáneos; la elegida, exactamente **5**.
 5. **CI/CD y demo en vivo:** en la URL pública, el sexto intento responde 429 "Demasiados intentos".
 
-## Prácticas del curso pendientes
+## Hooks y subagente (día 7)
 
-| Práctica | Plan |
-|---|---|
-| Hooks | Viernes 20. Propuesta: typecheck automático tras cada edición o bloqueo de lectura de `.dev.vars` |
-| Subagente que revisa el código | Viernes 20. Propuesta: revisión independiente al cerrar cada tarea |
+Las dos prácticas que faltaban, elegidas por Aymer entre varias opciones, para que cada una resuelva un problema que de verdad pasó:
+
+| Práctica | Cómo se aplicó | Evidencia |
+|---|---|---|
+| **Hooks** | **Guardián de reglas** (antes de cada acción): bloquea leer o editar `.dev.vars` y editar una migración que ya está en git. Dos reglas "que no se negocian" de `CLAUDE.md` pasaron de ser una instrucción que el agente debe recordar a una barrera automática. **Detector de caracteres invisibles** (después de cada edición): avisa con línea y columna si quedó un espacio duro, un BOM o una tilde suelta, el problema que se repitió los días 3 y 6. Se descartó un typecheck tras cada edición: lento y ruidoso a mitad de un cambio | `.claude/settings.json`, `.claude/hooks/`; 23 pruebas en `node .claude/hooks/probar-hooks.mjs` |
+| **Subagente revisor** | `revisor-spec`, de solo lectura y con su propio contexto: revisa el diff de una tarea contra los escenarios de la spec y las reglas que no se negocian, y reporta hallazgos con archivo y línea. Es una mirada independiente: no ve el razonamiento de quien escribió el código | `.claude/agents/revisor-spec.md` |
 
 Hechas desde el día 3: la visión (revisión visual con el MCP de Playwright), el RAG con guardas y evaluación de 90 % o más, el archivo de los cambios y la trazabilidad de 128 de 128 escenarios con su prueba.
 

@@ -67,7 +67,12 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
     - 51 pruebas renombradas, sin cambiar su lógica.
     - 5 escenarios sin prueba automática quedaron cubiertos: la fuente "Entregas de talleres", las 3 negativas del asistente y el primer ingreso en el navegador, con un E2E nuevo.
     - Dos pruebas de fuego confirmaron que tanto la prueba nueva como el verificador fallan cuando deben.
-  - Siguen: el hook y el subagente revisor.
+  - **Hooks y subagente** (opciones elegidas por Aymer):
+    - El guardián de reglas bloquea `.dev.vars` y las migraciones versionadas.
+    - El detector de caracteres invisibles avisa después de cada edición.
+    - `revisor-spec` es un subagente revisor de solo lectura.
+    - Los hooks tienen 23 pruebas (`node .claude/hooks/probar-hooks.mjs`).
+    - Falta reiniciar Claude Code para que carguen los hooks y el subagente, y probarlos en vivo.
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)

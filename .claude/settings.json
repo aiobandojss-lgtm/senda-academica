@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": ["Read(**/.dev.vars)", "Edit(**/.dev.vars)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardian-reglas.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/caracteres-invisibles.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
