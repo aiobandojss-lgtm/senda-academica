@@ -214,10 +214,6 @@
   .frase { margin-top: auto; font-family: var(--titulo); font-variation-settings: "opsz" 144; font-weight: 500; font-style: italic; font-size: 64px; line-height: 1.08; max-width: 1250px; }
   .frase-pie { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; font-size: 24px; color: #D8E9DE; }
 
-  /* Botón para abrir el guion desde la proyección (solo al mover el mouse) */
-  .control-proyeccion { position: fixed; top: 14px; right: 14px; display: flex; gap: 8px; opacity: 0; transition: opacity 200ms; z-index: 5; }
-  body.mouse-activo .control-proyeccion { opacity: 1; }
-  .control-proyeccion button { font: 600 15px var(--texto); padding: 8px 14px; border-radius: 10px; border: 1px solid var(--borde); background: var(--papel); color: var(--tinta); cursor: pointer; }
 
   /* ---------- Vista de guion: el teleprompter ---------- */
   #guion { display: grid; grid-template-rows: auto auto 1fr auto; height: 100vh; }
@@ -294,7 +290,6 @@
     body.vista-proyeccion .lienzo { position: static; transform: none !important; width: auto; height: auto; overflow: visible; }
     body.vista-proyeccion .diapositiva { page: diapositivas; position: relative; width: 1600px; height: 900px; opacity: 1; visibility: visible; break-after: page; }
     body.vista-proyeccion .entra { animation: none !important; }
-    body.vista-proyeccion .control-proyeccion { display: none; }
     body.vista-guion #guion { display: none; }
     body.vista-guion #guion-completo { display: block; font-size: 12.5pt; line-height: 1.5; }
     #guion-completo h1 { font-family: var(--titulo); font-size: 22pt; margin: 0 0 4pt; }
@@ -310,10 +305,6 @@
 <body class="vista-proyeccion">
 
 <div id="proyeccion">
-  <div class="control-proyeccion">
-    <button type="button" id="abrir-guion">Abrir el guion</button>
-    <button type="button" id="pantalla-completa">Pantalla completa (F)</button>
-  </div>
   <div class="escenario">
     <div class="lienzo" id="lienzo">
 
@@ -953,17 +944,14 @@ function alternarPantallaCompleta() {
   else document.documentElement.requestFullscreen?.();
 }
 
+// En la proyección no hay ningún botón: es lo que ve el jurado. El cursor se oculta si el mouse se queda quieto
 let temporizadorMouse;
 document.addEventListener("mousemove", () => {
   if (vista !== "proyeccion") return;
-  document.body.classList.add("mouse-activo");
   document.body.classList.remove("ocultar-cursor");
   clearTimeout(temporizadorMouse);
-  temporizadorMouse = setTimeout(() => document.body.classList.replace("mouse-activo", "ocultar-cursor"), 1800);
+  temporizadorMouse = setTimeout(() => document.body.classList.add("ocultar-cursor"), 1800);
 });
-
-$("#abrir-guion").addEventListener("click", () => window.open("?vista=guion", "senda-guion"));
-$("#pantalla-completa").addEventListener("click", alternarPantallaCompleta);
 $("#b-anterior").addEventListener("click", () => irA(estado.paso - 1));
 $("#b-siguiente").addEventListener("click", siguiente);
 $("#b-reloj").addEventListener("click", iniciarOPausar);
