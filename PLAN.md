@@ -82,8 +82,9 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
   - [x] Prueba manual completa en producción, en el computador y en el celular: 46 de 47. La única falla es la conocida de "semana de parciales".
   - [x] Cambio `cerrar-sesion-y-temas-de-cursos` archivado, con sus specs sincronizadas: **trazabilidad de 130 de 130**, 413 pruebas de Vitest y 3 E2E.
   - [x] Decisiones de Aymer: no se hace el bonus de WhatsApp, y el buscador de Cartera queda para después de la presentación.
-  - [x] "Semana de parciales", diagnosticada y corregida. El fragmento correcto quedaba primero, pero con 0,549 frente al umbral de 0,55. Se escribió el calendario con las palabras del estudiante, sin tocar el umbral, y la evaluación dio **25 de 25**. [Bitácora](docs/bitacora/2026-11-21-dia-8.md)
-  - [ ] Reindexar producción (lo hace Aymer) y probar la pregunta desde el celular.
+  - [x] "Semana de parciales", diagnosticada y corregida. El fragmento correcto quedaba primero, pero con 0,549 frente al umbral de 0,55. Se escribió el calendario con las palabras del estudiante, sin tocar el umbral, y la evaluación dio **25 de 25**. Otra corrida, recalificada, da 24 de 25: el modelo no es determinista. [Bitácora](docs/bitacora/2026-11-21-dia-8.md)
+  - [x] Producción reindexada (por Aymer) y probada: "¿Cuándo es la semana de parciales?" y "¿Cuándo son los exámenes parciales?" responden "del 30 de noviembre al 4 de diciembre", con su cita.
+  - [x] Revisión de `revisor-spec` a los commits del día: dos afirmaciones equivocadas, corregidas (ver la bitácora).
   - [ ] Diapositivas.
 - [ ] Presentación
 
@@ -115,7 +116,7 @@ Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
   - Cerrar sesión borraba la cookie del navegador, pero el token seguía siendo válido hasta que vencía (8 horas). La spec dice "la sesión deja de ser válida".
   - **Decidido el 19 de noviembre:** revocar al salir con `usuarios.sesion_version` (D4). También cierra las otras sesiones del usuario.
   - **Hecho antes de la presentación:** el cambio `cerrar-sesion-y-temas-de-cursos`, probado en producción en dos equipos el 21 de noviembre y archivado ese día.
-- [ ] **Buscador por nombre en las listas de administración**, empezando por Cartera. Es una sugerencia de Aymer en la prueba manual del 21 de noviembre (prueba 6.8): para registrar un pago hoy hay que recorrer la lista. Ninguna lista de administración tiene buscador. Es una función nueva, así que necesita su cambio de OpenSpec. Decisión del 21 de noviembre: después de la presentación.
+- [ ] **Buscador por nombre en Cartera** (sugerencia de Aymer en la prueba manual del 21 de noviembre, prueba 6.8). Estudiantes ya tiene "Buscar por nombre o documento" (filtro `q`, spec "Consulta y búsqueda de estudiantes"), y cada fila lleva al estado de cuenta, donde está "Registrar pago". Ese es el camino para la demo. Cartera no tiene buscador. Es una función nueva, así que necesita su cambio de OpenSpec, y puede partir del filtro `q`. Decisión del 21 de noviembre: después de la presentación.
 - [ ] **Mensaje propio para un archivo vacío** (prueba manual 9.1, 21 de noviembre): un archivo de 0 bytes se rechaza con "Adjunta el archivo que quieres subir", como si no hubiera archivo. El rechazo es correcto; lo que confunde es el mensaje. El paso 9.1 de la guía de prueba manual ya pide escribir algo dentro del archivo.
 - [ ] **Reintento del E2E del asistente en el CI** (hallazgo del subagente revisor, 19 de noviembre). Con `retries: 1`, si la primera corrida falla, el reintento también falla: la conversación y el contador de preguntas de la estudiante ya cambiaron. No oculta errores (el pipeline queda en rojo igual), pero un fallo intermitente no se puede rescatar. Solución: recargar el estado de la estudiante al inicio de la prueba, no solo en `e2e/preparar.ts`.
 - [ ] Pantalla de administración de los documentos del asistente (cargar, reemplazar y retirar). Para la demo bastan la API y `npm run rag:indexar`; decisión de Aymer en la revisión del RAG del 18 de noviembre.

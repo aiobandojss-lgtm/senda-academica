@@ -1,5 +1,5 @@
 {
-  "descripcion": "Evaluación del asistente Senda (tarea RAG 4.1, RAG design.md D7). Cada caso se pregunta por la API con la estudiante al día del seed y se califica con eval/calificar.ts. Los valores esperados salen de docs/rag y de los datos de la estudiante en el seed local recién cargado (npm run db:seed, fecha de referencia 2026-11-20). Dinero sin el signo $: el calificador iguala $360.000, $ 360 000 y 360000.",
+  "descripcion": "Evaluación del asistente Senda (tarea RAG 4.1, RAG design.md D7). Cada caso se pregunta por la API con la estudiante al día del seed y se califica con eval/calificar.ts. Los valores esperados salen de docs/rag y de los datos de la estudiante en el seed local recién cargado (npm run db:seed, fecha de referencia 2026-11-23). Dinero sin el signo $: el calificador iguala $360.000, $ 360 000 y 360000.",
   "estudiante": "Paola Andrea",
   "umbral": 90,
   "casos": [
