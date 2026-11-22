@@ -1,6 +1,6 @@
 # Guion de la presentación – lunes 23 de noviembre de 2026
 
-**Versión 1** (jueves 19). Se ajusta con los ensayos del domingo.
+**Versión 2** (domingo 22). **El texto para leer y las diapositivas están en [diapositivas.html](diapositivas.html)**: se abren con `npm run presentacion`, con la proyección en la pantalla compartida y el guion en la otra pantalla. Este documento queda como referencia: los tiempos, la preparación, el plan B y las preguntas esperadas.
 
 - **Formato:** unos 10 minutos de demo en vivo, más preguntas ([rúbrica](../rubrica.md)).
 - **Hilo conductor:** contar la metodología del curso **usando el producto como evidencia**. La rúbrica pide tres momentos: el problema, la demo del flujo principal y una decisión técnica de la que estés orgulloso.
@@ -76,11 +76,16 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 
 ## Preparación antes de empezar
 
-- **Navegadores separados:** cada sesión vive en una cookie, así que cada persona va en su propio navegador o perfil. **Cerrar sesión cierra a esa persona en todos los equipos** (desde el 19 de noviembre). Si en un ensayo abres a Paola en el celular y en el computador, cerrarla en uno la saca también del otro: vuelve a ingresar antes de la demo.
-  - **Celular:** Paola, con la pantalla de ingreso abierta.
-  - **Escritorio, perfil 1:** Liliana, la docente (`9900000103`).
-  - **Escritorio, perfil 2:** administración (`9900000001`).
-  - **Ventana de incógnito:** Manuela (`9900001002`).
+- **Presentación virtual con dos pantallas** (decisión del 21 de noviembre):
+  - **Pantalla 1, la que se comparte en la videollamada** (compartir la pantalla completa, no una ventana): la proyección en pantalla completa (tecla `F`) y las ventanas de la demo.
+  - **Pantalla 2, solo para ti:** el guion (`http://127.0.0.1:8765/?vista=guion`). Ahí avanzas con `→`, y la proyección cambia sola.
+  - Abre primero la terminal con `npm run presentacion` y déjala abierta durante toda la presentación.
+- **Navegadores separados:** cada sesión vive en una cookie, así que cada persona va en su propio navegador o perfil. **Cerrar sesión cierra a esa persona en todos los equipos** (desde el 19 de noviembre): si en un ensayo la cierras en otro lado, vuelve a ingresar antes de la demo.
+  - **Microsoft Edge, ventana angosta (unos 450 px):** Paola, en la pantalla de ingreso. Con menos de 768 px de ancho, Senda muestra la versión de celular, la misma que probaste en tu iPhone. Di en voz alta que es la misma web responsiva.
+  - **Chrome, perfil 1:** Liliana, la docente (`9900000103`), con la sesión ya abierta.
+  - **Chrome, perfil 2:** administración (`9900000001`), con la sesión ya abierta.
+  - **Ventana de incógnito:** Manuela (`9900001002`), en la pantalla de ingreso.
+- **El PDF de Paola:** copia `db/seed/placeholder.pdf` al Escritorio con el nombre `taller3-paola.pdf`.
 - **Pestañas de apoyo:**
   - GitHub Actions con la última ejecución en verde;
   - `design.md` del RAG en D5 y D7;

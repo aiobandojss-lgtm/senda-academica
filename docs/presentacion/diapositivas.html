@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Senda – presentación</title>
+<link rel="icon" href="data:,">
+<!--
+  Diapositivas de la presentación del lunes 23 de noviembre de 2026 (PLAN.md, día 8).
+  Se abre con `npm run presentacion` (scripts/presentacion.mjs), no con doble clic: Chrome bloquea las fuentes desde file://.
+  Dos vistas sincronizadas: proyección (/) y guion (/?vista=guion). El texto del guion vive en PASOS, más abajo.
+-->
+<style>
+  @font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces.woff2) format("woff2-variations"); font-weight: 100 900; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces-italica.woff2) format("woff2-variations"); font-weight: 100 900; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson.woff2) format("woff2-variations"); font-weight: 200 800; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson-italica.woff2) format("woff2-variations"); font-weight: 200 800; font-style: italic; font-display: swap; }
+
+  /* Paleta de docs/identidad-visual.md */
+  :root {
+    --papel: #FCF9F3;
+    --tinta: #0D251B;
+    --selva: #196144;
+    --selva-honda: #10432F;
+    --salvia: #DCF0DF;
+    --musgo: #51625A;
+    --barro: #FDE5CE;
+    --barro-texto: #723311;
+    --arcilla: #B63325;
+    --arcilla-suave: #FFE5DF;
+    --terracota: #CD632D;
+    --borde: #819089;
+    --linea: #E4DED2;
+    --crema: #FCF9F3;
+    --exito: #1B6236;
+    --exito-suave: #D6F4DD;
+    --alerta: #7D4A07;
+    --alerta-suave: #FFECC5;
+    --titulo: "Fraunces Variable", Georgia, "Times New Roman", serif;
+    --texto: "Atkinson Hyperlegible Next Variable", "Segoe UI", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--papel); color: var(--tinta); font-family: var(--texto); }
+  body.vista-proyeccion { overflow: hidden; background: #0B1F16; }
+  body.vista-proyeccion #guion, body.vista-guion #proyeccion { display: none; }
+  #guion-completo { display: none; }
+  strong { font-weight: 700; }
+  code, .mono { font-family: "Cascadia Code", Consolas, "Courier New", monospace; }
+
+  /* ---------- Proyección: lienzo fijo de 1600 × 900 escalado a la ventana ---------- */
+  .escenario { position: fixed; inset: 0; }
+  .lienzo { position: absolute; top: 50%; left: 50%; width: 1600px; height: 900px; transform-origin: center; overflow: hidden; background: var(--papel); }
+  body.ocultar-cursor { cursor: none; }
+
+  .diapositiva { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity 250ms ease, visibility 0s 250ms; background: var(--papel); }
+  .diapositiva.activa { opacity: 1; visibility: visible; transition: opacity 250ms ease; }
+  .diapositiva.verde { background: var(--selva); color: var(--crema); }
+  .curvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .curvas path { fill: none; stroke: var(--tinta); stroke-opacity: 0.075; stroke-width: 1.6; }
+  .verde .curvas path { stroke: var(--crema); stroke-opacity: 0.13; }
+  .contenido { position: relative; height: 100%; padding: 76px 112px 150px; display: flex; flex-direction: column; }
+
+  .activa .entra { animation: entrar 250ms ease both; animation-delay: calc(var(--d, 0) * 40ms); }
+  @keyframes entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .activa .entra { animation: none; }
+    .diapositiva, .diapositiva.activa { transition: none; }
+  }
+
+  .ceja { font-family: var(--texto); font-size: 22px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--selva); display: flex; align-items: center; gap: 14px; }
+  .ceja::before { content: ""; width: 34px; height: 0; border-top: 4px dotted var(--terracota); }
+  .verde .ceja { color: var(--barro); }
+  h2 { font-family: var(--titulo); font-variation-settings: "opsz" 144; font-weight: 600; font-size: 66px; line-height: 1.06; letter-spacing: -0.015em; margin: 18px 0 0; max-width: 1300px; }
+  .bajada { font-size: 28px; line-height: 1.4; color: var(--musgo); margin: 16px 0 0; max-width: 1180px; }
+  .verde .bajada { color: #D8E9DE; }
+  .pie { position: absolute; left: 112px; right: 112px; bottom: 112px; font-size: 19px; color: var(--musgo); }
+  .pie code { font-size: 17px; background: rgba(13, 37, 27, 0.06); padding: 2px 8px; border-radius: 6px; }
+
+  /* Sendero de la charla: los 5 bloques como pasos, con la meta en terracota */
+  .sendero-charla { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; pointer-events: none; }
+  .sendero-charla .camino { fill: none; stroke: var(--borde); stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 0.01 13; }
+  .sendero-charla .nodo { fill: var(--papel); stroke: var(--borde); stroke-width: 3; }
+  .sendero-charla .nodo.hecho { fill: var(--selva); stroke: var(--selva); }
+  .sendero-charla .nodo.actual { fill: var(--selva); stroke: var(--salvia); stroke-width: 7; }
+  .sendero-charla .nodo.meta { stroke: var(--terracota); }
+  .sendero-charla .nodo.meta.actual, .sendero-charla .nodo.meta.hecho { fill: var(--terracota); stroke: var(--barro); }
+  .sendero-charla text { font-family: var(--texto); font-size: 17px; fill: var(--musgo); }
+  .sendero-charla text.actual { fill: var(--tinta); font-weight: 700; }
+  .sendero-charla.oculto { display: none; }
+
+  /* Símbolo de Senda (web/src/components/marca/SimboloSenda.tsx) */
+  .simbolo .fondo { fill: var(--selva); }
+  .simbolo .paso { fill: none; stroke: var(--crema); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 0.01 4.1; }
+  .simbolo .meta { fill: var(--terracota); }
+  .verde .simbolo .fondo { fill: var(--selva-honda); }
+
+  /* 1. Portada */
+  .portada .contenido { padding: 92px 120px; justify-content: space-between; }
+  .portada .marca { display: flex; align-items: center; gap: 36px; }
+  .portada .marca svg { width: 168px; height: 168px; }
+  .portada h1 { font-family: var(--titulo); font-variation-settings: "opsz" 144; font-weight: 600; font-size: 196px; line-height: 0.9; letter-spacing: -0.03em; margin: 0; }
+  .portada .lema { font-family: var(--titulo); font-style: italic; font-weight: 400; font-size: 46px; color: var(--barro); margin: 30px 0 0; }
+  .portada .que-es { font-size: 36px; line-height: 1.35; max-width: 1080px; margin: 34px 0 0; }
+  .portada .firma { display: flex; justify-content: space-between; align-items: flex-end; font-size: 24px; line-height: 1.5; color: #D8E9DE; }
+  .portada .firma strong { color: var(--crema); font-size: 28px; }
+  .pastilla { display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px; background: rgba(252, 249, 243, 0.12); border: 2px solid rgba(252, 249, 243, 0.35); color: var(--crema); font-size: 24px; font-weight: 700; }
+  .pastilla::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--terracota); box-shadow: 0 0 0 5px rgba(205, 99, 45, 0.3); }
+
+  /* 2. El problema */
+  .preguntas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 50px; }
+  .pregunta { position: relative; background: #fff; border: 2px solid var(--linea); border-radius: 22px; padding: 30px 32px 32px; font-family: var(--titulo); font-variation-settings: "opsz" 72; font-weight: 500; font-size: 38px; line-height: 1.15; }
+  .pregunta span { display: block; font-family: var(--texto); font-size: 20px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--terracota); margin-bottom: 12px; }
+  .respuesta { margin-top: 34px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 30px; background: var(--selva); color: var(--crema); border-radius: 22px; padding: 30px 36px; }
+  .respuesta .nombre { font-family: var(--titulo); font-weight: 600; font-size: 44px; }
+  .respuesta ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 10px 30px; font-size: 25px; }
+  .respuesta li::before { content: "•"; color: var(--terracota); margin-right: 10px; font-weight: 700; }
+  .respuesta .costo { text-align: center; background: var(--crema); color: var(--selva); border-radius: 18px; padding: 14px 22px; font-size: 18px; font-weight: 700; line-height: 1.2; }
+  .respuesta .costo b { display: block; font-family: var(--titulo); font-size: 48px; line-height: 1; }
+
+  /* 3. Demo: el recorrido como sendero */
+  .recorrido { position: relative; margin-top: 64px; height: 420px; }
+  .recorrido svg.trazo { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .recorrido .camino { fill: none; stroke: var(--selva); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 0.01 17; }
+  .parada { position: absolute; width: 230px; transform: translateX(-50%); text-align: center; }
+  .parada .punto { width: 34px; height: 34px; border-radius: 50%; background: var(--selva); border: 7px solid var(--salvia); margin: 0 auto 16px; }
+  .parada.final .punto { background: var(--terracota); border-color: var(--barro); }
+  .parada .quien { font-size: 19px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--selva); }
+  .parada .que { font-family: var(--titulo); font-variation-settings: "opsz" 48; font-size: 29px; line-height: 1.15; margin-top: 6px; }
+  .parada.arriba .punto { margin: 16px auto 0; }
+  /* Anclada por abajo: el punto cae en la cresta del sendero (y = 120 de 420), tenga el texto una o dos líneas */
+  .parada.arriba { display: flex; flex-direction: column-reverse; top: auto; bottom: 283px; }
+
+  /* 4. Las tres guardas */
+  .guardas { display: grid; grid-template-columns: 500px 1fr; gap: 56px; margin-top: 30px; align-items: start; }
+  .alucinacion { position: relative; background: var(--barro); border-radius: 22px; padding: 34px 36px 30px; transform: rotate(-1.2deg); }
+  .alucinacion .cita { font-family: var(--titulo); font-style: italic; font-size: 46px; line-height: 1.15; color: var(--barro-texto); }
+  .alucinacion .cita code { font-family: var(--titulo); font-style: normal; font-size: 30px; display: block; margin-top: 12px; color: var(--barro-texto); opacity: 0.85; }
+  .alucinacion p { font-size: 22px; line-height: 1.4; color: var(--barro-texto); margin: 22px 0 0; }
+  .sello { position: absolute; top: -22px; right: -18px; transform: rotate(7deg); border: 4px solid var(--arcilla); color: var(--arcilla); background: var(--papel); font-weight: 800; font-size: 20px; letter-spacing: 0.16em; padding: 8px 16px; border-radius: 8px; }
+  .capas { display: flex; flex-direction: column; gap: 12px; }
+  .flujo-extremo { font-size: 19px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--musgo); padding-left: 86px; }
+  .capa { display: grid; grid-template-columns: 64px 1fr; gap: 22px; align-items: center; background: #fff; border: 2px solid var(--linea); border-radius: 20px; padding: 16px 24px 16px 18px; }
+  .capa .n { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--salvia); color: var(--selva); font-family: var(--titulo); font-weight: 600; font-size: 34px; }
+  .capa h3 { margin: 0; font-family: var(--titulo); font-variation-settings: "opsz" 48; font-weight: 600; font-size: 29px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+  .capa p { margin: 4px 0 0; font-size: 22px; line-height: 1.32; color: var(--musgo); }
+  .capa.clave { border-color: var(--selva); box-shadow: 0 0 0 4px var(--salvia); }
+  .capa.clave .n { background: var(--selva); color: var(--crema); }
+  .etiqueta { display: inline-block; font-family: var(--texto); font-size: 17px; font-weight: 700; color: var(--selva); background: var(--salvia); padding: 4px 12px; border-radius: 999px; }
+  .salidas { display: flex; gap: 14px; padding-left: 86px; }
+  .salida { font-size: 21px; font-weight: 700; padding: 10px 18px; border-radius: 14px; }
+  .salida.bien { background: var(--exito-suave); color: var(--exito); }
+  .salida.no { background: var(--alerta-suave); color: var(--alerta); }
+
+  /* 5. Medido */
+  .medido { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 32px; align-items: start; }
+  .panel { background: #fff; border: 2px solid var(--linea); border-radius: 24px; padding: 26px 32px; }
+  .panel h3 { margin: 0 0 6px; font-family: var(--titulo); font-variation-settings: "opsz" 48; font-weight: 600; font-size: 28px; line-height: 1.2; }
+  .panel .nota { font-size: 21px; color: var(--musgo); line-height: 1.4; margin: 0; }
+  .barra-modelo { margin-top: 24px; }
+  .barra-modelo .fila { display: flex; justify-content: space-between; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .barra-modelo .fila span:last-child { font-family: var(--titulo); font-size: 34px; }
+  .barra-modelo .pista { height: 26px; border-radius: 999px; background: #EFEBE2; overflow: hidden; }
+  .barra-modelo .lleno { height: 100%; border-radius: 999px; background: var(--selva); }
+  .barra-modelo.otro .lleno { background: var(--borde); }
+  .regla { position: relative; margin: 34px 6px 0; height: 92px; }
+  .regla .eje { position: absolute; left: 0; right: 0; top: 40px; height: 10px; border-radius: 999px; background: linear-gradient(90deg, #EFEBE2 0 75%, var(--salvia) 75% 100%); }
+  .regla .umbral { position: absolute; top: 18px; height: 56px; border-left: 4px solid var(--selva); left: 75%; }
+  .regla .umbral span { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 19px; font-weight: 700; color: var(--selva); }
+  .regla .valor { position: absolute; top: 31px; left: calc(74.5% - 14px); width: 28px; height: 28px; border-radius: 50%; background: var(--terracota); border: 5px solid var(--barro); }
+  .regla .valor span { position: absolute; top: 34px; right: 0; white-space: nowrap; font-size: 19px; font-weight: 700; color: var(--barro-texto); }
+  .regla .extremos { position: absolute; top: 60px; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 17px; color: var(--musgo); }
+  .cambio { margin-top: 26px; font-size: 21px; line-height: 1.45; }
+  .cambio del { color: var(--musgo); }
+  .cambio ins { text-decoration: none; background: var(--exito-suave); color: var(--exito); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  .resultado { display: flex; align-items: center; gap: 22px; margin-top: 22px; }
+  .resultado b { font-family: var(--titulo); font-size: 58px; line-height: 1; color: var(--selva); white-space: nowrap; }
+  .resultado span { font-size: 21px; color: var(--musgo); line-height: 1.35; }
+
+  /* 6. De la spec a producción */
+  .tuberia { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin-top: 54px; position: relative; }
+  .tuberia::before { content: ""; position: absolute; left: 7%; right: 7%; top: 38px; border-top: 5px dotted var(--selva); }
+  .estacion { position: relative; text-align: center; padding: 0 14px; }
+  .estacion .icono { width: 80px; height: 80px; margin: 0 auto 18px; border-radius: 24px; display: grid; place-items: center; background: var(--selva); color: var(--crema); font-family: var(--titulo); font-weight: 600; font-size: 34px; position: relative; }
+  .estacion:last-child .icono { background: var(--terracota); }
+  .estacion h3 { margin: 0; font-family: var(--titulo); font-variation-settings: "opsz" 48; font-weight: 600; font-size: 29px; }
+  .estacion p { margin: 6px 0 0; font-size: 21px; line-height: 1.35; color: var(--musgo); }
+  .cifras { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-top: 54px; }
+  .cifra { border-top: 3px solid var(--linea); padding-top: 18px; }
+  .cifra b { display: block; font-family: var(--titulo); font-variation-settings: "opsz" 144; font-weight: 600; font-size: 60px; line-height: 1; color: var(--selva); }
+  .cifra.roja b { color: var(--arcilla); }
+  .cifra span { display: block; margin-top: 10px; font-size: 21px; line-height: 1.35; color: var(--musgo); }
+
+  /* 7. El agente y el humano */
+  .dos-columnas { display: grid; grid-template-columns: 1.35fr 1fr; gap: 36px; margin-top: 40px; }
+  .herramientas { display: flex; flex-direction: column; gap: 12px; }
+  .herramienta { display: grid; grid-template-columns: 210px 1fr; gap: 20px; align-items: baseline; padding: 14px 0; border-bottom: 2px solid var(--linea); }
+  .herramienta b { font-family: var(--titulo); font-variation-settings: "opsz" 48; font-weight: 600; font-size: 29px; color: var(--selva); }
+  .herramienta span { font-size: 23px; line-height: 1.35; }
+  .humano { background: var(--selva); color: var(--crema); border-radius: 24px; padding: 32px 36px; }
+  .humano h3 { margin: 0 0 14px; font-family: var(--titulo); font-weight: 600; font-size: 38px; }
+  .humano ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; font-size: 24px; line-height: 1.3; }
+  .humano li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
+  .humano li::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--terracota); margin-top: 8px; }
+  .hallazgo { margin-top: 22px; background: var(--crema); color: var(--tinta); border-radius: 16px; padding: 16px 20px; font-size: 21px; line-height: 1.4; }
+
+  /* 8. Cierre */
+  .cierre .contenido { padding-bottom: 100px; }
+  .siguientes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 44px; }
+  .siguiente-paso { border-top: 5px dotted rgba(252, 249, 243, 0.55); padding-top: 22px; }
+  .siguiente-paso b { display: block; font-family: var(--titulo); font-size: 30px; font-weight: 600; margin-bottom: 8px; }
+  .siguiente-paso span { font-size: 23px; line-height: 1.4; color: #D8E9DE; }
+  .siguiente-paso:last-child { border-top-color: var(--terracota); }
+  .frase { margin-top: auto; font-family: var(--titulo); font-variation-settings: "opsz" 144; font-weight: 500; font-style: italic; font-size: 64px; line-height: 1.08; max-width: 1250px; }
+  .frase-pie { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; font-size: 24px; color: #D8E9DE; }
+
+  /* Botón para abrir el guion desde la proyección (solo al mover el mouse) */
+  .control-proyeccion { position: fixed; top: 14px; right: 14px; display: flex; gap: 8px; opacity: 0; transition: opacity 200ms; z-index: 5; }
+  body.mouse-activo .control-proyeccion { opacity: 1; }
+  .control-proyeccion button { font: 600 15px var(--texto); padding: 8px 14px; border-radius: 10px; border: 1px solid var(--borde); background: var(--papel); color: var(--tinta); cursor: pointer; }
+
+  /* ---------- Vista de guion: el teleprompter ---------- */
+  #guion { display: grid; grid-template-rows: auto auto 1fr auto; height: 100vh; }
+  .g-barra { display: grid; grid-template-columns: 1fr auto auto; gap: 28px; align-items: center; padding: 16px 28px; background: var(--selva); color: var(--crema); }
+  .g-bloque { font-size: 17px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--barro); }
+  .g-titulo { font-family: var(--titulo); font-weight: 600; font-size: 34px; line-height: 1.1; margin-top: 2px; }
+  .g-relojes { display: flex; gap: 22px; }
+  .reloj { min-width: 132px; }
+  .reloj .r-nombre { font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #CFE3D6; }
+  .reloj .r-valor { font-family: var(--titulo); font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .reloj .r-valor small { font-family: var(--texto); font-size: 17px; font-weight: 400; color: #CFE3D6; }
+  .reloj .r-pista { height: 6px; border-radius: 999px; background: rgba(252, 249, 243, 0.2); margin-top: 6px; overflow: hidden; }
+  .reloj .r-lleno { height: 100%; width: 0; background: var(--crema); border-radius: 999px; }
+  .reloj.justo .r-lleno { background: #F4C27A; }
+  .reloj.pasado .r-lleno { background: #FF9C85; }
+  .reloj.pasado .r-valor { color: #FFC2B3; }
+  .g-botones { display: flex; gap: 10px; }
+  .g-botones button { font: 700 17px var(--texto); padding: 12px 18px; border-radius: 12px; border: 2px solid rgba(252, 249, 243, 0.45); background: transparent; color: var(--crema); cursor: pointer; }
+  .g-botones button.principal { background: var(--crema); color: var(--selva); border-color: var(--crema); }
+  .g-botones button:focus-visible { outline: 3px solid var(--terracota); outline-offset: 2px; }
+
+  .g-pasos { display: flex; align-items: center; gap: 6px; padding: 12px 28px; border-bottom: 2px solid var(--linea); overflow-x: auto; }
+  .g-pasos button { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; font: 600 14px var(--texto); color: var(--musgo); background: none; border: 0; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+  .g-pasos button::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--borde); }
+  .g-pasos button.hecho::before { background: var(--selva); border-color: var(--selva); }
+  .g-pasos button.actual { color: var(--tinta); background: var(--salvia); }
+  .g-pasos button.actual::before { background: var(--terracota); border-color: var(--terracota); }
+  .g-pasos .sep { width: 18px; border-top: 3px dotted var(--borde); flex: 0 0 auto; }
+
+  .g-cuerpo { display: grid; grid-template-columns: 1fr 440px; min-height: 0; }
+  .g-lectura { overflow-y: auto; padding: 30px 44px 60px; }
+  .g-lectura .decir { font-size: 31px; line-height: 1.55; margin: 0 0 24px; max-width: 1150px; }
+  .g-lectura .decir strong { color: var(--selva); }
+  .g-lectura .hacer { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: baseline; margin: 0 0 24px; max-width: 1150px; background: var(--barro); border-left: 8px solid var(--terracota); border-radius: 12px; padding: 14px 20px; font-size: 23px; line-height: 1.45; color: var(--barro-texto); }
+  .g-lectura .hacer::before { content: "HAZ"; font-size: 15px; font-weight: 800; letter-spacing: 0.16em; color: var(--terracota); }
+  .g-lectura .hacer code, .entender code { font-size: 0.92em; background: rgba(255, 255, 255, 0.7); padding: 1px 7px; border-radius: 6px; }
+  .g-lectura .hacer strong { color: var(--barro-texto); }
+  .g-lateral { border-left: 2px solid var(--linea); padding: 22px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; background: #F7F2E8; }
+  .g-etiqueta { font-size: 14px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--musgo); margin-bottom: 8px; }
+  .mini { width: 392px; height: 220.5px; border-radius: 12px; overflow: hidden; border: 2px solid var(--linea); position: relative; background: var(--papel); }
+  .mini .mini-lienzo { position: absolute; top: 0; left: 0; width: 1600px; height: 900px; transform: scale(0.245); transform-origin: top left; }
+  .mini .diapositiva { opacity: 1; visibility: visible; transition: none; }
+  .mini .entra { animation: none !important; }
+  .g-siguiente { font-size: 20px; line-height: 1.35; }
+  .g-siguiente span { color: var(--musgo); }
+  .entender { background: var(--salvia); border-radius: 14px; padding: 16px 18px; font-size: 18px; line-height: 1.5; color: var(--tinta); }
+  .g-ayuda { padding: 10px 28px; border-top: 2px solid var(--linea); font-size: 15px; color: var(--musgo); display: flex; gap: 22px; flex-wrap: wrap; }
+  .g-ayuda kbd { font-family: var(--texto); font-weight: 700; background: #fff; border: 1px solid var(--borde); border-radius: 6px; padding: 1px 7px; color: var(--tinta); }
+  .g-sincronia { margin-left: auto; }
+
+  /* Pantalla de portátil (768 px de alto): más texto por pantalla, para no tener que desplazarse al leer */
+  @media (max-height: 900px), (max-width: 1500px) {
+    .g-barra { padding: 12px 24px; }
+    .g-titulo { font-size: 28px; }
+    .reloj .r-valor { font-size: 28px; }
+    .g-pasos { padding: 8px 24px; }
+    .g-cuerpo { grid-template-columns: 1fr 372px; }
+    .g-lectura { padding: 16px 34px 10px; }
+    .g-lectura .decir { font-size: 26px; line-height: 1.48; margin-bottom: 14px; }
+    .g-lectura .hacer { font-size: 20px; padding: 8px 16px; margin-bottom: 14px; }
+    .g-lateral { padding: 16px 18px; gap: 14px; }
+    .mini { width: 336px; height: 189px; }
+    .mini .mini-lienzo { transform: scale(0.21); }
+    .entender { font-size: 16px; }
+    .g-ayuda { padding: 8px 24px; }
+  }
+
+  /* ---------- Impresión: respaldo en PDF ---------- */
+  @page diapositivas { size: 1600px 900px; margin: 0; }
+  @page { size: letter; margin: 16mm 15mm; }
+  @media print {
+    body.vista-proyeccion { background: var(--papel); overflow: visible; }
+    body.vista-proyeccion .escenario { position: static; }
+    body.vista-proyeccion .lienzo { position: static; transform: none !important; width: auto; height: auto; overflow: visible; }
+    body.vista-proyeccion .diapositiva { page: diapositivas; position: relative; width: 1600px; height: 900px; opacity: 1; visibility: visible; break-after: page; }
+    body.vista-proyeccion .entra { animation: none !important; }
+    body.vista-proyeccion .control-proyeccion { display: none; }
+    body.vista-guion #guion { display: none; }
+    body.vista-guion #guion-completo { display: block; font-size: 12.5pt; line-height: 1.5; }
+    #guion-completo h1 { font-family: var(--titulo); font-size: 22pt; margin: 0 0 4pt; }
+    #guion-completo h2 { font-size: 15pt; margin: 18pt 0 6pt; color: var(--selva); max-width: none; letter-spacing: 0; }
+    #guion-completo h3 { font-size: 12.5pt; margin: 12pt 0 4pt; break-after: avoid; }
+    #guion-completo .decir { margin: 0 0 6pt; }
+    #guion-completo .hacer { margin: 0 0 6pt; padding: 4pt 8pt; border-left: 3pt solid var(--terracota); background: var(--barro); color: var(--barro-texto); font-size: 11pt; }
+    #guion-completo .entender { font-size: 10pt; margin: 4pt 0 0; padding: 6pt 8pt; }
+    #guion-completo .paso { break-inside: avoid; }
+  }
+</style>
+</head>
+<body class="vista-proyeccion">
+
+<div id="proyeccion">
+  <div class="control-proyeccion">
+    <button type="button" id="abrir-guion">Abrir el guion</button>
+    <button type="button" id="pantalla-completa">Pantalla completa (F)</button>
+  </div>
+  <div class="escenario">
+    <div class="lienzo" id="lienzo">
+
+      <!-- 1. Portada -->
+      <section class="diapositiva verde portada" data-id="portada">
+        <svg class="curvas" data-cx="1330" data-cy="210" data-n="13" data-semilla="1" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div>
+            <div class="marca entra">
+              <svg class="simbolo" viewBox="0 0 32 32" aria-hidden="true">
+                <rect class="fondo" width="32" height="32" rx="9"></rect>
+                <path class="paso" d="M8.5 25.5C15 25.5 22.5 24.6 22.5 20.8S9.5 17.4 9.5 13.3 15 9 19.4 8.8"></path>
+                <circle class="meta" cx="22.8" cy="8.6" r="2.6"></circle>
+              </svg>
+              <h1>Senda</h1>
+            </div>
+            <p class="lema entra" style="--d:1">Tu camino académico, paso a paso.</p>
+            <p class="que-es entra" style="--d:2">Una plataforma académica para una fundación educativa, con un asistente que responde con los documentos oficiales y los datos reales del estudiante, sin inventar.</p>
+          </div>
+          <div class="firma entra" style="--d:3">
+            <div><strong>Aymer Ivan</strong><br>Proyecto final · AI Agentic Engineer · Datapath<br>Lunes 23 de noviembre de 2026</div>
+            <span class="pastilla">senda.creativebycode.workers.dev</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. El problema -->
+      <section class="diapositiva" data-id="problema">
+        <svg class="curvas" data-cx="1480" data-cy="120" data-n="10" data-semilla="2" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">El problema</div>
+          <h2 class="entra" style="--d:1">Una fundación que empieza, sin dinero, con estudiantes que estudian desde el celular.</h2>
+          <div class="preguntas">
+            <div class="pregunta entra" style="--d:2"><span>Hoy no sabe</span>¿Quién entregó el taller?</div>
+            <div class="pregunta entra" style="--d:3"><span>Hoy no sabe</span>¿Quién va al día con los pagos?</div>
+            <div class="pregunta entra" style="--d:4"><span>Hoy no sabe</span>¿A quién suspender por mora?</div>
+          </div>
+          <div class="respuesta entra" style="--d:5">
+            <div class="nombre">Senda</div>
+            <ul>
+              <li>Talleres, entregas y notas</li>
+              <li>Cuotas y pagos</li>
+              <li>Bloqueo automático: más de 30 días de mora</li>
+              <li>Asistente con los documentos oficiales</li>
+            </ul>
+            <div class="costo"><b>$0</b>plan gratuito<br>de Cloudflare</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Demo -->
+      <section class="diapositiva" data-id="demo">
+        <svg class="curvas" data-cx="200" data-cy="760" data-n="11" data-semilla="3" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">Demo en vivo</div>
+          <h2 class="entra" style="--d:1">De punta a punta, con la base de datos real.</h2>
+          <div class="recorrido entra" style="--d:2">
+            <svg class="trazo" viewBox="0 0 1376 420" preserveAspectRatio="none" aria-hidden="true">
+              <path class="camino" d="M 70 285 C 170 285, 200 120, 300 120 S 440 285, 530 285 S 680 120, 780 120 S 920 285, 1020 285 S 1170 120, 1290 120"></path>
+            </svg>
+            <div class="parada" style="left:5.1%; top:268px"><div class="punto"></div><div class="quien">Paola · estudiante</div><div class="que">Sube su taller desde el celular</div></div>
+            <div class="parada arriba" style="left:21.8%"><div class="punto"></div><div class="quien">Liliana · docente</div><div class="que">Lo califica: 4,2</div></div>
+            <div class="parada" style="left:38.5%; top:268px"><div class="punto"></div><div class="quien">Paola</div><div class="que">Ve su nota al instante</div></div>
+            <div class="parada arriba" style="left:56.7%"><div class="punto"></div><div class="quien">Asistente</div><div class="que">Cita la fuente o dice «no sé»</div></div>
+            <div class="parada" style="left:74.1%; top:268px"><div class="punto"></div><div class="quien">Manuela · en mora</div><div class="que">No puede entrar</div></div>
+            <div class="parada arriba final" style="left:93.8%"><div class="punto"></div><div class="quien">Administración</div><div class="que">Registra el pago: Manuela entra</div></div>
+          </div>
+          <div class="pie entra" style="--d:3">Datos ficticios cargados en la base de datos real (D1), porque la Fundación aún no ha entregado los suyos.</div>
+        </div>
+      </section>
+
+      <!-- 4. Las tres guardas -->
+      <section class="diapositiva" data-id="guardas">
+        <svg class="curvas" data-cx="1500" data-cy="820" data-n="10" data-semilla="4" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">La decisión técnica</div>
+          <h2 class="entra" style="--d:1">Un asistente que no inventa.</h2>
+          <div class="guardas">
+            <div class="alucinacion entra" style="--d:2">
+              <span class="sello">ALUCINACIÓN</span>
+              <div class="cita">«La nota mínima es 4.0.»<code>[Reglamento Académico]</code></div>
+              <p>Respuesta real del modelo, 18 de noviembre. La nota correcta es 3,0 y esa cita no existe. La validación de entonces la dejó pasar.</p>
+            </div>
+            <div class="capas">
+              <div class="flujo-extremo entra" style="--d:2">Pregunta del estudiante</div>
+              <div class="capa entra" style="--d:3"><div class="n">1</div><div><h3>Umbral de similitud</h3><p>Un fragmento poco parecido a la pregunta (menos de 0,55) no cuenta como fuente.</p></div></div>
+              <div class="capa entra" style="--d:4"><div class="n">2</div><div><h3>Instrucciones estrictas</h3><p>Antes de responder sobre la Fundación, el modelo consulta una herramienta.</p></div></div>
+              <div class="capa clave entra" style="--d:5"><div class="n">3</div><div><h3>Validación en el código <span class="etiqueta">No depende de que el modelo obedezca</span></h3><p>Toda cita debe ser un fragmento recuperado de verdad. Sin herramientas, ninguna cifra.</p></div></div>
+              <div class="salidas entra" style="--d:6"><span class="salida bien">Respuesta con su cita</span><span class="salida no">o «No tengo esa información»</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Medido, no opinado -->
+      <section class="diapositiva" data-id="medido">
+        <svg class="curvas" data-cx="120" data-cy="140" data-n="10" data-semilla="5" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">La decisión técnica</div>
+          <h2 class="entra" style="--d:1">Medido, no opinado.</h2>
+          <div class="medido">
+            <div class="panel entra" style="--d:2">
+              <h3>25 preguntas, dos modelos</h3>
+              <p class="nota">Cada pregunta con su respuesta esperada, calificada con reglas fijas.</p>
+              <div class="barra-modelo"><div class="fila"><span>gpt-oss-20b</span><span>96 %</span></div><div class="pista"><div class="lleno" style="width:96%"></div></div></div>
+              <div class="barra-modelo otro"><div class="fila"><span>llama-3.3-70b</span><span>88 %</span></div><div class="pista"><div class="lleno" style="width:88%"></div></div></div>
+              <p class="nota" style="margin-top:22px">gpt-oss cuesta la mitad: unas 31 neuronas por pregunta, unas 320 preguntas diarias en el plan gratuito.</p>
+            </div>
+            <div class="panel entra" style="--d:3">
+              <h3>La única falla: «¿Cuándo es la semana de parciales?»</h3>
+              <p class="nota">Antes de arreglar, se midió dónde se perdía la respuesta.</p>
+              <div class="regla">
+                <div class="eje"></div>
+                <div class="umbral"><span>umbral 0,55</span></div>
+                <div class="valor"><span>0,549: el fragmento correcto</span></div>
+                <div class="extremos"><span>0,40</span><span>0,60</span></div>
+              </div>
+              <div class="cambio">Se corrigió el documento, no la guarda:<br><del>Semana de evaluaciones parciales</del> → <ins>Semana de parciales (evaluaciones parciales)</ins></div>
+              <div class="resultado"><b>25 de 25</b><span>El modelo no es determinista: 96&nbsp;%, 96&nbsp;% y 100&nbsp;% en tres corridas. Cuando falla, se niega; nunca inventa.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. De la spec a producción -->
+      <section class="diapositiva" data-id="spec">
+        <svg class="curvas" data-cx="1460" data-cy="160" data-n="10" data-semilla="6" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">Cómo se construyó</div>
+          <h2 class="entra" style="--d:1">De la spec a producción.</h2>
+          <div class="tuberia">
+            <div class="estacion entra" style="--d:2"><div class="icono">1</div><h3>OpenSpec</h3><p>Propuesta, specs, diseño, tareas y archivo. Nada sin mi aprobación.</p></div>
+            <div class="estacion entra" style="--d:3"><div class="icono">2</div><h3>Escenarios</h3><p>Cada uno tiene una prueba con su nombre.</p></div>
+            <div class="estacion entra" style="--d:4"><div class="icono">3</div><h3>Pruebas</h3><p>Vitest en el runtime de producción y Playwright de punta a punta.</p></div>
+            <div class="estacion entra" style="--d:5"><div class="icono">4</div><h3>GitHub Actions</h3><p>Si una prueba falla, no se despliega.</p></div>
+            <div class="estacion entra" style="--d:6"><div class="icono">5</div><h3>Cloudflare</h3><p>La URL pública, en el plan gratuito.</p></div>
+          </div>
+          <div class="cifras">
+            <div class="cifra entra" style="--d:6"><b>130 / 130</b><span>escenarios con su prueba, verificado en cada push</span></div>
+            <div class="cifra entra" style="--d:7"><b>413 + 3</b><span>pruebas automáticas y de punta a punta</span></div>
+            <div class="cifra entra" style="--d:8"><b>3</b><span>cambios de OpenSpec archivados, con 54 tareas</span></div>
+            <div class="cifra entra" style="--d:9"><b>17 / 17</b><span>mutaciones del código detectadas por las pruebas</span></div>
+            <div class="cifra roja entra" style="--d:10"><b>1</b><span>ejecución en rojo, a propósito: la prueba de fuego de la mora</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. El agente y el humano -->
+      <section class="diapositiva" data-id="agente">
+        <svg class="curvas" data-cx="140" data-cy="800" data-n="10" data-semilla="7" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">Cómo se construyó</div>
+          <h2 class="entra" style="--d:1">El agente trabaja con reglas; las decisiones son mías.</h2>
+          <div class="dos-columnas">
+            <div class="herramientas">
+              <div class="herramienta entra" style="--d:2"><b>CLAUDE.md</b><span>Las reglas que no se negocian: Habeas Data, secretos, migraciones.</span></div>
+              <div class="herramienta entra" style="--d:3"><b>Skills</b><span>El flujo de OpenSpec y las pruebas primero.</span></div>
+              <div class="herramienta entra" style="--d:4"><b>MCP</b><span>Playwright revisó más de 50 capturas; documentación vigente de las librerías.</span></div>
+              <div class="herramienta entra" style="--d:5"><b>Hooks</b><span>Le impiden leer los secretos o editar una migración ya aplicada.</span></div>
+              <div class="herramienta entra" style="--d:6"><b>Subagente revisor</b><span>Revisa contra la spec sin haber visto cómo se escribió el código.</span></div>
+            </div>
+            <div class="humano entra" style="--d:4">
+              <h3>Yo decido</h3>
+              <ul>
+                <li>Apruebo cada spec antes de programar.</li>
+                <li>Elijo entre opciones con sus pros y contras.</li>
+                <li>Cargo los secretos y hago los despliegues.</li>
+                <li>Pruebo en vivo: 47 pruebas manuales, en la web y en el celular.</li>
+              </ul>
+              <div class="hallazgo">El revisor encontró dos afirmaciones equivocadas antes de esta presentación.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Cierre -->
+      <section class="diapositiva verde cierre" data-id="cierre">
+        <svg class="curvas" data-cx="1300" data-cy="760" data-n="13" data-semilla="8" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+        <div class="contenido">
+          <div class="ceja entra">Cierre</div>
+          <h2 class="entra" style="--d:1">Senda funciona hoy: publicado, probado y en el plan gratuito.</h2>
+          <div class="siguientes">
+            <div class="siguiente-paso entra" style="--d:1"><b>La rectora revisa las specs</b><span>Las reglas y el alcance pueden cambiar; cada cambio entra por OpenSpec.</span></div>
+            <div class="siguiente-paso entra" style="--d:2"><b>Producción</b><span>Dominio de la Fundación, sus datos reales y R2 para los archivos.</span></div>
+            <div class="siguiente-paso entra" style="--d:3"><b>WhatsApp con n8n</b><span>Avisos de cartera antes de que una cuota llegue a la mora.</span></div>
+          </div>
+          <p class="frase entra" style="--d:4">«Con un agente, la diferencia la hace la disciplina.»</p>
+          <div class="frase-pie entra" style="--d:5"><span>Spec primero · pruebas que fallan por la razón correcta · medir antes de decidir</span><span class="pastilla">Gracias</span></div>
+        </div>
+      </section>
+
+      <svg class="sendero-charla" id="sendero-charla" viewBox="0 0 1600 104" aria-hidden="true"></svg>
+    </div>
+  </div>
+</div>
+
+<div id="guion">
+  <header class="g-barra">
+    <div>
+      <div class="g-bloque" id="g-bloque"></div>
+      <div class="g-titulo" id="g-titulo"></div>
+    </div>
+    <div class="g-relojes">
+      <div class="reloj" id="reloj-paso"><div class="r-nombre">Este paso</div><div class="r-valor"></div><div class="r-pista"><div class="r-lleno"></div></div></div>
+      <div class="reloj" id="reloj-bloque"><div class="r-nombre">Bloque</div><div class="r-valor"></div><div class="r-pista"><div class="r-lleno"></div></div></div>
+      <div class="reloj" id="reloj-total"><div class="r-nombre">Total</div><div class="r-valor"></div><div class="r-pista"><div class="r-lleno"></div></div></div>
+    </div>
+    <div class="g-botones">
+      <button type="button" id="b-anterior" aria-label="Paso anterior">◀</button>
+      <button type="button" id="b-reloj">Iniciar</button>
+      <button type="button" id="b-siguiente" class="principal">Siguiente ▶</button>
+    </div>
+  </header>
+  <nav class="g-pasos" id="g-pasos" aria-label="Pasos de la presentación"></nav>
+  <main class="g-cuerpo">
+    <article class="g-lectura" id="g-lectura" aria-live="polite"></article>
+    <aside class="g-lateral">
+      <div>
+        <div class="g-etiqueta">En la pantalla compartida</div>
+        <div class="mini"><div class="mini-lienzo" id="mini"></div></div>
+      </div>
+      <div>
+        <div class="g-etiqueta">Sigue</div>
+        <div class="g-siguiente" id="g-siguiente"></div>
+      </div>
+      <div>
+        <div class="g-etiqueta">Cómo funciona (no se lee)</div>
+        <div class="entender" id="g-entender"></div>
+      </div>
+    </aside>
+  </main>
+  <footer class="g-ayuda">
+    <span><kbd>→</kbd> o <kbd>Espacio</kbd> siguiente</span>
+    <span><kbd>←</kbd> anterior</span>
+    <span><kbd>↑</kbd> <kbd>↓</kbd> mover el texto</span>
+    <span><kbd>T</kbd> iniciar o pausar</span>
+    <span><kbd>R</kbd> reiniciar el cronómetro</span>
+    <span>Imprimir esta vista (<kbd>Ctrl</kbd>+<kbd>P</kbd>) da el guion completo en papel</span>
+    <span class="g-sincronia" id="g-sincronia"></span>
+  </footer>
+</div>
+
+<div id="guion-completo"></div>
+
+<script>
+"use strict";
+
+// ---------- El guion: bloques y pasos (unas 1.100 palabras para 10 minutos) ----------
+// Cada paso dice qué diapositiva se proyecta, cuánto tiempo tiene y qué se lee ("d") o se hace ("h").
+// "entender" es una nota para Aymer, no se lee en voz alta.
+const BLOQUES = [
+  { nombre: "El problema", segundos: 60 },
+  { nombre: "Demo en vivo", segundos: 240 },
+  { nombre: "Sin inventar", segundos: 150 },
+  { nombre: "Cómo se construyó", segundos: 105 },
+  { nombre: "Cierre", segundos: 45 },
+];
+
+const PASOS = [
+  {
+    bloque: 0, diapositiva: "portada", titulo: "Portada", segundos: 20,
+    guion: [
+      { d: "Hola a todos. Mi nombre es Aymer Ivan, soy ingeniero de sistemas en Cali. Les presento **Senda**: una plataforma académica para una fundación educativa, con un asistente que responde con los documentos oficiales y con los datos reales del estudiante, **sin inventar**." },
+    ],
+    entender: "«Senda» es el nombre del producto, independiente de la Fundación. La Fundación real es Funafrocol, pero la demo pública muestra «Fundación (demo)» hasta que autoricen por escrito: el nombre es una variable del Worker, no está escrito en el código.",
+  },
+  {
+    bloque: 0, diapositiva: "problema", titulo: "El problema", segundos: 40,
+    guion: [
+      { d: "La Fundación está empezando y no tiene dinero. Sus estudiantes son de carreras técnicas y casi todos estudian desde el celular. Hoy no tiene cómo saber **quién entregó** un taller, **quién va al día** con los pagos ni **a quién suspender** cuando se atrasa." },
+      { d: "Senda resuelve eso: talleres con entregas y notas, cuotas y pagos, y el bloqueo automático cuando una cuota pasa de 30 días vencida. Corre en el plan gratuito de Cloudflare, así que a la Fundación no le cuesta nada. Y todo lo que van a ver sale de la base de datos real: los datos son ficticios porque la Fundación aún no ha entregado los suyos." },
+    ],
+    entender: "Criterio 2 de la rúbrica (datos reales): el frontend nunca tiene datos escritos; todo llega de la API, que lee D1, la base de datos SQLite de Cloudflare. Los datos ficticios se cargaron en esa base real con un script de seed.",
+  },
+  {
+    bloque: 1, diapositiva: "demo", titulo: "Vamos a la plataforma", segundos: 10,
+    guion: [
+      { d: "Les muestro el flujo completo, en vivo, con tres personas: Paola, estudiante; Liliana, docente; y la administración de la Fundación." },
+      { h: "Cambia a la ventana de **Paola** (vista de celular), en la pantalla de ingreso." },
+    ],
+    entender: "Cada persona va en su propia ventana porque la sesión vive en una cookie del navegador: dos personas en la misma ventana se pisarían la sesión.",
+  },
+  {
+    bloque: 1, diapositiva: "demo", titulo: "Paola entrega su taller", segundos: 30,
+    guion: [
+      { h: "Ingresa con `9900001001` y `Demo2026*`." },
+      { d: "Paola estudia Programación de Software y va al día. Así ve Senda en su celular: su estado de cuenta y su próxima entrega." },
+      { h: "En Inicio, pulsa «Subir mi entrega» del Taller 3 de Lógica → elige el PDF → súbelo." },
+      { d: "Sube su taller desde el celular. El servidor revisa el archivo **por su contenido**, no por el nombre: un archivo de texto renombrado como PDF se rechaza." },
+    ],
+    entender: "La API lee los primeros bytes del archivo (la «firma» de PDF, DOCX, JPG o PNG) y rechaza más de 10 MB. El archivo se guarda en Workers KV y se descarga siempre a través de la API, con permisos: nunca hay una URL pública.",
+  },
+  {
+    bloque: 1, diapositiva: "demo", titulo: "Liliana califica", segundos: 45,
+    guion: [
+      { h: "Cambia a la ventana de **Liliana** (ya con su sesión abierta) → Mis cursos → Lógica de programación → Taller 3." },
+      { d: "Liliana, la docente, ve quién entregó y quién no, y puede descargar cada entrega. Fíjense que **no ve el celular ni el correo** de sus estudiantes: es la Ley de Habeas Data, y esa regla se aplica en el servidor, no solo en la pantalla." },
+      { h: "«Calificar» en la fila de Paola → nota `4,2` y el comentario «Buen manejo de funciones» → «Guardar nota»." },
+      { d: "Y califica: cuatro coma dos." },
+    ],
+    entender: "Los permisos se validan en la API: aunque alguien la llame directamente, a la docente no le llegan los datos de contacto (D18). Las notas van de 0,0 a 5,0 con un decimal, y una entrega calificada ya no se puede reemplazar: lo impide incluso un trigger de la base de datos.",
+  },
+  {
+    bloque: 1, diapositiva: "demo", titulo: "Paola ve su nota", segundos: 15,
+    guion: [
+      { h: "Vuelve a **Paola** → abre el Taller 3 de Lógica." },
+      { d: "Y Paola ya ve su nota, **4,2 de 5,0**, con el comentario de la docente. Al instante." },
+    ],
+    entender: "No hay notificaciones ni procesos en segundo plano: la pantalla de Paola consulta la API y la nota ya está guardada en D1.",
+  },
+  {
+    bloque: 1, diapositiva: "demo", titulo: "El asistente", segundos: 70,
+    guion: [
+      { h: "Paola → Asistente académico → toca la sugerencia «¿Cuál es la nota mínima para aprobar un curso?»." },
+      { d: "Ahora el asistente. Paola pregunta por la nota mínima: responde **tres** y cita la fuente, el Reglamento estudiantil, en la sección Evaluación y calificaciones." },
+      { h: "Escribe: «¿Cuánto debo en total?»" },
+      { d: "Ahora, sus propios datos: **360.000 pesos**. No sale de un documento: lo consulta en su estado de cuenta real, en este momento, y solo el de ella." },
+      { h: "Escribe: «¿Cuál es el horario de la cafetería?»" },
+      { d: "Y esto no está en ningún documento de la Fundación. Responde que **no tiene esa información** y la remite a la Fundación. No inventa un horario. En un momento les cuento cómo lo logramos." },
+    ],
+    entender: "Es RAG: la pregunta se convierte en un vector (embeddings bge-m3 de Workers AI), Vectorize busca los fragmentos más parecidos de los documentos y el modelo (gpt-oss-20b) responde solo con eso. Para los datos propios usa herramientas que leen D1 con el estudiante de la sesión: el modelo no puede pedir los datos de otra persona.",
+  },
+  {
+    bloque: 1, diapositiva: "demo", titulo: "Mora: bloqueo y pago", segundos: 70,
+    guion: [
+      { h: "Cambia a la ventana de **Manuela** → ingresa con `9900001002` y `Demo2026*`." },
+      { d: "Manuela tiene una cuota con **49 días de atraso**. Intenta entrar y no puede: su acceso está suspendido, con un mensaje claro de a quién acudir." },
+      { h: "Cambia a **administración** → Cartera → fila de Manuela Riascos Rojas (›) → en la cuota del 5 de octubre, «Registrar pago» → confirma." },
+      { d: "La administración registra su pago de octubre." },
+      { h: "Vuelve a **Manuela** → ingresa otra vez." },
+      { d: "Y Manuela entra **en ese mismo instante**. Queda «en riesgo», porque todavía debe noviembre. No hay ningún proceso nocturno: el estado se calcula en cada petición, con la fecha de Colombia." },
+    ],
+    entender: "calcularEstadoMora es una función pura: bloqueado si alguna cuota con saldo tiene 31 días o más de vencida, salvo un acuerdo de pago vigente. Se evalúa al ingresar y en cada petición del estudiante, así que el pago surte efecto de inmediato.",
+  },
+  {
+    bloque: 2, diapositiva: "guardas", titulo: "La alucinación del 4.0", segundos: 35,
+    guion: [
+      { h: "Vuelve a las diapositivas." },
+      { d: "La decisión técnica de la que estoy más orgulloso es cómo evitamos que el asistente invente. La regla está en la spec: si no encuentra información suficiente, debe decir que no la tiene; **nunca inventar** datos, fechas ni normas." },
+      { d: "Pero cuando lo probé con el modelo real, respondió de memoria: «La nota mínima es **cuatro**», citando un «Reglamento Académico» que no existe. La nota correcta es tres. Y mi validación de ese momento lo dejó pasar." },
+    ],
+    entender: "Por qué pasó: la validación de entonces solo reconocía como cita un texto con raya («Documento – Sección»). La cita inventada no tenía raya, así que ni siquiera se revisó. Lo encontró la prueba con el modelo real del 18 de noviembre, no las pruebas automáticas: por eso también se prueba a mano.",
+  },
+  {
+    bloque: 2, diapositiva: "guardas", titulo: "Las tres capas", segundos: 50,
+    guion: [
+      { d: "Entonces actualicé primero el diseño y después el código, con **tres capas**. Una: un umbral de similitud; si el fragmento encontrado no se parece lo suficiente a la pregunta, no cuenta como fuente. Dos: instrucciones estrictas; el modelo debe consultar una herramienta antes de responder sobre la Fundación. Y tres, la más importante: una validación **en el código**; toda cita tiene que ser un fragmento que de verdad se recuperó, y sin herramientas no se aceptan cifras. Si algo falla, la respuesta se reemplaza por «no tengo esa información». Esa capa no depende de que el modelo obedezca." },
+      { d: "Y hay una prueba automática que repite exactamente la alucinación del cuatro y verifica que se bloquea." },
+    ],
+    entender: "La similitud es el parecido entre el vector de la pregunta y el de cada fragmento (1 es idéntico). El umbral de 0,55 se midió antes: 0,743 con el fragmento correcto y 0,35 con un texto ajeno. La capa 3 está en api/src/rag/agente.ts y la prueba del «4.0», en api/test/agente.test.ts.",
+  },
+  {
+    bloque: 2, diapositiva: "medido", titulo: "Medido, no opinado", segundos: 65,
+    guion: [
+      { d: "Y no me quedé con la intuición: lo medí. Armé **25 preguntas** con su respuesta esperada y comparé dos modelos. gpt-oss acertó el 96 por ciento y Llama el 88, y gpt-oss cuesta la mitad: por eso lo elegí." },
+      { d: "La única falla era segura: no respondía cuándo es la semana de parciales, aunque está en el calendario. En lugar de adivinar, medí: el fragmento correcto salía primero, pero con **0,549**, a una milésima del umbral. No bajé el umbral, porque eso aflojaría la protección en todas las preguntas: escribí el calendario con las palabras del estudiante. Resultado: **25 de 25**, y sigue diciendo «no sé» cuando debe." },
+    ],
+    entender: "El modelo no es determinista: en tres corridas completas dio 96 %, 96 % y 100 %. Lo estable es que siempre supera el 90 % y que, cuando falla, se niega: nunca inventa. La evaluación está en eval/ y se califica con reglas fijas, sin otro modelo como juez.",
+  },
+  {
+    bloque: 3, diapositiva: "spec", titulo: "De la spec a producción", segundos: 50,
+    guion: [
+      { d: "¿Cómo se construyó? Con desarrollo guiado por especificaciones, usando **OpenSpec**. Nada se programó sin una spec aprobada por mí: propuesta, specs, diseño, tareas y archivo. Hoy Senda está descrito en **130 escenarios**, y cada uno tiene una prueba que lleva su nombre; un comando lo verifica en cada push." },
+      { d: "Son **413 pruebas** automáticas y 3 de punta a punta con Playwright. Si el flujo de la demo se rompe, el pipeline no despliega. Y lo comprobé: dañé a propósito la regla de mora, de 30 a 29 días, y el pipeline lo atrapó. Es la única ejecución en rojo de toda la historia." },
+      { h: "Solo si vas bien de tiempo: muestra la pestaña de GitHub Actions en verde." },
+    ],
+    entender: "Un escenario es un caso CUANDO/ENTONCES de la spec («cuando una cuota tiene 31 días de vencida, entonces el estudiante no puede ingresar»). npm run trazabilidad cruza los 130 escenarios con los nombres de las pruebas y falla en el CI si alguno queda sin prueba. Las pruebas de la API corren en workerd, el mismo runtime de producción.",
+  },
+  {
+    bloque: 3, diapositiva: "agente", titulo: "El agente y el humano", segundos: 55,
+    guion: [
+      { d: "Lo construí con Claude Code, pero con reglas. Un archivo CLAUDE.md con lo que no se negocia, como Habeas Data y no tocar los secretos. Skills de OpenSpec y de pruebas primero. Servidores MCP: Playwright para revisar más de 50 capturas de las pantallas, y la documentación vigente de las librerías." },
+      { d: "Las reglas críticas no dependen de la memoria del agente: un **hook** le impide leer los secretos o editar una migración ya aplicada. Y un **subagente revisor**, que no vio cómo se escribió el código, lo revisa contra la spec: este fin de semana encontró dos afirmaciones mías equivocadas antes de que llegaran a esta presentación." },
+      { d: "Y las decisiones las tomo yo: apruebo las specs, elijo entre opciones y cargo los secretos." },
+    ],
+    entender: "Skill: instrucciones empaquetadas que el agente carga para una tarea, como el flujo de OpenSpec. MCP: un protocolo para conectarle herramientas externas al agente, como el navegador de Playwright. Hook: un script que corre antes o después de cada acción del agente y puede bloquearla. Subagente: otra instancia del agente, con su propio contexto y solo lectura.",
+  },
+  {
+    bloque: 4, diapositiva: "cierre", titulo: "Cierre", segundos: 45,
+    guion: [
+      { d: "Senda funciona hoy, publicado y probado, en el plan gratuito. Lo que sigue: mostrarle las specs a la rectora de la Fundación, que puede cambiar reglas y alcances; y como todo nace de las specs, cada cambio entra por el mismo camino. Después, producción con sus datos reales, y avisos de cartera por WhatsApp con n8n." },
+      { d: "Lo que me llevo: con un agente, **la diferencia la hace la disciplina**. Spec primero, pruebas que fallan por la razón correcta y medir antes de decidir. Muchas gracias." },
+    ],
+    entender: "Si preguntan por producción: un dominio propio de la Fundación, el plan pago de Workers (ADR-003) y R2 para los archivos (ADR-002). Hoy los archivos van en Workers KV porque R2 exige registrar un medio de pago.",
+  },
+];
+
+// ---------- Utilidades ----------
+const $ = (s, raiz = document) => raiz.querySelector(s);
+const vista = new URLSearchParams(location.search).get("vista") === "guion" ? "guion" : "proyeccion";
+document.body.className = vista === "guion" ? "vista-guion" : "vista-proyeccion";
+document.title = vista === "guion" ? "Senda – guion" : "Senda – presentación";
+
+// Texto seguro: escapa el HTML, `código` va en <code> y **texto** en <strong>
+function formato(texto) {
+  const escapar = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return texto
+    .split(/(`[^`]*`)/)
+    .map((parte) =>
+      parte.startsWith("`") && parte.endsWith("`") && parte.length > 1
+        ? `<code>${escapar(parte.slice(1, -1))}</code>`
+        : escapar(parte).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>"),
+    )
+    .join("");
+}
+
+const mmss = (ms) => {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+
+// ---------- Curvas de nivel: anillos irregulares alrededor de un centro, deterministas ----------
+function dibujarCurvas(svg) {
+  const cx = Number(svg.dataset.cx), cy = Number(svg.dataset.cy), n = Number(svg.dataset.n), s = Number(svg.dataset.semilla);
+  const caminos = [];
+  for (let k = 1; k <= n; k++) {
+    const radio = 46 + k * 52;
+    const puntos = [];
+    for (let i = 0; i <= 140; i++) {
+      const t = (i / 140) * Math.PI * 2;
+      const r = radio * (1 + 0.11 * Math.sin(3 * t + s + k * 0.17) + 0.06 * Math.sin(5 * t + s * 2.3 - k * 0.11) + 0.035 * Math.sin(8 * t + s * 0.7 + k * 0.05));
+      puntos.push(`${(cx + r * Math.cos(t) * 1.28).toFixed(1)},${(cy + r * Math.sin(t)).toFixed(1)}`);
+    }
+    caminos.push(`<path d="M${puntos.join("L")}Z"></path>`);
+  }
+  svg.innerHTML = caminos.join("");
+}
+document.querySelectorAll("svg.curvas").forEach(dibujarCurvas);
+
+// ---------- Sendero de la charla (pie de las diapositivas de contenido) ----------
+const XS_SENDERO = [210, 505, 800, 1095, 1390];
+function dibujarSendero(bloqueActual, oculto) {
+  const svg = $("#sendero-charla");
+  svg.classList.toggle("oculto", oculto);
+  const y = (i) => (i % 2 === 0 ? 40 : 30);
+  const camino = `M120 40 ${XS_SENDERO.map((x, i) => `L${x} ${y(i)}`).join(" ")} L1480 40`;
+  const nodos = BLOQUES.map((b, i) => {
+    const clase = ["nodo", i === BLOQUES.length - 1 ? "meta" : "", i < bloqueActual ? "hecho" : "", i === bloqueActual ? "actual" : ""].join(" ");
+    const texto = `<text x="${XS_SENDERO[i]}" y="84" text-anchor="middle" class="${i === bloqueActual ? "actual" : ""}">${b.nombre}</text>`;
+    return `<circle class="${clase}" cx="${XS_SENDERO[i]}" cy="${y(i)}" r="${i === bloqueActual ? 12 : 9}"></circle>${texto}`;
+  });
+  svg.innerHTML = `<path class="camino" d="${camino}"></path>${nodos.join("")}`;
+}
+
+// ---------- Estado compartido entre las dos ventanas ----------
+// tiempos[i]: milisegundos acumulados en el paso i. marca: cuándo empezó a correr el paso actual (si corre)
+const CLAVE = "senda-presentacion-v1";
+let estado = { paso: 0, corriendo: false, marca: null, tiempos: PASOS.map(() => 0), rev: 0 };
+
+function guardar() {
+  try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch { /* sin almacenamiento: igual funciona */ }
+}
+function cargar() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? "null");
+    if (guardado && Array.isArray(guardado.tiempos) && guardado.tiempos.length === PASOS.length) estado = guardado;
+  } catch { /* ignorado */ }
+}
+
+const canal = "BroadcastChannel" in window ? new BroadcastChannel("senda-presentacion") : null;
+function publicar() {
+  estado.rev = Date.now();
+  guardar();
+  canal?.postMessage({ tipo: "estado", estado });
+  pintar();
+}
+if (canal) {
+  canal.onmessage = ({ data }) => {
+    if (data?.tipo === "pedir") canal.postMessage({ tipo: "estado", estado });
+    if (data?.tipo === "estado" && data.estado.rev > estado.rev) {
+      estado = data.estado;
+      guardar();
+      pintar();
+      senalarSincronia();
+    }
+  };
+}
+window.addEventListener("storage", (e) => {
+  if (e.key !== CLAVE || canal) return;
+  cargar();
+  pintar();
+});
+
+function transcurridoPaso(i) {
+  return estado.tiempos[i] + (estado.corriendo && i === estado.paso ? Date.now() - estado.marca : 0);
+}
+const total = () => PASOS.reduce((suma, _, i) => suma + transcurridoPaso(i), 0);
+const enBloque = (b) => PASOS.reduce((suma, p, i) => suma + (p.bloque === b ? transcurridoPaso(i) : 0), 0);
+
+function irA(i) {
+  const destino = Math.min(PASOS.length - 1, Math.max(0, i));
+  if (destino === estado.paso) return;
+  if (estado.corriendo) {
+    estado.tiempos[estado.paso] += Date.now() - estado.marca;
+    estado.marca = Date.now();
+  }
+  estado.paso = destino;
+  publicar();
+}
+function siguiente() {
+  // Avanzar desde la portada pone a correr el cronómetro, por si se olvidó
+  if (!estado.corriendo && estado.paso === 0 && total() === 0) iniciarOPausar();
+  irA(estado.paso + 1);
+}
+function iniciarOPausar() {
+  if (estado.corriendo) {
+    estado.tiempos[estado.paso] += Date.now() - estado.marca;
+    estado.corriendo = false;
+    estado.marca = null;
+  } else {
+    estado.corriendo = true;
+    estado.marca = Date.now();
+  }
+  publicar();
+}
+function reiniciar() {
+  estado = { paso: 0, corriendo: false, marca: null, tiempos: PASOS.map(() => 0), rev: 0 };
+  publicar();
+}
+
+// ---------- Pintar ----------
+let diapositivaPintada = null;
+function pintarProyeccion() {
+  const paso = PASOS[estado.paso];
+  if (paso.diapositiva !== diapositivaPintada) {
+    document.querySelectorAll("#lienzo .diapositiva").forEach((d) => d.classList.toggle("activa", d.dataset.id === paso.diapositiva));
+    diapositivaPintada = paso.diapositiva;
+  }
+  dibujarSendero(paso.bloque, paso.diapositiva === "portada" || paso.diapositiva === "cierre");
+}
+
+function pintarGuion() {
+  const paso = PASOS[estado.paso];
+  const bloque = BLOQUES[paso.bloque];
+  $("#g-bloque").textContent = `Bloque ${paso.bloque + 1} de ${BLOQUES.length} · ${bloque.nombre} · paso ${estado.paso + 1} de ${PASOS.length}`;
+  $("#g-titulo").textContent = paso.titulo;
+  $("#g-lectura").innerHTML = paso.guion
+    .map((s) => (s.d ? `<p class="decir">${formato(s.d)}</p>` : `<div class="hacer"><span>${formato(s.h)}</span></div>`))
+    .join("");
+  $("#g-lectura").scrollTop = 0;
+  $("#g-entender").innerHTML = formato(paso.entender);
+  const prox = PASOS[estado.paso + 1];
+  $("#g-siguiente").innerHTML = prox
+    ? `<strong>${formato(prox.titulo)}</strong><br><span>${prox.diapositiva === paso.diapositiva ? "Misma diapositiva" : "Cambia la diapositiva"} · ${BLOQUES[prox.bloque].nombre}</span>`
+    : "<strong>Fin.</strong><br><span>Siguen las preguntas del jurado.</span>";
+  $("#b-anterior").disabled = estado.paso === 0;
+  $("#b-siguiente").disabled = estado.paso === PASOS.length - 1;
+
+  // Miniatura de lo que se ve en la pantalla compartida
+  const original = document.querySelector(`#lienzo .diapositiva[data-id="${paso.diapositiva}"]`);
+  const mini = $("#mini");
+  mini.innerHTML = "";
+  const copia = original.cloneNode(true);
+  copia.classList.add("activa");
+  mini.appendChild(copia);
+
+  // Pasos como sendero
+  const nav = $("#g-pasos");
+  nav.innerHTML = PASOS.map((p, i) => {
+    const sep = i > 0 && PASOS[i - 1].bloque !== p.bloque ? '<span class="sep" aria-hidden="true"></span>' : "";
+    const clase = i < estado.paso ? "hecho" : i === estado.paso ? "actual" : "";
+    return `${sep}<button type="button" class="${clase}" data-i="${i}"${i === estado.paso ? ' aria-current="step"' : ""}>${i + 1}. ${formato(p.titulo)}</button>`;
+  }).join("");
+  nav.querySelector(".actual")?.scrollIntoView({ block: "nearest", inline: "center" });
+  pintarRelojes();
+}
+
+function pintarReloj(id, ms, presupuestoMs) {
+  const caja = document.getElementById(id);
+  caja.querySelector(".r-valor").innerHTML = `${mmss(ms)} <small>/ ${mmss(presupuestoMs)}</small>`;
+  const proporcion = presupuestoMs ? ms / presupuestoMs : 0;
+  caja.querySelector(".r-lleno").style.width = `${Math.min(100, proporcion * 100)}%`;
+  caja.classList.toggle("justo", proporcion >= 0.85 && proporcion <= 1);
+  caja.classList.toggle("pasado", proporcion > 1);
+}
+function pintarRelojes() {
+  if (vista !== "guion") return;
+  const paso = PASOS[estado.paso];
+  pintarReloj("reloj-paso", transcurridoPaso(estado.paso), paso.segundos * 1000);
+  pintarReloj("reloj-bloque", enBloque(paso.bloque), BLOQUES[paso.bloque].segundos * 1000);
+  pintarReloj("reloj-total", total(), BLOQUES.reduce((s, b) => s + b.segundos, 0) * 1000);
+  $("#b-reloj").textContent = estado.corriendo ? "Pausar" : total() > 0 ? "Seguir" : "Iniciar";
+}
+
+function pintar() {
+  pintarProyeccion();
+  if (vista === "guion") pintarGuion();
+}
+
+function senalarSincronia() {
+  const marca = $("#g-sincronia");
+  if (marca) marca.textContent = "Sincronizado con la proyección";
+}
+
+// Guion completo para imprimir (respaldo en papel)
+function armarGuionCompleto() {
+  const partes = ['<h1>Senda – guion de la presentación</h1><p>Lunes 23 de noviembre de 2026 · unos 10 minutos · lo que va en recuadro se hace, no se lee.</p>'];
+  BLOQUES.forEach((b, ib) => {
+    partes.push(`<h2>${ib + 1}. ${b.nombre} (${mmss(b.segundos * 1000)})</h2>`);
+    PASOS.forEach((p) => {
+      if (p.bloque !== ib) return;
+      partes.push(
+        `<div class="paso"><h3>${formato(p.titulo)} · ${p.segundos} s</h3>${p.guion
+          .map((s) => (s.d ? `<p class="decir">${formato(s.d)}</p>` : `<p class="hacer">HAZ: ${formato(s.h)}</p>`))
+          .join("")}<p class="entender">Cómo funciona: ${formato(p.entender)}</p></div>`,
+      );
+    });
+  });
+  $("#guion-completo").innerHTML = partes.join("");
+}
+
+// ---------- Escala del lienzo, teclado y controles ----------
+function ajustarLienzo() {
+  const escala = Math.min(innerWidth / 1600, innerHeight / 900);
+  $("#lienzo").style.transform = `translate(-50%, -50%) scale(${escala})`;
+}
+window.addEventListener("resize", ajustarLienzo);
+
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tecla = e.key;
+  if (["ArrowRight", "PageDown", " ", "Enter"].includes(tecla)) { e.preventDefault(); siguiente(); }
+  else if (["ArrowLeft", "PageUp", "Backspace"].includes(tecla)) { e.preventDefault(); irA(estado.paso - 1); }
+  else if ((tecla === "ArrowDown" || tecla === "ArrowUp") && vista === "guion") {
+    e.preventDefault();
+    $("#g-lectura").scrollBy({ top: tecla === "ArrowDown" ? 140 : -140, behavior: "smooth" });
+  }
+  else if (tecla === "Home") irA(0);
+  else if (tecla === "End") irA(PASOS.length - 1);
+  else if (tecla === "t" || tecla === "T") iniciarOPausar();
+  else if ((tecla === "r" || tecla === "R") && vista === "guion" && confirm("¿Reiniciar el cronómetro y volver a la portada?")) reiniciar();
+  else if ((tecla === "f" || tecla === "F") && vista === "proyeccion") alternarPantallaCompleta();
+});
+
+function alternarPantallaCompleta() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen?.();
+}
+
+let temporizadorMouse;
+document.addEventListener("mousemove", () => {
+  if (vista !== "proyeccion") return;
+  document.body.classList.add("mouse-activo");
+  document.body.classList.remove("ocultar-cursor");
+  clearTimeout(temporizadorMouse);
+  temporizadorMouse = setTimeout(() => document.body.classList.replace("mouse-activo", "ocultar-cursor"), 1800);
+});
+
+$("#abrir-guion").addEventListener("click", () => window.open("?vista=guion", "senda-guion"));
+$("#pantalla-completa").addEventListener("click", alternarPantallaCompleta);
+$("#b-anterior").addEventListener("click", () => irA(estado.paso - 1));
+$("#b-siguiente").addEventListener("click", siguiente);
+$("#b-reloj").addEventListener("click", iniciarOPausar);
+$("#g-pasos").addEventListener("click", (e) => {
+  const boton = e.target.closest("button[data-i]");
+  if (boton) irA(Number(boton.dataset.i));
+});
+
+// ---------- Arranque ----------
+cargar();
+ajustarLienzo();
+armarGuionCompleto();
+pintar();
+canal?.postMessage({ tipo: "pedir" });
+setInterval(pintarRelojes, 250);
+</script>
+</body>
+</html>
