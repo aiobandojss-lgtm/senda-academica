@@ -1,9 +1,9 @@
 /* Fuentes y colores de Senda (docs/identidad-visual.md), compartidos por diapositivas.html, guion.html y glosario.html.
-   Las fuentes las sirve scripts/presentacion.mjs desde los paquetes de Fontsource: funciona sin internet. */
-@font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces.woff2) format("woff2-variations"); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces-italica.woff2) format("woff2-variations"); font-weight: 100 900; font-style: italic; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson.woff2) format("woff2-variations"); font-weight: 200 800; font-style: normal; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson-italica.woff2) format("woff2-variations"); font-weight: 200 800; font-style: italic; font-display: swap; }
+   Las fuentes están en fuentes/ (copiadas de los paquetes de Fontsource): funciona con doble clic y sin internet. */
+@font-face { font-family: "Fraunces Variable"; src: url(fuentes/fraunces.woff2) format("woff2-variations"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Fraunces Variable"; src: url(fuentes/fraunces-italica.woff2) format("woff2-variations"); font-weight: 100 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(fuentes/atkinson.woff2) format("woff2-variations"); font-weight: 200 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(fuentes/atkinson-italica.woff2) format("woff2-variations"); font-weight: 200 800; font-style: italic; font-display: swap; }
 
 /* Paleta de docs/identidad-visual.md */
 :root {

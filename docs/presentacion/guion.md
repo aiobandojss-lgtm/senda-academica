@@ -1,6 +1,6 @@
 # Guion de la presentación – lunes 23 de noviembre de 2026
 
-**Versión 2** (domingo 22). **Las diapositivas están en [diapositivas.html](diapositivas.html) y el texto para leer en [guion.html](guion.html)**: se abren con `npm run presentacion`, las diapositivas en la pantalla compartida y el guion en la otra pantalla. Este documento queda como referencia: los tiempos, la preparación, el plan B y las preguntas esperadas.
+**Versión 2** (domingo 22). **Las diapositivas están en [diapositivas.html](diapositivas.html) y el texto para leer en [guion.html](guion.html)**: se abren con doble clic (en el mismo navegador, para que se sincronicen), las diapositivas en la pantalla compartida y el guion en la otra pantalla. Este documento queda como referencia: los tiempos, la preparación, el plan B y las preguntas esperadas.
 
 - **Formato:** unos 10 minutos de demo en vivo, más preguntas ([rúbrica](../rubrica.md)).
 - **Hilo conductor:** contar la metodología del curso **usando el producto como evidencia**. La rúbrica pide tres momentos: el problema, la demo del flujo principal y una decisión técnica de la que estés orgulloso.
@@ -86,8 +86,8 @@ Se muestran los archivos reales, en este orden. El texto para leer está en `gui
 
 - **Presentación virtual con dos pantallas** (decisión del 21 de noviembre):
   - **Pantalla 1, la que se comparte en la videollamada** (compartir la pantalla completa, no una ventana): la proyección en pantalla completa (tecla `F`) y las ventanas de la demo.
-  - **Pantalla 2, solo para ti:** el guion (`http://127.0.0.1:8765/guion.html`). Ahí avanzas con `→`, y la proyección cambia sola.
-  - Abre primero la terminal con `npm run presentacion` y déjala abierta durante toda la presentación.
+  - **Pantalla 2, solo para ti:** el guion (doble clic en `docs/presentacion/guion.html`). Ahí avanzas con `→`, y la proyección cambia sola.
+  - Abre `diapositivas.html` y `guion.html` con doble clic: los dos quedan en tu navegador predeterminado y así se sincronizan. No hace falta terminal ni internet.
 - **Navegadores separados:** cada sesión vive en una cookie, así que cada persona va en su propio navegador o perfil. **Cerrar sesión cierra a esa persona en todos los equipos** (desde el 19 de noviembre): si en un ensayo la cierras en otro lado, vuelve a ingresar antes de la demo.
   - **Microsoft Edge, ventana angosta (unos 450 px):** Paola, en la pantalla de ingreso. Con menos de 768 px de ancho, Senda muestra la versión de celular, la misma que probaste en tu iPhone. Di en voz alta que es la misma web responsiva.
   - **Chrome, perfil 1:** Liliana, la docente (`9900000103`), con la sesión ya abierta.

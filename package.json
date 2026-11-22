@@ -22,8 +22,7 @@
     "test:e2e": "playwright test",
     "rag:indexar": "node scripts/rag-indexar.mjs",
     "eval:rag": "node scripts/eval-rag.mjs",
-    "trazabilidad": "node scripts/trazabilidad.mjs",
-    "presentacion": "node scripts/presentacion.mjs"
+    "trazabilidad": "node scripts/trazabilidad.mjs"
   },
   "dependencies": {
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",

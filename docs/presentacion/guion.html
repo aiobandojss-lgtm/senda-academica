@@ -7,7 +7,7 @@
 <link rel="icon" href="data:,">
 <!--
   El guion de Aymer para su otra pantalla: el texto que se lee, las acciones de la demo, las notas de "cómo funciona"
-  y los cronómetros. Se abre con `npm run presentacion` en http://127.0.0.1:8765/guion.html
+  y los cronómetros. Se abre con doble clic, en el mismo navegador que diapositivas.html.
   Se sincroniza con diapositivas.html (lo que ve el jurado) por presentacion.js. Para cambiar una frase, edita TEXTOS.
 -->
 <link rel="stylesheet" href="comun.css">
@@ -118,7 +118,7 @@
     <aside class="g-lateral">
       <div>
         <div class="g-etiqueta">En la pantalla compartida</div>
-        <div class="mini"><iframe src="/?miniatura" title="Lo que ve el jurado" tabindex="-1" aria-hidden="true"></iframe></div>
+        <div class="mini"><iframe src="diapositivas.html?miniatura" title="Lo que ve el jurado" tabindex="-1" aria-hidden="true"></iframe></div>
       </div>
       <div>
         <div class="g-etiqueta">Sigue</div>
@@ -143,11 +143,15 @@
 
 <div id="guion-completo"></div>
 
-<script type="module">
-import {
+<script src="presentacion.js"></script>
+<script>
+"use strict";
+// Todo dentro de un bloque: las constantes de esta página no se vuelven variables globales
+{
+const {
   BLOQUES, PASOS, $, estado, cargar, alCambiar, alRecibir, pedirEstado, teclaDeNavegacion,
   transcurridoPaso, total, enBloque, irA, siguiente, iniciarOPausar, reiniciar,
-} from "./presentacion.js";
+} = window.Senda;
 
 // ---------- El texto de cada paso (unas 1.050 palabras para 10 minutos) ----------
 // La llave es el id del paso en presentacion.js. "d" se dice en voz alta; "h" se hace y no se lee.
@@ -409,6 +413,7 @@ armarGuionCompleto();
 pintarGuion();
 pedirEstado();
 setInterval(pintarRelojes, 250);
+}
 </script>
 </body>
 </html>

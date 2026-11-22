@@ -47,8 +47,8 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
-    // Diapositivas de la presentación: módulos ES que corren en el navegador (docs/presentacion/*.html los importan)
+    // Diapositivas de la presentación: script clásico del navegador (se abren con doble clic, y file:// no admite módulos ES)
     files: ["docs/presentacion/**/*.js"],
-    languageOptions: { globals: globals.browser },
+    languageOptions: { sourceType: "script", globals: globals.browser },
   },
 ]);

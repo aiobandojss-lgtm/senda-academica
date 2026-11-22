@@ -7,7 +7,7 @@
 <link rel="icon" href="data:,">
 <!--
   Lo que ve el jurado: las diapositivas de la presentación del lunes 23 de noviembre de 2026 (PLAN.md, día 8).
-  Se abre con `npm run presentacion` (scripts/presentacion.mjs), no con doble clic: Chrome bloquea las fuentes desde file://.
+  Se abre con doble clic, en el mismo navegador que guion.html: así se sincronizan. Funciona sin internet.
   Aquí no está el texto del guion: ese vive en guion.html. Los pasos y la sincronización están en presentacion.js.
 -->
 <link rel="stylesheet" href="comun.css">
@@ -355,8 +355,12 @@
   </div>
 </div>
 
-<script type="module">
-import { BLOQUES, PASOS, $, estado, cargar, alCambiar, pedirEstado, teclaDeNavegacion } from "./presentacion.js";
+<script src="presentacion.js"></script>
+<script>
+"use strict";
+// Todo dentro de un bloque: las constantes de esta página no se vuelven variables globales
+{
+const { BLOQUES, PASOS, $, estado, cargar, alCambiar, pedirEstado, teclaDeNavegacion } = window.Senda;
 
 const parametros = new URLSearchParams(location.search);
 // La dirección vieja del guion (/?vista=guion) lleva a su página propia
@@ -440,6 +444,7 @@ cargar();
 ajustarLienzo();
 pintarProyeccion();
 pedirEstado();
+}
 </script>
 </body>
 </html>
