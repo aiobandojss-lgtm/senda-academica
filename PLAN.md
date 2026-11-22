@@ -12,7 +12,7 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 | 6 | Jue 19 | Mañana: E2E completo, evaluación del RAG, revisión visual. Tarde: la nueva fecha en el seed y la documentación, el guion y, adelantados del viernes, la trazabilidad, los hooks y el subagente revisor | MVP 6.x, RAG 4.x | 3, 4, 6 |
 | 7 | Vie 20 | Probar en vivo los hooks y el subagente (después de recargar la ventana de Antigravity). Propuesta, pendiente del visto bueno de Aymer: adelantar lo del sábado | – | 4, 6 |
 | 8 | Sáb 21 | Diapositivas y la falla de "semana de parciales" con su evaluación. Decisión sobre el bonus de WhatsApp | – | 3, 6 |
-| 9 | Dom 22 | Video de respaldo de la demo, 2 ensayos cronometrados y preguntas esperadas. **Producto congelado a las 6 p. m.** | – | todos |
+| 9 | Dom 22 | Mañana: diapositivas web y guion de lectura. Mediodía: banco de preguntas y simulacro. Tarde: video de respaldo de la demo y 2 ensayos cronometrados. **Producto congelado a las 6 p. m.** | – | todos |
 | 10 | Lun 23 | Mañana: seed remoto recargado, checklist de "Antes de presentar" y ensayo final. **Presentación** | – | – |
 
 La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **lunes 23** (confirmado). Todas las tareas de OpenSpec estaban hechas el jueves 19 a mediodía, así que los días extra son para reducir riesgo y fortalecer la evidencia, no para agregar funciones. Reglas:
@@ -85,7 +85,11 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
   - [x] "Semana de parciales", diagnosticada y corregida. El fragmento correcto quedaba primero, pero con 0,549 frente al umbral de 0,55. Se escribió el calendario con las palabras del estudiante, sin tocar el umbral, y la evaluación dio **25 de 25**. Otra corrida, recalificada, da 24 de 25: el modelo no es determinista. [Bitácora](docs/bitacora/2026-11-21-dia-8.md)
   - [x] Producción reindexada (por Aymer) y probada: "¿Cuándo es la semana de parciales?" y "¿Cuándo son los exámenes parciales?" responden "del 30 de noviembre al 4 de diciembre", con su cita.
   - [x] Revisión de `revisor-spec` a los commits del día: dos afirmaciones equivocadas, corregidas (ver la bitácora).
-  - [ ] Diapositivas.
+  - [x] Plan de la exposición, con decisiones de Aymer. Las diapositivas y lo demás pasan al domingo:
+    - **Formato:** una página web propia en el repo (`docs/presentacion/`), con la identidad de Senda y dos vistas sincronizadas. La de proyección tiene unas 7 diapositivas; la de guion tiene el texto completo para leer, las acciones de la demo marcadas aparte y un cronómetro. Funciona sin internet y se exporta a PDF de respaldo.
+    - **Modalidad virtual, compartiendo pantalla, con dos pantallas:** en una se comparte (diapositivas y plataforma) y en la otra se lee el guion. Paola se muestra en una ventana del navegador con vista de celular (375 px): es la misma web responsiva probada en el iPhone.
+    - **Contenido:** solo la rúbrica, sin otras indicaciones del profesor. Son 5 bloques en 10 minutos: el problema, la demo en vivo (4 min), la decisión técnica (las guardas, con el diagnóstico de "semana de parciales"), la metodología y el cierre.
+    - **Preguntas:** un banco de unas 25, organizado por criterio de la rúbrica, y un simulacro con Claude haciendo de jurado.
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
