@@ -1,6 +1,6 @@
 # Guion de la presentación – lunes 23 de noviembre de 2026
 
-**Versión 2** (domingo 22). **El texto para leer y las diapositivas están en [diapositivas.html](diapositivas.html)**: se abren con `npm run presentacion`, con la proyección en la pantalla compartida y el guion en la otra pantalla. Este documento queda como referencia: los tiempos, la preparación, el plan B y las preguntas esperadas.
+**Versión 2** (domingo 22). **Las diapositivas están en [diapositivas.html](diapositivas.html) y el texto para leer en [guion.html](guion.html)**: se abren con `npm run presentacion`, las diapositivas en la pantalla compartida y el guion en la otra pantalla. Este documento queda como referencia: los tiempos, la preparación, el plan B y las preguntas esperadas.
 
 - **Formato:** unos 10 minutos de demo en vivo, más preguntas ([rúbrica](../rubrica.md)).
 - **Hilo conductor:** contar la metodología del curso **usando el producto como evidencia**. La rúbrica pide tres momentos: el problema, la demo del flujo principal y una decisión técnica de la que estés orgulloso.
@@ -17,7 +17,7 @@
 | 6:50 – 9:20 | 4. Cómo se construyó: **ruta de evidencias en vivo** (VS Code, terminal y GitHub) | 4, 5, 6 |
 | 9:20 – 10:00 | 5. Cierre | bonus |
 
-Ajuste del 22 de noviembre: la rúbrica pide "~10 minutos de demo en vivo" y "los tests y el pipeline listos para mostrarse en verde". Por eso el bloque 4 muestra los archivos reales en lugar de diapositivas. El texto exacto de cada paso está en la vista de guion de `diapositivas.html`.
+Ajuste del 22 de noviembre: la rúbrica pide "~10 minutos de demo en vivo" y "los tests y el pipeline listos para mostrarse en verde". Por eso el bloque 4 muestra los archivos reales en lugar de diapositivas. El texto exacto de cada paso está en `guion.html`.
 
 ## 1. El problema y qué es Senda (1 minuto)
 
@@ -63,7 +63,7 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 
 ## 4. Cómo se construyó: ruta de evidencias en vivo (2 minutos y medio)
 
-Se muestran los archivos reales, en este orden. El texto para leer está en la vista de guion (pasos 12 a 15).
+Se muestran los archivos reales, en este orden. El texto para leer está en `guion.html` (pasos 12 a 15).
 
 | # | Qué muestras | Dónde | Criterio |
 |---|---|---|---|
@@ -86,7 +86,7 @@ Se muestran los archivos reales, en este orden. El texto para leer está en la v
 
 - **Presentación virtual con dos pantallas** (decisión del 21 de noviembre):
   - **Pantalla 1, la que se comparte en la videollamada** (compartir la pantalla completa, no una ventana): la proyección en pantalla completa (tecla `F`) y las ventanas de la demo.
-  - **Pantalla 2, solo para ti:** el guion (`http://127.0.0.1:8765/?vista=guion`). Ahí avanzas con `→`, y la proyección cambia sola.
+  - **Pantalla 2, solo para ti:** el guion (`http://127.0.0.1:8765/guion.html`). Ahí avanzas con `→`, y la proyección cambia sola.
   - Abre primero la terminal con `npm run presentacion` y déjala abierta durante toda la presentación.
 - **Navegadores separados:** cada sesión vive en una cookie, así que cada persona va en su propio navegador o perfil. **Cerrar sesión cierra a esa persona en todos los equipos** (desde el 19 de noviembre): si en un ensayo la cierras en otro lado, vuelve a ingresar antes de la demo.
   - **Microsoft Edge, ventana angosta (unos 450 px):** Paola, en la pantalla de ingreso. Con menos de 768 px de ancho, Senda muestra la versión de celular, la misma que probaste en tu iPhone. Di en voz alta que es la misma web responsiva.

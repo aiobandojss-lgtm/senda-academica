@@ -46,4 +46,9 @@ export default defineConfig([
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.node },
   },
+  {
+    // Diapositivas de la presentación: módulos ES que corren en el navegador (docs/presentacion/*.html los importan)
+    files: ["docs/presentacion/**/*.js"],
+    languageOptions: { globals: globals.browser },
+  },
 ]);

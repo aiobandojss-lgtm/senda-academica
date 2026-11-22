@@ -1,0 +1,35 @@
+/* Fuentes y colores de Senda (docs/identidad-visual.md), compartidos por diapositivas.html, guion.html y glosario.html.
+   Las fuentes las sirve scripts/presentacion.mjs desde los paquetes de Fontsource: funciona sin internet. */
+@font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces.woff2) format("woff2-variations"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces-italica.woff2) format("woff2-variations"); font-weight: 100 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson.woff2) format("woff2-variations"); font-weight: 200 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson-italica.woff2) format("woff2-variations"); font-weight: 200 800; font-style: italic; font-display: swap; }
+
+/* Paleta de docs/identidad-visual.md */
+:root {
+  --papel: #FCF9F3;
+  --tinta: #0D251B;
+  --selva: #196144;
+  --selva-honda: #10432F;
+  --salvia: #DCF0DF;
+  --musgo: #51625A;
+  --barro: #FDE5CE;
+  --barro-texto: #723311;
+  --arcilla: #B63325;
+  --arcilla-suave: #FFE5DF;
+  --terracota: #CD632D;
+  --borde: #819089;
+  --linea: #E4DED2;
+  --crema: #FCF9F3;
+  --exito: #1B6236;
+  --exito-suave: #D6F4DD;
+  --alerta: #7D4A07;
+  --alerta-suave: #FFECC5;
+  --titulo: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --texto: "Atkinson Hyperlegible Next Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--papel); color: var(--tinta); font-family: var(--texto); }
+strong { font-weight: 700; }
+code, .mono { font-family: "Cascadia Code", Consolas, "Courier New", monospace; }

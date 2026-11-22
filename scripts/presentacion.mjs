@@ -1,6 +1,6 @@
 // Servidor local de las diapositivas de la presentación (docs/presentacion/diapositivas.html).
 //
-//   npm run presentacion        -> http://127.0.0.1:8765 (proyección) y http://127.0.0.1:8765/?vista=guion (guion)
+//   npm run presentacion        -> http://127.0.0.1:8765 (diapositivas) y http://127.0.0.1:8765/guion.html (guion)
 //
 // Por qué un servidor y no abrir el archivo con doble clic: Chrome bloquea las fuentes cargadas desde file://, y con un
 // mismo origen las dos ventanas (proyección y guion) se sincronizan con BroadcastChannel. Funciona sin internet.
@@ -64,7 +64,7 @@ const servidor = createServer(async (peticion, respuesta) => {
 servidor.listen(PUERTO, "127.0.0.1", () => {
   console.log("Diapositivas de Senda, sin internet:");
   console.log(`  Proyección (pantalla compartida): http://127.0.0.1:${PUERTO}`);
-  console.log(`  Guion (tu otra pantalla):        http://127.0.0.1:${PUERTO}/?vista=guion`);
+  console.log(`  Guion (tu otra pantalla):        http://127.0.0.1:${PUERTO}/guion.html`);
   console.log(`  Glosario para estudiar:          http://127.0.0.1:${PUERTO}/glosario.html`);
   console.log("Teclas: → o espacio avanza, ← retrocede, F pantalla completa, T inicia o pausa el cronómetro. Ctrl+C para salir.");
 });

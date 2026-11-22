@@ -6,47 +6,17 @@
 <title>Senda – presentación</title>
 <link rel="icon" href="data:,">
 <!--
-  Diapositivas de la presentación del lunes 23 de noviembre de 2026 (PLAN.md, día 8).
+  Lo que ve el jurado: las diapositivas de la presentación del lunes 23 de noviembre de 2026 (PLAN.md, día 8).
   Se abre con `npm run presentacion` (scripts/presentacion.mjs), no con doble clic: Chrome bloquea las fuentes desde file://.
-  Dos vistas sincronizadas: proyección (/) y guion (/?vista=guion). El texto del guion vive en PASOS, más abajo.
+  Aquí no está el texto del guion: ese vive en guion.html. Los pasos y la sincronización están en presentacion.js.
 -->
+<link rel="stylesheet" href="comun.css">
 <style>
-  @font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces.woff2) format("woff2-variations"); font-weight: 100 900; font-style: normal; font-display: swap; }
-  @font-face { font-family: "Fraunces Variable"; src: url(/fuentes/fraunces-italica.woff2) format("woff2-variations"); font-weight: 100 900; font-style: italic; font-display: swap; }
-  @font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson.woff2) format("woff2-variations"); font-weight: 200 800; font-style: normal; font-display: swap; }
-  @font-face { font-family: "Atkinson Hyperlegible Next Variable"; src: url(/fuentes/atkinson-italica.woff2) format("woff2-variations"); font-weight: 200 800; font-style: italic; font-display: swap; }
-
-  /* Paleta de docs/identidad-visual.md */
-  :root {
-    --papel: #FCF9F3;
-    --tinta: #0D251B;
-    --selva: #196144;
-    --selva-honda: #10432F;
-    --salvia: #DCF0DF;
-    --musgo: #51625A;
-    --barro: #FDE5CE;
-    --barro-texto: #723311;
-    --arcilla: #B63325;
-    --arcilla-suave: #FFE5DF;
-    --terracota: #CD632D;
-    --borde: #819089;
-    --linea: #E4DED2;
-    --crema: #FCF9F3;
-    --exito: #1B6236;
-    --exito-suave: #D6F4DD;
-    --alerta: #7D4A07;
-    --alerta-suave: #FFECC5;
-    --titulo: "Fraunces Variable", Georgia, "Times New Roman", serif;
-    --texto: "Atkinson Hyperlegible Next Variable", "Segoe UI", system-ui, sans-serif;
-  }
-
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--papel); color: var(--tinta); font-family: var(--texto); }
-  body.vista-proyeccion { overflow: hidden; background: #0B1F16; }
-  body.vista-proyeccion #guion, body.vista-guion #proyeccion { display: none; }
-  #guion-completo { display: none; }
-  strong { font-weight: 700; }
-  code, .mono { font-family: "Cascadia Code", Consolas, "Courier New", monospace; }
+  body { overflow: hidden; background: #0B1F16; }
+  /* Dentro del guion, esta página se carga en pequeño (?miniatura): sin animaciones y sin cursor */
+  body.miniatura { cursor: default; }
+  body.miniatura .entra { animation: none !important; }
+  body.miniatura .diapositiva { transition: none; }
 
   /* ---------- Proyección: lienzo fijo de 1600 × 900 escalado a la ventana ---------- */
   .escenario { position: fixed; inset: 0; }
@@ -191,18 +161,6 @@
   .cifra.roja b { color: var(--arcilla); }
   .cifra span { display: block; margin-top: 10px; font-size: 21px; line-height: 1.35; color: var(--musgo); }
 
-  /* 7. El agente y el humano */
-  .dos-columnas { display: grid; grid-template-columns: 1.35fr 1fr; gap: 36px; margin-top: 40px; }
-  .herramientas { display: flex; flex-direction: column; gap: 12px; }
-  .herramienta { display: grid; grid-template-columns: 210px 1fr; gap: 20px; align-items: baseline; padding: 14px 0; border-bottom: 2px solid var(--linea); }
-  .herramienta b { font-family: var(--titulo); font-variation-settings: "opsz" 48; font-weight: 600; font-size: 29px; color: var(--selva); }
-  .herramienta span { font-size: 23px; line-height: 1.35; }
-  .humano { background: var(--selva); color: var(--crema); border-radius: 24px; padding: 32px 36px; }
-  .humano h3 { margin: 0 0 14px; font-family: var(--titulo); font-weight: 600; font-size: 38px; }
-  .humano ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; font-size: 24px; line-height: 1.3; }
-  .humano li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
-  .humano li::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--terracota); margin-top: 8px; }
-  .hallazgo { margin-top: 22px; background: var(--crema); color: var(--tinta); border-radius: 16px; padding: 16px 20px; font-size: 21px; line-height: 1.4; }
 
   /* 8. Cierre */
   .cierre .contenido { padding-bottom: 100px; }
@@ -214,95 +172,19 @@
   .frase { margin-top: auto; font-family: var(--titulo); font-variation-settings: "opsz" 144; font-weight: 500; font-style: italic; font-size: 64px; line-height: 1.08; max-width: 1250px; }
   .frase-pie { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; font-size: 24px; color: #D8E9DE; }
 
-
-  /* ---------- Vista de guion: el teleprompter ---------- */
-  #guion { display: grid; grid-template-rows: auto auto 1fr auto; height: 100vh; }
-  .g-barra { display: grid; grid-template-columns: 1fr auto auto; gap: 28px; align-items: center; padding: 16px 28px; background: var(--selva); color: var(--crema); }
-  .g-bloque { font-size: 17px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--barro); }
-  .g-titulo { font-family: var(--titulo); font-weight: 600; font-size: 34px; line-height: 1.1; margin-top: 2px; }
-  .g-relojes { display: flex; gap: 22px; }
-  .reloj { min-width: 132px; }
-  .reloj .r-nombre { font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #CFE3D6; }
-  .reloj .r-valor { font-family: var(--titulo); font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
-  .reloj .r-valor small { font-family: var(--texto); font-size: 17px; font-weight: 400; color: #CFE3D6; }
-  .reloj .r-pista { height: 6px; border-radius: 999px; background: rgba(252, 249, 243, 0.2); margin-top: 6px; overflow: hidden; }
-  .reloj .r-lleno { height: 100%; width: 0; background: var(--crema); border-radius: 999px; }
-  .reloj.justo .r-lleno { background: #F4C27A; }
-  .reloj.pasado .r-lleno { background: #FF9C85; }
-  .reloj.pasado .r-valor { color: #FFC2B3; }
-  .g-botones { display: flex; gap: 10px; }
-  .g-botones button { font: 700 17px var(--texto); padding: 12px 18px; border-radius: 12px; border: 2px solid rgba(252, 249, 243, 0.45); background: transparent; color: var(--crema); cursor: pointer; }
-  .g-botones button.principal { background: var(--crema); color: var(--selva); border-color: var(--crema); }
-  .g-botones button:focus-visible { outline: 3px solid var(--terracota); outline-offset: 2px; }
-
-  .g-pasos { display: flex; align-items: center; gap: 6px; padding: 12px 28px; border-bottom: 2px solid var(--linea); overflow-x: auto; }
-  .g-pasos button { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; font: 600 14px var(--texto); color: var(--musgo); background: none; border: 0; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
-  .g-pasos button::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--borde); }
-  .g-pasos button.hecho::before { background: var(--selva); border-color: var(--selva); }
-  .g-pasos button.actual { color: var(--tinta); background: var(--salvia); }
-  .g-pasos button.actual::before { background: var(--terracota); border-color: var(--terracota); }
-  .g-pasos .sep { width: 18px; border-top: 3px dotted var(--borde); flex: 0 0 auto; }
-
-  .g-cuerpo { display: grid; grid-template-columns: 1fr 440px; min-height: 0; }
-  .g-lectura { overflow-y: auto; padding: 30px 44px 60px; }
-  .g-lectura .decir { font-size: 31px; line-height: 1.55; margin: 0 0 24px; max-width: 1150px; }
-  .g-lectura .decir strong { color: var(--selva); }
-  .g-lectura .hacer { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: baseline; margin: 0 0 24px; max-width: 1150px; background: var(--barro); border-left: 8px solid var(--terracota); border-radius: 12px; padding: 14px 20px; font-size: 23px; line-height: 1.45; color: var(--barro-texto); }
-  .g-lectura .hacer::before { content: "HAZ"; font-size: 15px; font-weight: 800; letter-spacing: 0.16em; color: var(--terracota); }
-  .g-lectura .hacer code, .entender code { font-size: 0.92em; background: rgba(255, 255, 255, 0.7); padding: 1px 7px; border-radius: 6px; }
-  .g-lectura .hacer strong { color: var(--barro-texto); }
-  .g-lateral { border-left: 2px solid var(--linea); padding: 22px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; background: #F7F2E8; }
-  .g-etiqueta { font-size: 14px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--musgo); margin-bottom: 8px; }
-  .mini { width: 392px; height: 220.5px; border-radius: 12px; overflow: hidden; border: 2px solid var(--linea); position: relative; background: var(--papel); }
-  .mini .mini-lienzo { position: absolute; top: 0; left: 0; width: 1600px; height: 900px; transform: scale(0.245); transform-origin: top left; }
-  .mini .diapositiva { opacity: 1; visibility: visible; transition: none; }
-  .mini .entra { animation: none !important; }
-  .g-siguiente { font-size: 20px; line-height: 1.35; }
-  .g-siguiente span { color: var(--musgo); }
-  .entender { background: var(--salvia); border-radius: 14px; padding: 16px 18px; font-size: 18px; line-height: 1.5; color: var(--tinta); }
-  .g-ayuda { padding: 10px 28px; border-top: 2px solid var(--linea); font-size: 15px; color: var(--musgo); display: flex; gap: 22px; flex-wrap: wrap; }
-  .g-ayuda kbd { font-family: var(--texto); font-weight: 700; background: #fff; border: 1px solid var(--borde); border-radius: 6px; padding: 1px 7px; color: var(--tinta); }
-  .g-sincronia { margin-left: auto; }
-
-  /* Pantalla de portátil (768 px de alto): más texto por pantalla, para no tener que desplazarse al leer */
-  @media (max-height: 900px), (max-width: 1500px) {
-    .g-barra { padding: 12px 24px; }
-    .g-titulo { font-size: 28px; }
-    .reloj .r-valor { font-size: 28px; }
-    .g-pasos { padding: 8px 24px; }
-    .g-cuerpo { grid-template-columns: 1fr 372px; }
-    .g-lectura { padding: 16px 34px 10px; }
-    .g-lectura .decir { font-size: 26px; line-height: 1.48; margin-bottom: 14px; }
-    .g-lectura .hacer { font-size: 20px; padding: 8px 16px; margin-bottom: 14px; }
-    .g-lateral { padding: 16px 18px; gap: 14px; }
-    .mini { width: 336px; height: 189px; }
-    .mini .mini-lienzo { transform: scale(0.21); }
-    .entender { font-size: 16px; }
-    .g-ayuda { padding: 8px 24px; }
-  }
-
-  /* ---------- Impresión: respaldo en PDF ---------- */
-  @page diapositivas { size: 1600px 900px; margin: 0; }
-  @page { size: letter; margin: 16mm 15mm; }
+  /* ---------- Impresión: las diapositivas en PDF, una por página ---------- */
+  @page { size: 1600px 900px; margin: 0; }
   @media print {
-    body.vista-proyeccion { background: var(--papel); overflow: visible; }
-    body.vista-proyeccion .escenario { position: static; }
-    body.vista-proyeccion .lienzo { position: static; transform: none !important; width: auto; height: auto; overflow: visible; }
-    body.vista-proyeccion .diapositiva { page: diapositivas; position: relative; width: 1600px; height: 900px; opacity: 1; visibility: visible; break-after: page; }
-    body.vista-proyeccion .entra { animation: none !important; }
-    body.vista-guion #guion { display: none; }
-    body.vista-guion #guion-completo { display: block; font-size: 12.5pt; line-height: 1.5; }
-    #guion-completo h1 { font-family: var(--titulo); font-size: 22pt; margin: 0 0 4pt; }
-    #guion-completo h2 { font-size: 15pt; margin: 18pt 0 6pt; color: var(--selva); max-width: none; letter-spacing: 0; }
-    #guion-completo h3 { font-size: 12.5pt; margin: 12pt 0 4pt; break-after: avoid; }
-    #guion-completo .decir { margin: 0 0 6pt; }
-    #guion-completo .hacer { margin: 0 0 6pt; padding: 4pt 8pt; border-left: 3pt solid var(--terracota); background: var(--barro); color: var(--barro-texto); font-size: 11pt; }
-    #guion-completo .entender { font-size: 10pt; margin: 4pt 0 0; padding: 6pt 8pt; }
-    #guion-completo .paso { break-inside: avoid; }
+    body { background: var(--papel); overflow: visible; }
+    .escenario { position: static; }
+    .lienzo { position: static; transform: none !important; width: auto; height: auto; overflow: visible; }
+    .diapositiva { position: relative; width: 1600px; height: 900px; opacity: 1; visibility: visible; break-after: page; }
+    .entra { animation: none !important; }
+    .sendero-charla { display: none; }
   }
 </style>
 </head>
-<body class="vista-proyeccion">
+<body>
 
 <div id="proyeccion">
   <div class="escenario">
@@ -473,246 +355,14 @@
   </div>
 </div>
 
-<div id="guion">
-  <header class="g-barra">
-    <div>
-      <div class="g-bloque" id="g-bloque"></div>
-      <div class="g-titulo" id="g-titulo"></div>
-    </div>
-    <div class="g-relojes">
-      <div class="reloj" id="reloj-paso"><div class="r-nombre">Este paso</div><div class="r-valor"></div><div class="r-pista"><div class="r-lleno"></div></div></div>
-      <div class="reloj" id="reloj-bloque"><div class="r-nombre">Bloque</div><div class="r-valor"></div><div class="r-pista"><div class="r-lleno"></div></div></div>
-      <div class="reloj" id="reloj-total"><div class="r-nombre">Total</div><div class="r-valor"></div><div class="r-pista"><div class="r-lleno"></div></div></div>
-    </div>
-    <div class="g-botones">
-      <button type="button" id="b-anterior" aria-label="Paso anterior">◀</button>
-      <button type="button" id="b-reloj">Iniciar</button>
-      <button type="button" id="b-siguiente" class="principal">Siguiente ▶</button>
-    </div>
-  </header>
-  <nav class="g-pasos" id="g-pasos" aria-label="Pasos de la presentación"></nav>
-  <main class="g-cuerpo">
-    <article class="g-lectura" id="g-lectura" aria-live="polite"></article>
-    <aside class="g-lateral">
-      <div>
-        <div class="g-etiqueta">En la pantalla compartida</div>
-        <div class="mini"><div class="mini-lienzo" id="mini"></div></div>
-      </div>
-      <div>
-        <div class="g-etiqueta">Sigue</div>
-        <div class="g-siguiente" id="g-siguiente"></div>
-      </div>
-      <div>
-        <div class="g-etiqueta">Cómo funciona (no se lee)</div>
-        <div class="entender" id="g-entender"></div>
-      </div>
-    </aside>
-  </main>
-  <footer class="g-ayuda">
-    <span><kbd>→</kbd> o <kbd>Espacio</kbd> siguiente</span>
-    <span><kbd>←</kbd> anterior</span>
-    <span><kbd>↑</kbd> <kbd>↓</kbd> mover el texto</span>
-    <span><kbd>T</kbd> iniciar o pausar</span>
-    <span><kbd>R</kbd> reiniciar el cronómetro</span>
-    <span>Imprimir esta vista (<kbd>Ctrl</kbd>+<kbd>P</kbd>) da el guion completo en papel</span>
-    <span class="g-sincronia" id="g-sincronia"></span>
-  </footer>
-</div>
+<script type="module">
+import { BLOQUES, PASOS, $, estado, cargar, alCambiar, pedirEstado, teclaDeNavegacion } from "./presentacion.js";
 
-<div id="guion-completo"></div>
-
-<script>
-"use strict";
-
-// ---------- El guion: bloques y pasos (unas 1.100 palabras para 10 minutos) ----------
-// 16 pasos. Cada paso dice qué diapositiva se proyecta, cuánto tiempo tiene y qué se lee ("d") o se hace ("h").
-// "entender" es una nota para Aymer, no se lee en voz alta.
-const BLOQUES = [
-  { nombre: "El problema", segundos: 50 },
-  { nombre: "Demo en vivo", segundos: 240 },
-  { nombre: "Sin inventar", segundos: 120 },
-  { nombre: "Cómo se construyó", segundos: 150 },
-  { nombre: "Cierre", segundos: 40 },
-];
-
-const PASOS = [
-  {
-    bloque: 0, diapositiva: "portada", titulo: "Portada", segundos: 15,
-    guion: [
-      { d: "Hola a todos. Mi nombre es Aymer Ivan Obando Valois, soy ingeniero de sistemas en Cali. Les presento **Senda**: una plataforma académica para una fundación educativa, con un asistente que **no inventa**." },
-    ],
-    entender: "«Senda» es el nombre del producto, independiente de la Fundación. La Fundación real es Funafrocol, pero la demo pública muestra «Fundación (demo)» hasta que autoricen por escrito: el nombre es una variable del Worker, no está escrito en el código.",
-  },
-  {
-    bloque: 0, diapositiva: "problema", titulo: "El problema", segundos: 35,
-    guion: [
-      { d: "La Fundación está empezando, no tiene dinero y sus estudiantes estudian desde el celular. Hoy no sabe **quién entregó** un taller, **quién va al día** con los pagos ni **a quién suspender**." },
-      { d: "Senda resuelve eso: entregas y notas, cuotas y pagos, y el bloqueo automático cuando una cuota pasa de 30 días vencida, en el plan gratuito de Cloudflare. Todo lo que van a ver sale de la base de datos real: los datos son ficticios porque la Fundación aún no entrega los suyos." },
-    ],
-    entender: "Criterio 2 de la rúbrica (datos reales): el frontend nunca tiene datos escritos; todo llega de la API, que lee D1, la base de datos SQLite de Cloudflare. Los datos ficticios se cargaron en esa base real con un script de seed.",
-  },
-  {
-    bloque: 1, diapositiva: "demo", titulo: "Vamos a la plataforma", segundos: 10,
-    guion: [
-      { d: "Les muestro el flujo completo, en vivo, con tres personas: Paola, estudiante; Liliana, docente; y la administración de la Fundación." },
-      { h: "Cambia a la ventana de **Paola** (Edge, vista de celular), en la pantalla de ingreso." },
-    ],
-    entender: "Cada persona va en su propia ventana porque la sesión vive en una cookie del navegador: dos personas en la misma ventana se pisarían la sesión.",
-  },
-  {
-    bloque: 1, diapositiva: "demo", titulo: "Paola entrega su taller", segundos: 40,
-    guion: [
-      { d: "Primero, el diseño, que es propio: el símbolo es un sendero que sube paso a paso hasta la meta, los colores salen de la tierra y la selva, y la letra se diseñó para personas con baja visión, porque nuestros estudiantes leen desde el celular." },
-      { h: "Ingresa con `9900001001` y `Demo2026*`." },
-      { d: "Paola estudia Programación de Software y va al día. Así ve Senda en su celular: su estado de cuenta y su próxima entrega." },
-      { h: "En Inicio, pulsa «Subir mi entrega» del Taller 3 de Lógica → elige `taller3-paola.pdf` del Escritorio → súbelo." },
-      { d: "Sube su taller. El servidor revisa el archivo **por su contenido**, no por el nombre: un archivo de texto renombrado como PDF se rechaza." },
-    ],
-    entender: "Identidad visual (docs/identidad-visual.md): concepto «Senda, paso a paso»; la letra es Atkinson Hyperlegible, del Braille Institute, que distingue caracteres parecidos (I, l, 1; O, 0); el contraste cumple WCAG AA y los estados nunca se comunican solo con color. Sobre el archivo: la API lee los primeros bytes (la «firma» de PDF, DOCX, JPG o PNG) y rechaza más de 10 MB. El archivo se guarda en Workers KV y se descarga siempre a través de la API, con permisos: nunca hay una URL pública.",
-  },
-  {
-    bloque: 1, diapositiva: "demo", titulo: "Liliana califica", segundos: 45,
-    guion: [
-      { h: "Cambia a la ventana de **Liliana** (ya con su sesión abierta) → Mis cursos → Lógica de programación → Taller 3." },
-      { d: "Liliana, la docente, ve quién entregó y quién no, y puede descargar cada entrega. Fíjense que **no ve el celular ni el correo** de sus estudiantes: es la Ley de Habeas Data, y esa regla se aplica en el servidor, no solo en la pantalla." },
-      { h: "«Calificar» en la fila de Paola → nota `4,2` y el comentario «Buen manejo de funciones» → «Guardar nota»." },
-      { d: "Y califica: cuatro coma dos." },
-    ],
-    entender: "Los permisos se validan en la API: aunque alguien la llame directamente, a la docente no le llegan los datos de contacto (D18). Las notas van de 0,0 a 5,0 con un decimal, y una entrega calificada ya no se puede reemplazar: lo impide incluso un trigger de la base de datos.",
-  },
-  {
-    bloque: 1, diapositiva: "demo", titulo: "Paola ve su nota", segundos: 15,
-    guion: [
-      { h: "Vuelve a **Paola** → abre el Taller 3 de Lógica." },
-      { d: "Y Paola ya ve su nota, **4,2 de 5,0**, con el comentario de la docente. Al instante." },
-    ],
-    entender: "No hay notificaciones ni procesos en segundo plano: la pantalla de Paola consulta la API y la nota ya está guardada en D1.",
-  },
-  {
-    bloque: 1, diapositiva: "demo", titulo: "El asistente", segundos: 65,
-    guion: [
-      { h: "Paola → Asistente académico → toca la sugerencia «¿Cuál es la nota mínima para aprobar un curso?»." },
-      { d: "Ahora el asistente. Paola pregunta por la nota mínima: responde **tres** y cita la fuente, el Reglamento estudiantil, en la sección Evaluación y calificaciones." },
-      { h: "Escribe: «¿Cuánto debo en total?»" },
-      { d: "Ahora, sus propios datos: **360.000 pesos**. No sale de un documento: lo consulta en su estado de cuenta real, en este momento, y solo el de ella." },
-      { h: "Escribe: «¿Cuál es el horario de la cafetería?»" },
-      { d: "Y esto no está en ningún documento de la Fundación. Responde que **no tiene esa información** y la remite a la Fundación. No inventa un horario. En un momento les cuento cómo lo logramos." },
-    ],
-    entender: "Es RAG: la pregunta se convierte en un vector (embeddings bge-m3 de Workers AI), Vectorize busca los fragmentos más parecidos de los documentos y el modelo (gpt-oss-20b) responde solo con eso. Para los datos propios usa herramientas que leen D1 con el estudiante de la sesión: el modelo no puede pedir los datos de otra persona.",
-  },
-  {
-    bloque: 1, diapositiva: "demo", titulo: "Mora: bloqueo y pago", segundos: 65,
-    guion: [
-      { h: "Cambia a la ventana de **Manuela** (incógnito) → ingresa con `9900001002` y `Demo2026*`." },
-      { d: "Manuela tiene una cuota con **49 días de atraso**. Intenta entrar y no puede: su acceso está suspendido, con un mensaje claro de a quién acudir." },
-      { h: "Cambia a **administración** → Cartera → fila de Manuela Riascos Rojas (›) → en la cuota del 5 de octubre, «Registrar pago» → confirma." },
-      { d: "La administración registra su pago de octubre." },
-      { h: "Vuelve a **Manuela** → ingresa otra vez." },
-      { d: "Y Manuela entra **en ese mismo instante**. Queda «en riesgo», porque todavía debe noviembre. No hay ningún proceso nocturno: el estado se calcula en cada petición, con la fecha de Colombia." },
-    ],
-    entender: "calcularEstadoMora es una función pura: bloqueado si alguna cuota con saldo tiene 31 días o más de vencida, salvo un acuerdo de pago vigente. Se evalúa al ingresar y en cada petición del estudiante, así que el pago surte efecto de inmediato.",
-  },
-  {
-    bloque: 2, diapositiva: "guardas", titulo: "La alucinación del 4.0", segundos: 30,
-    guion: [
-      { h: "Vuelve a las diapositivas." },
-      { d: "La decisión técnica de la que estoy más orgulloso: un asistente que **no inventa**. La spec dice que, si no encuentra información, debe decir que no la tiene." },
-      { d: "Pero al probarlo con el modelo real respondió de memoria: «La nota mínima es **cuatro**», citando un reglamento que no existe. La correcta es tres, y mi validación de ese momento lo dejó pasar." },
-    ],
-    entender: "Por qué pasó: la validación de entonces solo reconocía como cita un texto con raya («Documento – Sección»). La cita inventada no tenía raya, así que ni siquiera se revisó. Lo encontró la prueba con el modelo real del 18 de noviembre, no las pruebas automáticas: por eso también se prueba a mano.",
-  },
-  {
-    bloque: 2, diapositiva: "guardas", titulo: "Las tres capas", segundos: 45,
-    guion: [
-      { d: "Primero actualicé el diseño y después el código, con **tres capas**. Uno: un umbral de similitud; un fragmento poco parecido a la pregunta no cuenta como fuente. Dos: el modelo debe consultar una herramienta antes de responder." },
-      { d: "Y tres, la más importante, **en el código**: toda cita tiene que ser un fragmento que de verdad se recuperó, y sin herramientas no se aceptan cifras. Si no, la respuesta se reemplaza por «no tengo esa información». Esa capa no depende de que el modelo obedezca, y una prueba automática repite la alucinación del cuatro para verificar que se bloquea." },
-    ],
-    entender: "La similitud es el parecido entre el vector de la pregunta y el de cada fragmento (1 es idéntico). El umbral de 0,55 se midió antes: 0,743 con el fragmento correcto y 0,35 con un texto ajeno. La capa 3 está en api/src/rag/agente.ts y la prueba del «4.0», en api/test/agente.test.ts.",
-  },
-  {
-    bloque: 2, diapositiva: "medido", titulo: "Medido, no opinado", segundos: 45,
-    guion: [
-      { d: "Y lo medí: **25 preguntas** con su respuesta esperada y dos modelos. gpt-oss acertó el 96 por ciento, Llama el 88, y gpt-oss cuesta la mitad: por eso lo elegí." },
-      { d: "La única falla, la semana de parciales, la diagnostiqué antes de arreglarla: el fragmento correcto quedaba a **una milésima** del umbral. No bajé el umbral, porque aflojaría la protección en todas las preguntas: escribí el calendario con las palabras del estudiante. Resultado: **25 de 25**, y sigue diciendo «no sé» cuando debe." },
-    ],
-    entender: "El modelo no es determinista: en tres corridas completas dio 96 %, 96 % y 100 %. Lo estable es que siempre supera el 90 % y que, cuando falla, se niega: nunca inventa. La evaluación está en eval/ y se califica con reglas fijas, sin otro modelo como juez.",
-  },
-  {
-    bloque: 3, diapositiva: "spec", titulo: "Un cambio de OpenSpec", segundos: 30,
-    guion: [
-      { d: "Ahora les muestro cómo se construyó, en los archivos reales. Nada se programó sin una spec aprobada por mí: usé **OpenSpec**, desarrollo guiado por especificaciones." },
-      { h: "Cambia a **VS Code** → carpeta `openspec/changes/archive/2026-11-21-cerrar-sesion-y-temas-de-cursos/`." },
-      { d: "Así es un cambio: la **propuesta** dice por qué, las **specs** qué debe pasar, el **diseño** cómo, con mi decisión, y las **tareas**, diez de diez. Al archivarlo, sus specs pasan a ser la fuente de verdad del producto." },
-    ],
-    entender: "Este cambio nació de una revisión del subagente: cerrar sesión no invalidaba el token en el servidor. Tú elegiste la solución (subir sesion_version al salir) y quedó en design.md como D1. Archivar es cerrar el cambio: sus specs delta se fusionan en openspec/specs/, que describe el producto terminado.",
-  },
-  {
-    bloque: 3, diapositiva: "spec", titulo: "Spec, prueba y trazabilidad", segundos: 35,
-    guion: [
-      { h: "Abre `openspec/specs/bloqueo-mora/spec.md` → escenario «31 días de atraso»." },
-      { d: "Esta es la regla de mora escrita como escenario: cuando una cuota vence el 5 de octubre y hoy es 5 de noviembre, el estudiante está bloqueado." },
-      { h: "Abre `api/test/mora.test.ts` (línea 11)." },
-      { d: "Y esta es su prueba, con **el mismo nombre**." },
-      { h: "En la terminal de VS Code: `npm run trazabilidad`." },
-      { d: "Este comando cruza los **130 escenarios** con las pruebas: si uno queda sin prueba, el pipeline falla." },
-    ],
-    entender: "Escenario: un caso CUANDO/ENTONCES (WHEN/THEN) de la spec. La prueba usa la función pura calcularEstadoMora con fechas fijas, así no depende del día en que corra. La trazabilidad compara nombres exactos: el nombre de la prueba empieza con el nombre del escenario, seguido de dos puntos.",
-  },
-  {
-    bloque: 3, diapositiva: "spec", titulo: "Playwright y el pipeline", segundos: 50,
-    guion: [
-      { h: "Abre `e2e/demo.spec.ts`." },
-      { d: "Esto es **Playwright**: un robot que usa la aplicación como una persona. Sus pasos son la demo que acaban de ver: Paola entrega, Liliana califica, Manuela no entra, se registra el pago y entra." },
-      { h: "Cambia a **GitHub** → Actions → la última ejecución, en verde." },
-      { d: "Y este es el pipeline: en cada push corren las **413 pruebas**, la trazabilidad y el robot de Playwright. Solo si todo pasa, se despliega en Cloudflare." },
-      { h: "Abre el pull request #1, «Prueba de fuego»." },
-      { d: "Y lo comprobé: dañé a propósito la regla de mora, de 30 a 29 días, y el pipeline lo atrapó. Es la única ejecución en rojo de toda la historia." },
-    ],
-    entender: "CI/CD: integración continua (cada push se prueba solo) y despliegue continuo (si todo pasa, se publica solo). El pipeline (.github/workflows) tiene 3 etapas: calidad (lint, tipos, pruebas, trazabilidad y build), la E2E con Playwright, y migraciones y despliegue. Vitest prueba las piezas por dentro; Playwright, la aplicación entera desde afuera.",
-  },
-  {
-    bloque: 3, diapositiva: "spec", titulo: "El agente con reglas", segundos: 35,
-    guion: [
-      { h: "Vuelve a **VS Code** → abre `CLAUDE.md` y despliega la carpeta `.claude/` (skills, hooks y agents)." },
-      { d: "Lo construí con Claude Code, pero con reglas. Este **CLAUDE.md** tiene lo que no se negocia, como Habeas Data y los secretos. Aquí están las **skills** de OpenSpec; los **hooks**, que le impiden leer los secretos o editar una migración aplicada; y el **subagente revisor**, que revisa el código contra la spec: este fin de semana encontró dos afirmaciones mías equivocadas." },
-      { d: "Y las decisiones las tomo yo: apruebo cada spec, elijo entre opciones y cargo los secretos." },
-    ],
-    entender: "Skill: instrucciones empaquetadas que el agente carga para una tarea (las 6 de OpenSpec están en .claude/skills/). Hook: un script que corre antes o después de cada acción del agente y puede bloquearla (.claude/hooks/guardian-reglas.mjs, activado en .claude/settings.json). Subagente: otra instancia del agente, con su propio contexto y solo lectura (.claude/agents/revisor-spec.md). MCP: un protocolo para conectarle herramientas al agente, como el navegador de Playwright.",
-  },
-  {
-    bloque: 4, diapositiva: "cierre", titulo: "Cierre", segundos: 40,
-    guion: [
-      { h: "Vuelve a las diapositivas." },
-      { d: "Senda funciona hoy, publicado y probado, en el plan gratuito. Lo que sigue: mostrarle las specs a la rectora de la Fundación, que puede cambiar reglas y alcances; cada cambio entrará por el mismo camino. Después, producción con sus datos reales, y avisos de cartera por WhatsApp con n8n." },
-      { d: "Lo que me llevo: con un agente, **la diferencia la hace la disciplina**: spec primero, pruebas que fallan por la razón correcta y medir antes de decidir. Muchas gracias." },
-    ],
-    entender: "Si preguntan por producción: un dominio propio de la Fundación, el plan pago de Workers (ADR-003) y R2 para los archivos (ADR-002). Hoy los archivos van en Workers KV porque R2 exige registrar un medio de pago.",
-  },
-];
-
-// ---------- Utilidades ----------
-const $ = (s, raiz = document) => raiz.querySelector(s);
-const vista = new URLSearchParams(location.search).get("vista") === "guion" ? "guion" : "proyeccion";
-document.body.className = vista === "guion" ? "vista-guion" : "vista-proyeccion";
-document.title = vista === "guion" ? "Senda – guion" : "Senda – presentación";
-
-// Texto seguro: escapa el HTML, `código` va en <code> y **texto** en <strong>
-function formato(texto) {
-  const escapar = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return texto
-    .split(/(`[^`]*`)/)
-    .map((parte) =>
-      parte.startsWith("`") && parte.endsWith("`") && parte.length > 1
-        ? `<code>${escapar(parte.slice(1, -1))}</code>`
-        : escapar(parte).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>"),
-    )
-    .join("");
-}
-
-const mmss = (ms) => {
-  const s = Math.max(0, Math.round(ms / 1000));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-};
+const parametros = new URLSearchParams(location.search);
+// La dirección vieja del guion (/?vista=guion) lleva a su página propia
+if (parametros.get("vista") === "guion") location.replace("guion.html");
+const esMiniatura = parametros.has("miniatura");
+if (esMiniatura) document.body.classList.add("miniatura");
 
 // ---------- Curvas de nivel: anillos irregulares alrededor de un centro, deterministas ----------
 function dibujarCurvas(svg) {
@@ -747,83 +397,7 @@ function dibujarSendero(bloqueActual, oculto) {
   svg.innerHTML = `<path class="camino" d="${camino}"></path>${nodos.join("")}`;
 }
 
-// ---------- Estado compartido entre las dos ventanas ----------
-// tiempos[i]: milisegundos acumulados en el paso i. marca: cuándo empezó a correr el paso actual (si corre)
-const CLAVE = "senda-presentacion-v1";
-let estado = { paso: 0, corriendo: false, marca: null, tiempos: PASOS.map(() => 0), rev: 0 };
-
-function guardar() {
-  try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch { /* sin almacenamiento: igual funciona */ }
-}
-function cargar() {
-  try {
-    const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? "null");
-    if (guardado && Array.isArray(guardado.tiempos) && guardado.tiempos.length === PASOS.length) estado = guardado;
-  } catch { /* ignorado */ }
-}
-
-const canal = "BroadcastChannel" in window ? new BroadcastChannel("senda-presentacion") : null;
-function publicar() {
-  estado.rev = Date.now();
-  guardar();
-  canal?.postMessage({ tipo: "estado", estado });
-  pintar();
-}
-if (canal) {
-  canal.onmessage = ({ data }) => {
-    if (data?.tipo === "pedir") canal.postMessage({ tipo: "estado", estado });
-    if (data?.tipo === "estado" && data.estado.rev > estado.rev) {
-      estado = data.estado;
-      guardar();
-      pintar();
-      senalarSincronia();
-    }
-  };
-}
-window.addEventListener("storage", (e) => {
-  if (e.key !== CLAVE || canal) return;
-  cargar();
-  pintar();
-});
-
-function transcurridoPaso(i) {
-  return estado.tiempos[i] + (estado.corriendo && i === estado.paso ? Date.now() - estado.marca : 0);
-}
-const total = () => PASOS.reduce((suma, _, i) => suma + transcurridoPaso(i), 0);
-const enBloque = (b) => PASOS.reduce((suma, p, i) => suma + (p.bloque === b ? transcurridoPaso(i) : 0), 0);
-
-function irA(i) {
-  const destino = Math.min(PASOS.length - 1, Math.max(0, i));
-  if (destino === estado.paso) return;
-  if (estado.corriendo) {
-    estado.tiempos[estado.paso] += Date.now() - estado.marca;
-    estado.marca = Date.now();
-  }
-  estado.paso = destino;
-  publicar();
-}
-function siguiente() {
-  // Avanzar desde la portada pone a correr el cronómetro, por si se olvidó
-  if (!estado.corriendo && estado.paso === 0 && total() === 0) iniciarOPausar();
-  irA(estado.paso + 1);
-}
-function iniciarOPausar() {
-  if (estado.corriendo) {
-    estado.tiempos[estado.paso] += Date.now() - estado.marca;
-    estado.corriendo = false;
-    estado.marca = null;
-  } else {
-    estado.corriendo = true;
-    estado.marca = Date.now();
-  }
-  publicar();
-}
-function reiniciar() {
-  estado = { paso: 0, corriendo: false, marca: null, tiempos: PASOS.map(() => 0), rev: 0 };
-  publicar();
-}
-
-// ---------- Pintar ----------
+// ---------- Pintar la diapositiva del paso actual ----------
 let diapositivaPintada = null;
 function pintarProyeccion() {
   const paso = PASOS[estado.paso];
@@ -833,138 +407,39 @@ function pintarProyeccion() {
   }
   dibujarSendero(paso.bloque, paso.diapositiva === "portada" || paso.diapositiva === "cierre");
 }
+alCambiar(pintarProyeccion);
 
-function pintarGuion() {
-  const paso = PASOS[estado.paso];
-  const bloque = BLOQUES[paso.bloque];
-  $("#g-bloque").textContent = `Bloque ${paso.bloque + 1} de ${BLOQUES.length} · ${bloque.nombre} · paso ${estado.paso + 1} de ${PASOS.length}`;
-  $("#g-titulo").textContent = paso.titulo;
-  $("#g-lectura").innerHTML = paso.guion
-    .map((s) => (s.d ? `<p class="decir">${formato(s.d)}</p>` : `<div class="hacer"><span>${formato(s.h)}</span></div>`))
-    .join("");
-  $("#g-lectura").scrollTop = 0;
-  $("#g-entender").innerHTML = formato(paso.entender);
-  const prox = PASOS[estado.paso + 1];
-  $("#g-siguiente").innerHTML = prox
-    ? `<strong>${formato(prox.titulo)}</strong><br><span>${prox.diapositiva === paso.diapositiva ? "Misma diapositiva" : "Cambia la diapositiva"} · ${BLOQUES[prox.bloque].nombre}</span>`
-    : "<strong>Fin.</strong><br><span>Siguen las preguntas del jurado.</span>";
-  $("#b-anterior").disabled = estado.paso === 0;
-  $("#b-siguiente").disabled = estado.paso === PASOS.length - 1;
-
-  // Miniatura de lo que se ve en la pantalla compartida
-  const original = document.querySelector(`#lienzo .diapositiva[data-id="${paso.diapositiva}"]`);
-  const mini = $("#mini");
-  mini.innerHTML = "";
-  const copia = original.cloneNode(true);
-  copia.classList.add("activa");
-  mini.appendChild(copia);
-
-  // Pasos como sendero
-  const nav = $("#g-pasos");
-  nav.innerHTML = PASOS.map((p, i) => {
-    const sep = i > 0 && PASOS[i - 1].bloque !== p.bloque ? '<span class="sep" aria-hidden="true"></span>' : "";
-    const clase = i < estado.paso ? "hecho" : i === estado.paso ? "actual" : "";
-    return `${sep}<button type="button" class="${clase}" data-i="${i}"${i === estado.paso ? ' aria-current="step"' : ""}>${i + 1}. ${formato(p.titulo)}</button>`;
-  }).join("");
-  nav.querySelector(".actual")?.scrollIntoView({ block: "nearest", inline: "center" });
-  pintarRelojes();
-}
-
-function pintarReloj(id, ms, presupuestoMs) {
-  const caja = document.getElementById(id);
-  caja.querySelector(".r-valor").innerHTML = `${mmss(ms)} <small>/ ${mmss(presupuestoMs)}</small>`;
-  const proporcion = presupuestoMs ? ms / presupuestoMs : 0;
-  caja.querySelector(".r-lleno").style.width = `${Math.min(100, proporcion * 100)}%`;
-  caja.classList.toggle("justo", proporcion >= 0.85 && proporcion <= 1);
-  caja.classList.toggle("pasado", proporcion > 1);
-}
-function pintarRelojes() {
-  if (vista !== "guion") return;
-  const paso = PASOS[estado.paso];
-  pintarReloj("reloj-paso", transcurridoPaso(estado.paso), paso.segundos * 1000);
-  pintarReloj("reloj-bloque", enBloque(paso.bloque), BLOQUES[paso.bloque].segundos * 1000);
-  pintarReloj("reloj-total", total(), BLOQUES.reduce((s, b) => s + b.segundos, 0) * 1000);
-  $("#b-reloj").textContent = estado.corriendo ? "Pausar" : total() > 0 ? "Seguir" : "Iniciar";
-}
-
-function pintar() {
-  pintarProyeccion();
-  if (vista === "guion") pintarGuion();
-}
-
-function senalarSincronia() {
-  const marca = $("#g-sincronia");
-  if (marca) marca.textContent = "Sincronizado con la proyección";
-}
-
-// Guion completo para imprimir (respaldo en papel)
-function armarGuionCompleto() {
-  const partes = ['<h1>Senda – guion de la presentación</h1><p>Lunes 23 de noviembre de 2026 · unos 10 minutos · lo que va en recuadro se hace, no se lee.</p>'];
-  BLOQUES.forEach((b, ib) => {
-    partes.push(`<h2>${ib + 1}. ${b.nombre} (${mmss(b.segundos * 1000)})</h2>`);
-    PASOS.forEach((p) => {
-      if (p.bloque !== ib) return;
-      partes.push(
-        `<div class="paso"><h3>${formato(p.titulo)} · ${p.segundos} s</h3>${p.guion
-          .map((s) => (s.d ? `<p class="decir">${formato(s.d)}</p>` : `<p class="hacer">HAZ: ${formato(s.h)}</p>`))
-          .join("")}<p class="entender">Cómo funciona: ${formato(p.entender)}</p></div>`,
-      );
-    });
-  });
-  $("#guion-completo").innerHTML = partes.join("");
-}
-
-// ---------- Escala del lienzo, teclado y controles ----------
+// ---------- Escala del lienzo, teclado y cursor ----------
 function ajustarLienzo() {
   const escala = Math.min(innerWidth / 1600, innerHeight / 900);
   $("#lienzo").style.transform = `translate(-50%, -50%) scale(${escala})`;
 }
 window.addEventListener("resize", ajustarLienzo);
 
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
-  const tecla = e.key;
-  if (["ArrowRight", "PageDown", " ", "Enter"].includes(tecla)) { e.preventDefault(); siguiente(); }
-  else if (["ArrowLeft", "PageUp", "Backspace"].includes(tecla)) { e.preventDefault(); irA(estado.paso - 1); }
-  else if ((tecla === "ArrowDown" || tecla === "ArrowUp") && vista === "guion") {
-    e.preventDefault();
-    $("#g-lectura").scrollBy({ top: tecla === "ArrowDown" ? 140 : -140, behavior: "smooth" });
-  }
-  else if (tecla === "Home") irA(0);
-  else if (tecla === "End") irA(PASOS.length - 1);
-  else if (tecla === "t" || tecla === "T") iniciarOPausar();
-  else if ((tecla === "r" || tecla === "R") && vista === "guion" && confirm("¿Reiniciar el cronómetro y volver a la portada?")) reiniciar();
-  else if ((tecla === "f" || tecla === "F") && vista === "proyeccion") alternarPantallaCompleta();
-});
-
 function alternarPantallaCompleta() {
   if (document.fullscreenElement) document.exitFullscreen();
   else document.documentElement.requestFullscreen?.();
 }
 
-// En la proyección no hay ningún botón: es lo que ve el jurado. El cursor se oculta si el mouse se queda quieto
-let temporizadorMouse;
-document.addEventListener("mousemove", () => {
-  if (vista !== "proyeccion") return;
-  document.body.classList.remove("ocultar-cursor");
-  clearTimeout(temporizadorMouse);
-  temporizadorMouse = setTimeout(() => document.body.classList.add("ocultar-cursor"), 1800);
-});
-$("#b-anterior").addEventListener("click", () => irA(estado.paso - 1));
-$("#b-siguiente").addEventListener("click", siguiente);
-$("#b-reloj").addEventListener("click", iniciarOPausar);
-$("#g-pasos").addEventListener("click", (e) => {
-  const boton = e.target.closest("button[data-i]");
-  if (boton) irA(Number(boton.dataset.i));
-});
+if (!esMiniatura) {
+  document.addEventListener("keydown", (e) => {
+    if (teclaDeNavegacion(e)) return;
+    if ((e.key === "f" || e.key === "F") && !e.ctrlKey && !e.metaKey && !e.altKey) alternarPantallaCompleta();
+  });
+  // En esta página no hay ningún botón: es lo que ve el jurado. El cursor se oculta si el mouse se queda quieto
+  let temporizadorMouse;
+  document.addEventListener("mousemove", () => {
+    document.body.classList.remove("ocultar-cursor");
+    clearTimeout(temporizadorMouse);
+    temporizadorMouse = setTimeout(() => document.body.classList.add("ocultar-cursor"), 1800);
+  });
+}
 
 // ---------- Arranque ----------
 cargar();
 ajustarLienzo();
-armarGuionCompleto();
-pintar();
-canal?.postMessage({ tipo: "pedir" });
-setInterval(pintarRelojes, 250);
+pintarProyeccion();
+pedirEstado();
 </script>
 </body>
 </html>
