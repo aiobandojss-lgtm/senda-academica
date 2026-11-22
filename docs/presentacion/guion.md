@@ -52,7 +52,8 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 5. **Medido, no opinado:** 25 preguntas con su respuesta esperada y dos modelos.
    - gpt-oss-20b acierta el **96 %** y llama-3.3-70b el **88 %**; gpt-oss cuesta la mitad. Por eso se eligió gpt-oss.
    - Cada pregunta cuesta unas 31 neuronas: el plan gratuito aguanta unas 320 preguntas diarias.
-   - La única falla de gpt-oss es segura: se negó a responder algo que sí estaba en el calendario.
+   - La única falla de gpt-oss era segura: se negó a responder la semana de parciales, que sí estaba en el calendario.
+   - **Diagnosticada con evidencia el 21 de noviembre:** el fragmento correcto quedó primero, con 0,549, a una milésima del umbral. No se bajó el umbral, porque eso aflojaría la guarda en todas las preguntas. Se escribió el calendario con las palabras del estudiante, "semana de parciales". Resultado: **25 de 25 (100 %)**, con las 9 negativas intactas.
 
 **Qué muestras:** el `design.md` del RAG en D5, la prueba con el error real ("sin herramientas y con una 'cita' inventada sin raya: se reemplaza", en `api/test/agente.test.ts`) y la tabla de resultados de la evaluación (D7).
 
@@ -100,7 +101,7 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 
 | Pregunta | Respuesta corta |
 |---|---|
-| ¿Cómo sabes que el asistente no inventa? | Por las 3 capas y la evaluación: 96 % de aciertos, y la falla que tiene es negarse, no inventar |
+| ¿Cómo sabes que el asistente no inventa? | Por las 3 capas y la evaluación: 25 de 25. La única falla que tuvo fue negarse, no inventar, y se corrigió en el documento sin aflojar el umbral |
 | ¿Por qué ese modelo? | Se midieron los dos con las mismas 25 preguntas: más aciertos y la mitad del costo |
 | ¿Qué pasa si se acaba la cuota gratuita? | El asistente avisa que no está disponible (D11), y el límite de 30 preguntas por estudiante evita que uno solo la agote |
 | ¿Qué datos personales ve la IA? | Solo el nombre de pila, la carrera y los resultados de las herramientas; nunca el documento, el correo ni el celular (D6) |

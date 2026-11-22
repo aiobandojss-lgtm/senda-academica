@@ -77,7 +77,7 @@
       "id": "pendientes",
       "categoria": "datos_propios",
       "pregunta": "¿Qué actividades tengo pendientes?",
-      "contiene": ["Taller 3", "parcial", ["23 de noviembre", "23 nov", "2026-11-23", "23/11"]],
+      "contiene": ["Taller 3", "parcial", ["26 de noviembre", "26 nov", "2026-11-26", "26/11"]],
       "noContiene": ["Taller 4", "Proyecto integrador"]
     },
     {

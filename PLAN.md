@@ -82,7 +82,8 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
   - [x] Prueba manual completa en producción, en el computador y en el celular: 46 de 47. La única falla es la conocida de "semana de parciales".
   - [x] Cambio `cerrar-sesion-y-temas-de-cursos` archivado, con sus specs sincronizadas: **trazabilidad de 130 de 130**, 413 pruebas de Vitest y 3 E2E.
   - [x] Decisiones de Aymer: no se hace el bonus de WhatsApp, y el buscador de Cartera queda para después de la presentación.
-  - [ ] Diagnóstico y corrección de "semana de parciales", con la evaluación completa del asistente.
+  - [x] "Semana de parciales", diagnosticada y corregida. El fragmento correcto quedaba primero, pero con 0,549 frente al umbral de 0,55. Se escribió el calendario con las palabras del estudiante, sin tocar el umbral, y la evaluación dio **25 de 25**. [Bitácora](docs/bitacora/2026-11-21-dia-8.md)
+  - [ ] Reindexar producción (lo hace Aymer) y probar la pregunta desde el celular.
   - [ ] Diapositivas.
 - [ ] Presentación
 
@@ -101,7 +102,7 @@ Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
 
 - [ ] Proyecto corriendo en local y en la URL pública.
 - [ ] Pipeline y pruebas en verde.
-- [x] `npm run eval:rag` con al menos 90 % de aciertos: 96 % con gpt-oss-20b el 19 de noviembre (RAG design.md D7).
+- [x] `npm run eval:rag` con al menos 90 % de aciertos: 96 % con gpt-oss-20b el 19 de noviembre (RAG design.md D7) y **25 de 25 (100 %) el 21 de noviembre**, después de corregir "semana de parciales" (`eval/resultados/2026-11-22T0149-gpt-oss-20b.json`).
 - [x] El asistente probado en la URL pública con el modelo real (19 de noviembre, desde el celular de Aymer): la nota mínima con su cita y "no tengo esa información" para la cafetería.
 - [ ] La mañana del 23: seed recargado en la base remota (`npx wrangler d1 execute DB --remote --file db/seed/seed.sql`) para deshacer los cambios de los ensayos. El seed ya está generado con la fecha de la presentación (2026-11-23). La recarga borra también las conversaciones y los contadores del asistente, y no toca la base de conocimiento.
 - [ ] Confirmar con el profesor que el seed ficticio en la base real cumple el criterio 2.

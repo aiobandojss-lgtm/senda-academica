@@ -17,7 +17,7 @@ carrera: general
 
 ## Evaluaciones
 
-- Semana de evaluaciones parciales: del 30 de noviembre al 4 de diciembre de 2026.
+- Semana de parciales (evaluaciones parciales): del 30 de noviembre al 4 de diciembre de 2026.
 - Entregas finales de talleres: hasta el 11 de diciembre de 2026.
 - Habilitaciones: 14 y 15 de enero de 2027.
 
