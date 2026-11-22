@@ -70,7 +70,7 @@ El asistente MUST NOT responder preguntas ajenas a la vida académica y administ
 
 #### Scenario: Pedir que explique un tema de un curso
 - **WHEN** el estudiante pide que le explique un tema de un curso que no está en los documentos de la Fundación, como "¿qué es un arreglo?"
-- **THEN** el asistente responde que no tiene esa información y no lo explica con conocimiento propio del modelo
+- **THEN** el asistente no lo explica con conocimiento propio del modelo: responde que no tiene esa información o que solo ayuda con temas de la Fundación
 
 ### Requirement: Privacidad de los datos enviados al modelo
 El sistema MUST NOT enviar al modelo de lenguaje el número de documento, el correo ni el celular del estudiante, ni datos de otros estudiantes. La pantalla del asistente SHALL recordar al estudiante que no escriba datos personales en sus preguntas, porque lo que escribe sí se envía al modelo.

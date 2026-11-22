@@ -18,7 +18,7 @@ Cada día cierra con: pruebas en verde, push a `main`, pipeline en verde y la UR
 La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **lunes 23** (confirmado). Todas las tareas de OpenSpec estaban hechas el jueves 19 a mediodía, así que los días extra son para reducir riesgo y fortalecer la evidencia, no para agregar funciones. Reglas:
 - **Producto congelado desde el domingo 22 a las 6 p. m.:** después solo hay ensayos. El mayor riesgo de una demo en vivo es un cambio de última hora.
 - Hasta entonces solo entran mejoras que suban la nota, cada una con sus pruebas y el pipeline en verde.
-- El bonus de WhatsApp con n8n se decide el sábado 21, solo si todo lo demás está listo, y con un máximo de un día.
+- El bonus de WhatsApp con n8n se decide el sábado 21, solo si todo lo demás está listo, y con un máximo de un día. **Decidido el 21 de noviembre: no se hace.** El tiempo va a las diapositivas, el video de respaldo y los ensayos; en la presentación se menciona como siguiente paso.
 - El día de la presentación no se corre `npm run eval:rag`, para no gastar la cuota de Workers AI.
 
 ## Avance
@@ -73,11 +73,17 @@ La presentación pasó del sábado 21 al viernes 20 y, el 19 de noviembre, al **
       - `revisor-spec` es un subagente revisor de solo lectura.
       - Los hooks tienen 23 pruebas (`node .claude/hooks/probar-hooks.mjs`).
     - Todo está en GitHub (hasta el commit `57ee1e2`) con el pipeline en verde: 395 pruebas de Vitest y 3 E2E.
-- [ ] Día 7 (viernes 20), siguiente:
-  1. Recargar la ventana de Antigravity (`Ctrl+Shift+P` → "Developer: Reload Window") para que Claude Code cargue los hooks.
-  2. `/hooks` debe mostrar PreToolUse y PostToolUse con origen "project".
-  3. Probar en vivo el detector con un archivo de prueba y correr `revisor-spec` sobre los commits del jueves.
-  4. Propuesta: adelantar lo del sábado (diapositivas y la falla de "semana de parciales").
+- [x] Día 7, adelantado al jueves 19 en la noche ([bitácora del día 6](docs/bitacora/2026-11-19-dia-6.md), "Final de la tarde"):
+  - Hooks probados en vivo.
+  - Dos revisiones del subagente `revisor-spec`, con sus hallazgos corregidos.
+  - El cambio `cerrar-sesion-y-temas-de-cursos`, 10 de 10.
+  - La guía de prueba manual (`docs/presentacion/prueba-manual.html`).
+- [ ] Día 8 (sábado 21), en curso:
+  - [x] Prueba manual completa en producción, en el computador y en el celular: 46 de 47. La única falla es la conocida de "semana de parciales".
+  - [x] Cambio `cerrar-sesion-y-temas-de-cursos` archivado, con sus specs sincronizadas: **trazabilidad de 130 de 130**, 413 pruebas de Vitest y 3 E2E.
+  - [x] Decisiones de Aymer: no se hace el bonus de WhatsApp, y el buscador de Cartera queda para después de la presentación.
+  - [ ] Diagnóstico y corrección de "semana de parciales", con la evaluación completa del asistente.
+  - [ ] Diapositivas.
 - [ ] Presentación
 
 ## Guion de la presentación (~10 minutos)
@@ -104,11 +110,12 @@ Incluye la preparación de pantallas, el plan B y las preguntas esperadas.
 
 - [ ] **Antes de operar con la Fundación** (revisado el 16 de noviembre; no afecta la demo): crear el primer administrador en una base nueva, un requisito que **falta en las specs** porque hoy el único administrador sale del seed. Además: Workers Paid (ADR-003), R2 (ADR-002), el aviso de privacidad definitivo y validar con la Fundación los supuestos de las specs.
 - [ ] **Antes del 27 de noviembre:** hacer el seed de la prueba E2E relativo a la fecha del día (`--fecha-referencia`) y ajustar las fechas que compara `e2e/demo.spec.ts`. El seed actual solo sirve del 6 al 26 de noviembre; fuera de esa ventana, `e2e/preparar.ts` falla a propósito y, como el despliegue depende del E2E, **no se puede desplegar**.
-- [ ] **Decisión de Aymer, "Cerrar sesión"** (encontrado al cruzar specs y pruebas el 19 de noviembre).
-  - Hoy cerrar sesión borra la cookie del navegador, pero el token sigue siendo válido hasta que vence (8 horas): quien hubiera copiado la cookie antes podría seguir usándola. La spec dice "la sesión deja de ser válida".
-  - Opción: aumentar `usuarios.sesion_version` al salir (D4). Revoca el token, pero también cierra las otras sesiones del usuario.
-  - No afecta la demo.
-  - **Decidido el 19 de noviembre, después de la revisión del subagente:** opción de revocar al salir. Se adelanta antes de la presentación con un cambio de OpenSpec pequeño.
+- [x] **Decisión de Aymer, "Cerrar sesión"** (encontrado al cruzar specs y pruebas el 19 de noviembre).
+  - Cerrar sesión borraba la cookie del navegador, pero el token seguía siendo válido hasta que vencía (8 horas). La spec dice "la sesión deja de ser válida".
+  - **Decidido el 19 de noviembre:** revocar al salir con `usuarios.sesion_version` (D4). También cierra las otras sesiones del usuario.
+  - **Hecho antes de la presentación:** el cambio `cerrar-sesion-y-temas-de-cursos`, probado en producción en dos equipos el 21 de noviembre y archivado ese día.
+- [ ] **Buscador por nombre en las listas de administración**, empezando por Cartera. Es una sugerencia de Aymer en la prueba manual del 21 de noviembre (prueba 6.8): para registrar un pago hoy hay que recorrer la lista. Ninguna lista de administración tiene buscador. Es una función nueva, así que necesita su cambio de OpenSpec. Decisión del 21 de noviembre: después de la presentación.
+- [ ] **Mensaje propio para un archivo vacío** (prueba manual 9.1, 21 de noviembre): un archivo de 0 bytes se rechaza con "Adjunta el archivo que quieres subir", como si no hubiera archivo. El rechazo es correcto; lo que confunde es el mensaje. El paso 9.1 de la guía de prueba manual ya pide escribir algo dentro del archivo.
 - [ ] **Reintento del E2E del asistente en el CI** (hallazgo del subagente revisor, 19 de noviembre). Con `retries: 1`, si la primera corrida falla, el reintento también falla: la conversación y el contador de preguntas de la estudiante ya cambiaron. No oculta errores (el pipeline queda en rojo igual), pero un fallo intermitente no se puede rescatar. Solución: recargar el estado de la estudiante al inicio de la prueba, no solo en `e2e/preparar.ts`.
 - [ ] Pantalla de administración de los documentos del asistente (cargar, reemplazar y retirar). Para la demo bastan la API y `npm run rag:indexar`; decisión de Aymer en la revisión del RAG del 18 de noviembre.
 - [ ] Antes de ir a producción con la Fundación, buscar "Senda" en el registro de marcas de la SIC (clases de Niza 9, 41 y 42). Si está tomado, se cambia `PRODUCTO_NOMBRE` y el símbolo (D19).

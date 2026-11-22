@@ -444,7 +444,7 @@ const GRUPOS = [
       { id: "9.1", titulo: "Un archivo falso se rechaza", donde: PC,
         pasos: [
           "En el Explorador de Windows, activa Vista → «Extensiones de nombre de archivo».",
-          "Crea un archivo de texto y cámbiale el nombre a <code>falso.pdf</code>.",
+          "Crea un archivo de texto, escribe cualquier cosa dentro y guárdalo (vacío pesa 0 bytes y la plataforma lo trata como si no hubieras adjuntado nada). Después cámbiale el nombre a <code>falso.pdf</code>.",
           "Súbelo al Taller 3 de Bases de datos.",
         ],
         esperado: "«El archivo debe ser PDF, DOCX, JPG o PNG». Se valida por el contenido, no por el nombre." },
