@@ -11,11 +11,13 @@
 
 | Minuto | Bloque | Criterios |
 |---|---|---|
-| 0:00 – 1:00 | 1. El problema y qué es Senda | – |
-| 1:00 – 5:00 | 2. Demo en vivo del flujo principal | 1, 2, 3 |
-| 5:00 – 7:30 | 3. La decisión técnica: un asistente que no inventa | 3, 6 |
-| 7:30 – 9:15 | 4. Cómo se construyó: la metodología | 4, 5, 6 |
-| 9:15 – 10:00 | 5. Cierre | – |
+| 0:00 – 0:50 | 1. El problema y qué es Senda | – |
+| 0:50 – 4:50 | 2. Demo en vivo del flujo principal, con la identidad visual | 1, 2, 3, 6 |
+| 4:50 – 6:50 | 3. La decisión técnica: un asistente que no inventa | 3, 6 |
+| 6:50 – 9:20 | 4. Cómo se construyó: **ruta de evidencias en vivo** (VS Code, terminal y GitHub) | 4, 5, 6 |
+| 9:20 – 10:00 | 5. Cierre | bonus |
+
+Ajuste del 22 de noviembre: la rúbrica pide "~10 minutos de demo en vivo" y "los tests y el pipeline listos para mostrarse en verde". Por eso el bloque 4 muestra los archivos reales en lugar de diapositivas. El texto exacto de cada paso está en la vista de guion de `diapositivas.html`.
 
 ## 1. El problema y qué es Senda (1 minuto)
 
@@ -59,19 +61,25 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
 
 **Frase de cierre del bloque:** "Preferimos un asistente que diga 'no sé' a uno que invente una nota."
 
-## 4. Cómo se construyó: la metodología (1 minuto y 45 segundos)
+## 4. Cómo se construyó: ruta de evidencias en vivo (2 minutos y medio)
 
-| Práctica | Qué dices | Qué muestras |
-|---|---|---|
-| **OpenSpec** (desarrollo guiado por specs) | "Nada se programó sin una spec aprobada por mí: proponer, revisar, implementar y archivar. Hoy el producto está descrito en 7 capacidades, con 55 requisitos y 130 escenarios, y cada escenario tiene una prueba que lleva su nombre: un comando lo verifica en cada push." | `openspec/specs/` y `npm run trazabilidad`: "Escenarios con prueba: 130 de 130" |
-| **Pruebas y CI/CD** | "413 pruebas automáticas y 3 E2E con Playwright. Si el flujo de la demo se rompe, el pipeline no despliega. Y lo comprobé: dañé a propósito la regla de mora, de 30 a 29 días, escribí antes qué debía fallar y el pipeline lo atrapó tal cual. Es la única ejecución en rojo de toda la historia." | GitHub Actions en verde, y el pull request #1, "Prueba de fuego", en rojo |
-| **El agente con contexto** | "Claude Code trabajó con un `CLAUDE.md` de reglas que no se negocian, skills de OpenSpec y TDD, y MCP: Playwright para revisar las 50 capturas de las pantallas, y context7 para la documentación vigente. Las reglas más importantes no dependen de que el agente las recuerde: un hook le bloquea leer los secretos o editar una migración aplicada, otro le avisa si deja caracteres invisibles, y un subagente revisor, que no vio cómo se escribió el código, lo revisa contra la spec." | `CLAUDE.md`, `.claude/settings.json` y el [informe de la revisión visual](../revision/2026-11-19-revision-visual.md) |
-| **Humano en el bucle** | "Las decisiones las tomé yo: los secretos los cargo yo y las specs las apruebo yo. El agente presenta opciones con pros y contras." | Una revisión aprobada en `docs/revision/` |
-| **Más allá de lo pedido** (bonus) | "Además de lo que pide la rúbrica: la evaluación medida del asistente, la revisión visual automatizada y una prueba E2E del asistente sin gastar cuota, con un candado para que la simulación nunca llegue a producción." | – |
+Se muestran los archivos reales, en este orden. El texto para leer está en la vista de guion (pasos 12 a 15).
 
-## 5. Cierre (45 segundos)
+| # | Qué muestras | Dónde | Criterio |
+|---|---|---|---|
+| 1 | Un cambio de OpenSpec completo: propuesta, specs, diseño y tareas | VS Code → `openspec/changes/archive/2026-11-21-cerrar-sesion-y-temas-de-cursos/` | 6 |
+| 2 | Una regla escrita como escenario | `openspec/specs/bloqueo-mora/spec.md`, escenario "31 días de atraso" | 4, 6 |
+| 3 | Su prueba, con el mismo nombre | `api/test/mora.test.ts`, línea 11 | 4 |
+| 4 | Que ningún escenario quede sin prueba | Terminal de VS Code: `npm run trazabilidad` → "130 de 130" | 4 |
+| 5 | El robot que repite la demo | `e2e/demo.spec.ts` (Playwright) | 4 |
+| 6 | El pipeline en verde y la prueba de fuego | GitHub → Actions → última ejecución; pull request #1 en rojo | 5 |
+| 7 | El agente con reglas | `CLAUDE.md` y la carpeta `.claude/` (skills, hooks y agents) | 6 |
 
-- "Senda funciona hoy, publicado y probado, en el plan gratuito. Para la Fundación sigue el paso a producción: su dominio, sus datos reales y el almacenamiento definitivo, R2."
+**Más allá de lo pedido** (bonus, si preguntan): la evaluación medida del asistente, la revisión visual automatizada, el subagente revisor y los hooks, y una prueba E2E del asistente sin gastar cuota.
+
+## 5. Cierre (40 segundos)
+
+- "Senda funciona hoy, publicado y probado, en el plan gratuito. Lo que sigue: mostrarle las specs a la rectora de la Fundación, que puede cambiar reglas y alcances. Después, producción con sus datos reales, y avisos de cartera por WhatsApp con n8n."
 - "Lo que me llevo: con un agente, la diferencia la hace la disciplina. Spec primero, pruebas que fallan por la razón correcta y medir antes de decidir."
 
 ## Preparación antes de empezar
@@ -86,11 +94,16 @@ Es la historia de la que estás orgulloso. Cuéntala en cinco pasos:
   - **Chrome, perfil 2:** administración (`9900000001`), con la sesión ya abierta.
   - **Ventana de incógnito:** Manuela (`9900001002`), en la pantalla de ingreso.
 - **El PDF de Paola:** copia `db/seed/placeholder.pdf` al Escritorio con el nombre `taller3-paola.pdf`.
-- **Pestañas de apoyo:**
-  - GitHub Actions con la última ejecución en verde;
-  - `design.md` del RAG en D5 y D7;
-  - `openspec/specs/`;
-  - la prueba del "4.0" en `api/test/agente.test.ts`.
+- **VS Code, abierto en el repo, con estas pestañas ya abiertas y en este orden** (para la ruta de evidencias):
+  - `openspec/changes/archive/2026-11-21-cerrar-sesion-y-temas-de-cursos/proposal.md`, con la carpeta desplegada en el explorador;
+  - `openspec/specs/bloqueo-mora/spec.md`, en el escenario "31 días de atraso";
+  - `api/test/mora.test.ts`, en la línea 11;
+  - `e2e/demo.spec.ts`;
+  - `CLAUDE.md`, con la carpeta `.claude/` desplegada;
+  - la terminal integrada lista con `npm run trazabilidad` escrito, sin ejecutar.
+  - Sube el tamaño de la letra de VS Code (`Ctrl` + `+`): en la videollamada se ve más pequeño.
+- **Navegador:** GitHub → Actions con la última ejecución en verde, y otra pestaña con el pull request #1, "Prueba de fuego".
+- **El proyecto también en local** (la rúbrica lo pide como respaldo): `npm run dev` en otra terminal. Si la URL pública fallara, la demo sigue en `http://localhost:5173`. Gasta cuota de Workers AI solo si se usa el asistente.
 - **Datos:** recargar el seed remoto esa mañana. La demo cambia datos (la entrega, la nota y el pago) y los ensayos también.
 - **Cuota de IA:** no correr la evaluación ese día. Cada pregunta de la demo cuesta unas 31 neuronas, y Paola tiene 30 preguntas diarias.
 

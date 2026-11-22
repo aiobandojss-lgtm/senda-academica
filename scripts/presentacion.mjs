@@ -65,5 +65,6 @@ servidor.listen(PUERTO, "127.0.0.1", () => {
   console.log("Diapositivas de Senda, sin internet:");
   console.log(`  Proyección (pantalla compartida): http://127.0.0.1:${PUERTO}`);
   console.log(`  Guion (tu otra pantalla):        http://127.0.0.1:${PUERTO}/?vista=guion`);
+  console.log(`  Glosario para estudiar:          http://127.0.0.1:${PUERTO}/glosario.html`);
   console.log("Teclas: → o espacio avanza, ← retrocede, F pantalla completa, T inicia o pausa el cronómetro. Ctrl+C para salir.");
 });

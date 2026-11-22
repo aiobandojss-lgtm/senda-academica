@@ -452,35 +452,7 @@
         </div>
       </section>
 
-      <!-- 7. El agente y el humano -->
-      <section class="diapositiva" data-id="agente">
-        <svg class="curvas" data-cx="140" data-cy="800" data-n="10" data-semilla="7" viewBox="0 0 1600 900" aria-hidden="true"></svg>
-        <div class="contenido">
-          <div class="ceja entra">Cómo se construyó</div>
-          <h2 class="entra" style="--d:1">El agente trabaja con reglas; las decisiones son mías.</h2>
-          <div class="dos-columnas">
-            <div class="herramientas">
-              <div class="herramienta entra" style="--d:2"><b>CLAUDE.md</b><span>Las reglas que no se negocian: Habeas Data, secretos, migraciones.</span></div>
-              <div class="herramienta entra" style="--d:3"><b>Skills</b><span>El flujo de OpenSpec y las pruebas primero.</span></div>
-              <div class="herramienta entra" style="--d:4"><b>MCP</b><span>Playwright revisó más de 50 capturas; documentación vigente de las librerías.</span></div>
-              <div class="herramienta entra" style="--d:5"><b>Hooks</b><span>Le impiden leer los secretos o editar una migración ya aplicada.</span></div>
-              <div class="herramienta entra" style="--d:6"><b>Subagente revisor</b><span>Revisa contra la spec sin haber visto cómo se escribió el código.</span></div>
-            </div>
-            <div class="humano entra" style="--d:4">
-              <h3>Yo decido</h3>
-              <ul>
-                <li>Apruebo cada spec antes de programar.</li>
-                <li>Elijo entre opciones con sus pros y contras.</li>
-                <li>Cargo los secretos y hago los despliegues.</li>
-                <li>Pruebo en vivo: 47 pruebas manuales, en la web y en el celular.</li>
-              </ul>
-              <div class="hallazgo">El revisor encontró dos afirmaciones equivocadas antes de esta presentación.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 8. Cierre -->
+      <!-- 7. Cierre -->
       <section class="diapositiva verde cierre" data-id="cierre">
         <svg class="curvas" data-cx="1300" data-cy="760" data-n="13" data-semilla="8" viewBox="0 0 1600 900" aria-hidden="true"></svg>
         <div class="contenido">
@@ -553,29 +525,29 @@
 "use strict";
 
 // ---------- El guion: bloques y pasos (unas 1.100 palabras para 10 minutos) ----------
-// Cada paso dice qué diapositiva se proyecta, cuánto tiempo tiene y qué se lee ("d") o se hace ("h").
+// 16 pasos. Cada paso dice qué diapositiva se proyecta, cuánto tiempo tiene y qué se lee ("d") o se hace ("h").
 // "entender" es una nota para Aymer, no se lee en voz alta.
 const BLOQUES = [
-  { nombre: "El problema", segundos: 60 },
+  { nombre: "El problema", segundos: 50 },
   { nombre: "Demo en vivo", segundos: 240 },
-  { nombre: "Sin inventar", segundos: 150 },
-  { nombre: "Cómo se construyó", segundos: 105 },
-  { nombre: "Cierre", segundos: 45 },
+  { nombre: "Sin inventar", segundos: 120 },
+  { nombre: "Cómo se construyó", segundos: 150 },
+  { nombre: "Cierre", segundos: 40 },
 ];
 
 const PASOS = [
   {
-    bloque: 0, diapositiva: "portada", titulo: "Portada", segundos: 20,
+    bloque: 0, diapositiva: "portada", titulo: "Portada", segundos: 15,
     guion: [
-      { d: "Hola a todos. Mi nombre es Aymer Ivan Obando Valois, soy ingeniero de sistemas en Cali. Les presento **Senda**: una plataforma académica para una fundación educativa, con un asistente que responde con los documentos oficiales y con los datos reales del estudiante, **sin inventar**." },
+      { d: "Hola a todos. Mi nombre es Aymer Ivan Obando Valois, soy ingeniero de sistemas en Cali. Les presento **Senda**: una plataforma académica para una fundación educativa, con un asistente que **no inventa**." },
     ],
     entender: "«Senda» es el nombre del producto, independiente de la Fundación. La Fundación real es Funafrocol, pero la demo pública muestra «Fundación (demo)» hasta que autoricen por escrito: el nombre es una variable del Worker, no está escrito en el código.",
   },
   {
-    bloque: 0, diapositiva: "problema", titulo: "El problema", segundos: 40,
+    bloque: 0, diapositiva: "problema", titulo: "El problema", segundos: 35,
     guion: [
-      { d: "La Fundación está empezando y no tiene dinero. Sus estudiantes son de carreras técnicas y casi todos estudian desde el celular. Hoy no tiene cómo saber **quién entregó** un taller, **quién va al día** con los pagos ni **a quién suspender** cuando se atrasa." },
-      { d: "Senda resuelve eso: talleres con entregas y notas, cuotas y pagos, y el bloqueo automático cuando una cuota pasa de 30 días vencida. Corre en el plan gratuito de Cloudflare, así que a la Fundación no le cuesta nada. Y todo lo que van a ver sale de la base de datos real: los datos son ficticios porque la Fundación aún no ha entregado los suyos." },
+      { d: "La Fundación está empezando, no tiene dinero y sus estudiantes estudian desde el celular. Hoy no sabe **quién entregó** un taller, **quién va al día** con los pagos ni **a quién suspender**." },
+      { d: "Senda resuelve eso: entregas y notas, cuotas y pagos, y el bloqueo automático cuando una cuota pasa de 30 días vencida, en el plan gratuito de Cloudflare. Todo lo que van a ver sale de la base de datos real: los datos son ficticios porque la Fundación aún no entrega los suyos." },
     ],
     entender: "Criterio 2 de la rúbrica (datos reales): el frontend nunca tiene datos escritos; todo llega de la API, que lee D1, la base de datos SQLite de Cloudflare. Los datos ficticios se cargaron en esa base real con un script de seed.",
   },
@@ -583,19 +555,20 @@ const PASOS = [
     bloque: 1, diapositiva: "demo", titulo: "Vamos a la plataforma", segundos: 10,
     guion: [
       { d: "Les muestro el flujo completo, en vivo, con tres personas: Paola, estudiante; Liliana, docente; y la administración de la Fundación." },
-      { h: "Cambia a la ventana de **Paola** (vista de celular), en la pantalla de ingreso." },
+      { h: "Cambia a la ventana de **Paola** (Edge, vista de celular), en la pantalla de ingreso." },
     ],
     entender: "Cada persona va en su propia ventana porque la sesión vive en una cookie del navegador: dos personas en la misma ventana se pisarían la sesión.",
   },
   {
-    bloque: 1, diapositiva: "demo", titulo: "Paola entrega su taller", segundos: 30,
+    bloque: 1, diapositiva: "demo", titulo: "Paola entrega su taller", segundos: 40,
     guion: [
+      { d: "Primero, el diseño, que es propio: el símbolo es un sendero que sube paso a paso hasta la meta, los colores salen de la tierra y la selva, y la letra se diseñó para personas con baja visión, porque nuestros estudiantes leen desde el celular." },
       { h: "Ingresa con `9900001001` y `Demo2026*`." },
       { d: "Paola estudia Programación de Software y va al día. Así ve Senda en su celular: su estado de cuenta y su próxima entrega." },
-      { h: "En Inicio, pulsa «Subir mi entrega» del Taller 3 de Lógica → elige el PDF → súbelo." },
-      { d: "Sube su taller desde el celular. El servidor revisa el archivo **por su contenido**, no por el nombre: un archivo de texto renombrado como PDF se rechaza." },
+      { h: "En Inicio, pulsa «Subir mi entrega» del Taller 3 de Lógica → elige `taller3-paola.pdf` del Escritorio → súbelo." },
+      { d: "Sube su taller. El servidor revisa el archivo **por su contenido**, no por el nombre: un archivo de texto renombrado como PDF se rechaza." },
     ],
-    entender: "La API lee los primeros bytes del archivo (la «firma» de PDF, DOCX, JPG o PNG) y rechaza más de 10 MB. El archivo se guarda en Workers KV y se descarga siempre a través de la API, con permisos: nunca hay una URL pública.",
+    entender: "Identidad visual (docs/identidad-visual.md): concepto «Senda, paso a paso»; la letra es Atkinson Hyperlegible, del Braille Institute, que distingue caracteres parecidos (I, l, 1; O, 0); el contraste cumple WCAG AA y los estados nunca se comunican solo con color. Sobre el archivo: la API lee los primeros bytes (la «firma» de PDF, DOCX, JPG o PNG) y rechaza más de 10 MB. El archivo se guarda en Workers KV y se descarga siempre a través de la API, con permisos: nunca hay una URL pública.",
   },
   {
     bloque: 1, diapositiva: "demo", titulo: "Liliana califica", segundos: 45,
@@ -616,7 +589,7 @@ const PASOS = [
     entender: "No hay notificaciones ni procesos en segundo plano: la pantalla de Paola consulta la API y la nota ya está guardada en D1.",
   },
   {
-    bloque: 1, diapositiva: "demo", titulo: "El asistente", segundos: 70,
+    bloque: 1, diapositiva: "demo", titulo: "El asistente", segundos: 65,
     guion: [
       { h: "Paola → Asistente académico → toca la sugerencia «¿Cuál es la nota mínima para aprobar un curso?»." },
       { d: "Ahora el asistente. Paola pregunta por la nota mínima: responde **tres** y cita la fuente, el Reglamento estudiantil, en la sección Evaluación y calificaciones." },
@@ -628,9 +601,9 @@ const PASOS = [
     entender: "Es RAG: la pregunta se convierte en un vector (embeddings bge-m3 de Workers AI), Vectorize busca los fragmentos más parecidos de los documentos y el modelo (gpt-oss-20b) responde solo con eso. Para los datos propios usa herramientas que leen D1 con el estudiante de la sesión: el modelo no puede pedir los datos de otra persona.",
   },
   {
-    bloque: 1, diapositiva: "demo", titulo: "Mora: bloqueo y pago", segundos: 70,
+    bloque: 1, diapositiva: "demo", titulo: "Mora: bloqueo y pago", segundos: 65,
     guion: [
-      { h: "Cambia a la ventana de **Manuela** → ingresa con `9900001002` y `Demo2026*`." },
+      { h: "Cambia a la ventana de **Manuela** (incógnito) → ingresa con `9900001002` y `Demo2026*`." },
       { d: "Manuela tiene una cuota con **49 días de atraso**. Intenta entrar y no puede: su acceso está suspendido, con un mensaje claro de a quién acudir." },
       { h: "Cambia a **administración** → Cartera → fila de Manuela Riascos Rojas (›) → en la cuota del 5 de octubre, «Registrar pago» → confirma." },
       { d: "La administración registra su pago de octubre." },
@@ -640,53 +613,78 @@ const PASOS = [
     entender: "calcularEstadoMora es una función pura: bloqueado si alguna cuota con saldo tiene 31 días o más de vencida, salvo un acuerdo de pago vigente. Se evalúa al ingresar y en cada petición del estudiante, así que el pago surte efecto de inmediato.",
   },
   {
-    bloque: 2, diapositiva: "guardas", titulo: "La alucinación del 4.0", segundos: 35,
+    bloque: 2, diapositiva: "guardas", titulo: "La alucinación del 4.0", segundos: 30,
     guion: [
       { h: "Vuelve a las diapositivas." },
-      { d: "La decisión técnica de la que estoy más orgulloso es cómo evitamos que el asistente invente. La regla está en la spec: si no encuentra información suficiente, debe decir que no la tiene; **nunca inventar** datos, fechas ni normas." },
-      { d: "Pero cuando lo probé con el modelo real, respondió de memoria: «La nota mínima es **cuatro**», citando un «Reglamento Académico» que no existe. La nota correcta es tres. Y mi validación de ese momento lo dejó pasar." },
+      { d: "La decisión técnica de la que estoy más orgulloso: un asistente que **no inventa**. La spec dice que, si no encuentra información, debe decir que no la tiene." },
+      { d: "Pero al probarlo con el modelo real respondió de memoria: «La nota mínima es **cuatro**», citando un reglamento que no existe. La correcta es tres, y mi validación de ese momento lo dejó pasar." },
     ],
     entender: "Por qué pasó: la validación de entonces solo reconocía como cita un texto con raya («Documento – Sección»). La cita inventada no tenía raya, así que ni siquiera se revisó. Lo encontró la prueba con el modelo real del 18 de noviembre, no las pruebas automáticas: por eso también se prueba a mano.",
   },
   {
-    bloque: 2, diapositiva: "guardas", titulo: "Las tres capas", segundos: 50,
+    bloque: 2, diapositiva: "guardas", titulo: "Las tres capas", segundos: 45,
     guion: [
-      { d: "Entonces actualicé primero el diseño y después el código, con **tres capas**. Una: un umbral de similitud; si el fragmento encontrado no se parece lo suficiente a la pregunta, no cuenta como fuente. Dos: instrucciones estrictas; el modelo debe consultar una herramienta antes de responder sobre la Fundación. Y tres, la más importante: una validación **en el código**; toda cita tiene que ser un fragmento que de verdad se recuperó, y sin herramientas no se aceptan cifras. Si algo falla, la respuesta se reemplaza por «no tengo esa información». Esa capa no depende de que el modelo obedezca." },
-      { d: "Y hay una prueba automática que repite exactamente la alucinación del cuatro y verifica que se bloquea." },
+      { d: "Primero actualicé el diseño y después el código, con **tres capas**. Uno: un umbral de similitud; un fragmento poco parecido a la pregunta no cuenta como fuente. Dos: el modelo debe consultar una herramienta antes de responder." },
+      { d: "Y tres, la más importante, **en el código**: toda cita tiene que ser un fragmento que de verdad se recuperó, y sin herramientas no se aceptan cifras. Si no, la respuesta se reemplaza por «no tengo esa información». Esa capa no depende de que el modelo obedezca, y una prueba automática repite la alucinación del cuatro para verificar que se bloquea." },
     ],
     entender: "La similitud es el parecido entre el vector de la pregunta y el de cada fragmento (1 es idéntico). El umbral de 0,55 se midió antes: 0,743 con el fragmento correcto y 0,35 con un texto ajeno. La capa 3 está en api/src/rag/agente.ts y la prueba del «4.0», en api/test/agente.test.ts.",
   },
   {
-    bloque: 2, diapositiva: "medido", titulo: "Medido, no opinado", segundos: 65,
+    bloque: 2, diapositiva: "medido", titulo: "Medido, no opinado", segundos: 45,
     guion: [
-      { d: "Y no me quedé con la intuición: lo medí. Armé **25 preguntas** con su respuesta esperada y comparé dos modelos. gpt-oss acertó el 96 por ciento y Llama el 88, y gpt-oss cuesta la mitad: por eso lo elegí." },
-      { d: "La única falla era segura: no respondía cuándo es la semana de parciales, aunque está en el calendario. En lugar de adivinar, medí: el fragmento correcto salía primero, pero con **0,549**, a una milésima del umbral. No bajé el umbral, porque eso aflojaría la protección en todas las preguntas: escribí el calendario con las palabras del estudiante. Resultado: **25 de 25**, y sigue diciendo «no sé» cuando debe." },
+      { d: "Y lo medí: **25 preguntas** con su respuesta esperada y dos modelos. gpt-oss acertó el 96 por ciento, Llama el 88, y gpt-oss cuesta la mitad: por eso lo elegí." },
+      { d: "La única falla, la semana de parciales, la diagnostiqué antes de arreglarla: el fragmento correcto quedaba a **una milésima** del umbral. No bajé el umbral, porque aflojaría la protección en todas las preguntas: escribí el calendario con las palabras del estudiante. Resultado: **25 de 25**, y sigue diciendo «no sé» cuando debe." },
     ],
     entender: "El modelo no es determinista: en tres corridas completas dio 96 %, 96 % y 100 %. Lo estable es que siempre supera el 90 % y que, cuando falla, se niega: nunca inventa. La evaluación está en eval/ y se califica con reglas fijas, sin otro modelo como juez.",
   },
   {
-    bloque: 3, diapositiva: "spec", titulo: "De la spec a producción", segundos: 50,
+    bloque: 3, diapositiva: "spec", titulo: "Un cambio de OpenSpec", segundos: 30,
     guion: [
-      { d: "¿Cómo se construyó? Con desarrollo guiado por especificaciones, usando **OpenSpec**. Nada se programó sin una spec aprobada por mí: propuesta, specs, diseño, tareas y archivo. Hoy Senda está descrito en **130 escenarios**, y cada uno tiene una prueba que lleva su nombre; un comando lo verifica en cada push." },
-      { d: "Son **413 pruebas** automáticas y 3 de punta a punta con Playwright. Si el flujo de la demo se rompe, el pipeline no despliega. Y lo comprobé: dañé a propósito la regla de mora, de 30 a 29 días, y el pipeline lo atrapó. Es la única ejecución en rojo de toda la historia." },
-      { h: "Solo si vas bien de tiempo: muestra la pestaña de GitHub Actions en verde." },
+      { d: "Ahora les muestro cómo se construyó, en los archivos reales. Nada se programó sin una spec aprobada por mí: usé **OpenSpec**, desarrollo guiado por especificaciones." },
+      { h: "Cambia a **VS Code** → carpeta `openspec/changes/archive/2026-11-21-cerrar-sesion-y-temas-de-cursos/`." },
+      { d: "Así es un cambio: la **propuesta** dice por qué, las **specs** qué debe pasar, el **diseño** cómo, con mi decisión, y las **tareas**, diez de diez. Al archivarlo, sus specs pasan a ser la fuente de verdad del producto." },
     ],
-    entender: "Un escenario es un caso CUANDO/ENTONCES de la spec («cuando una cuota tiene 31 días de vencida, entonces el estudiante no puede ingresar»). npm run trazabilidad cruza los 130 escenarios con los nombres de las pruebas y falla en el CI si alguno queda sin prueba. Las pruebas de la API corren en workerd, el mismo runtime de producción.",
+    entender: "Este cambio nació de una revisión del subagente: cerrar sesión no invalidaba el token en el servidor. Tú elegiste la solución (subir sesion_version al salir) y quedó en design.md como D1. Archivar es cerrar el cambio: sus specs delta se fusionan en openspec/specs/, que describe el producto terminado.",
   },
   {
-    bloque: 3, diapositiva: "agente", titulo: "El agente y el humano", segundos: 55,
+    bloque: 3, diapositiva: "spec", titulo: "Spec, prueba y trazabilidad", segundos: 35,
     guion: [
-      { d: "Lo construí con Claude Code, pero con reglas. Un archivo CLAUDE.md con lo que no se negocia, como Habeas Data y no tocar los secretos. Skills de OpenSpec y de pruebas primero. Servidores MCP: Playwright para revisar más de 50 capturas de las pantallas, y la documentación vigente de las librerías." },
-      { d: "Las reglas críticas no dependen de la memoria del agente: un **hook** le impide leer los secretos o editar una migración ya aplicada. Y un **subagente revisor**, que no vio cómo se escribió el código, lo revisa contra la spec: este fin de semana encontró dos afirmaciones mías equivocadas antes de que llegaran a esta presentación." },
-      { d: "Y las decisiones las tomo yo: apruebo las specs, elijo entre opciones y cargo los secretos." },
+      { h: "Abre `openspec/specs/bloqueo-mora/spec.md` → escenario «31 días de atraso»." },
+      { d: "Esta es la regla de mora escrita como escenario: cuando una cuota vence el 5 de octubre y hoy es 5 de noviembre, el estudiante está bloqueado." },
+      { h: "Abre `api/test/mora.test.ts` (línea 11)." },
+      { d: "Y esta es su prueba, con **el mismo nombre**." },
+      { h: "En la terminal de VS Code: `npm run trazabilidad`." },
+      { d: "Este comando cruza los **130 escenarios** con las pruebas: si uno queda sin prueba, el pipeline falla." },
     ],
-    entender: "Skill: instrucciones empaquetadas que el agente carga para una tarea, como el flujo de OpenSpec. MCP: un protocolo para conectarle herramientas externas al agente, como el navegador de Playwright. Hook: un script que corre antes o después de cada acción del agente y puede bloquearla. Subagente: otra instancia del agente, con su propio contexto y solo lectura.",
+    entender: "Escenario: un caso CUANDO/ENTONCES (WHEN/THEN) de la spec. La prueba usa la función pura calcularEstadoMora con fechas fijas, así no depende del día en que corra. La trazabilidad compara nombres exactos: el nombre de la prueba empieza con el nombre del escenario, seguido de dos puntos.",
   },
   {
-    bloque: 4, diapositiva: "cierre", titulo: "Cierre", segundos: 45,
+    bloque: 3, diapositiva: "spec", titulo: "Playwright y el pipeline", segundos: 50,
     guion: [
-      { d: "Senda funciona hoy, publicado y probado, en el plan gratuito. Lo que sigue: mostrarle las specs a la rectora de la Fundación, que puede cambiar reglas y alcances; y como todo nace de las specs, cada cambio entra por el mismo camino. Después, producción con sus datos reales, y avisos de cartera por WhatsApp con n8n." },
-      { d: "Lo que me llevo: con un agente, **la diferencia la hace la disciplina**. Spec primero, pruebas que fallan por la razón correcta y medir antes de decidir. Muchas gracias." },
+      { h: "Abre `e2e/demo.spec.ts`." },
+      { d: "Esto es **Playwright**: un robot que usa la aplicación como una persona. Sus pasos son la demo que acaban de ver: Paola entrega, Liliana califica, Manuela no entra, se registra el pago y entra." },
+      { h: "Cambia a **GitHub** → Actions → la última ejecución, en verde." },
+      { d: "Y este es el pipeline: en cada push corren las **413 pruebas**, la trazabilidad y el robot de Playwright. Solo si todo pasa, se despliega en Cloudflare." },
+      { h: "Abre el pull request #1, «Prueba de fuego»." },
+      { d: "Y lo comprobé: dañé a propósito la regla de mora, de 30 a 29 días, y el pipeline lo atrapó. Es la única ejecución en rojo de toda la historia." },
+    ],
+    entender: "CI/CD: integración continua (cada push se prueba solo) y despliegue continuo (si todo pasa, se publica solo). El pipeline (.github/workflows) tiene 3 etapas: calidad (lint, tipos, pruebas, trazabilidad y build), la E2E con Playwright, y migraciones y despliegue. Vitest prueba las piezas por dentro; Playwright, la aplicación entera desde afuera.",
+  },
+  {
+    bloque: 3, diapositiva: "spec", titulo: "El agente con reglas", segundos: 35,
+    guion: [
+      { h: "Vuelve a **VS Code** → abre `CLAUDE.md` y despliega la carpeta `.claude/` (skills, hooks y agents)." },
+      { d: "Lo construí con Claude Code, pero con reglas. Este **CLAUDE.md** tiene lo que no se negocia, como Habeas Data y los secretos. Aquí están las **skills** de OpenSpec; los **hooks**, que le impiden leer los secretos o editar una migración aplicada; y el **subagente revisor**, que revisa el código contra la spec: este fin de semana encontró dos afirmaciones mías equivocadas." },
+      { d: "Y las decisiones las tomo yo: apruebo cada spec, elijo entre opciones y cargo los secretos." },
+    ],
+    entender: "Skill: instrucciones empaquetadas que el agente carga para una tarea (las 6 de OpenSpec están en .claude/skills/). Hook: un script que corre antes o después de cada acción del agente y puede bloquearla (.claude/hooks/guardian-reglas.mjs, activado en .claude/settings.json). Subagente: otra instancia del agente, con su propio contexto y solo lectura (.claude/agents/revisor-spec.md). MCP: un protocolo para conectarle herramientas al agente, como el navegador de Playwright.",
+  },
+  {
+    bloque: 4, diapositiva: "cierre", titulo: "Cierre", segundos: 40,
+    guion: [
+      { h: "Vuelve a las diapositivas." },
+      { d: "Senda funciona hoy, publicado y probado, en el plan gratuito. Lo que sigue: mostrarle las specs a la rectora de la Fundación, que puede cambiar reglas y alcances; cada cambio entrará por el mismo camino. Después, producción con sus datos reales, y avisos de cartera por WhatsApp con n8n." },
+      { d: "Lo que me llevo: con un agente, **la diferencia la hace la disciplina**: spec primero, pruebas que fallan por la razón correcta y medir antes de decidir. Muchas gracias." },
     ],
     entender: "Si preguntan por producción: un dominio propio de la Fundación, el plan pago de Workers (ADR-003) y R2 para los archivos (ADR-002). Hoy los archivos van en Workers KV porque R2 exige registrar un medio de pago.",
   },
