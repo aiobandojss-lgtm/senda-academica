@@ -25,3 +25,6 @@ blob-report/
 .DS_Store
 Thumbs.db
 *.log
+
+# Notas personales de Aymer (están fuera del repositorio; esto evita subirlas si algún día se copian aquí)
+Datos.txt
