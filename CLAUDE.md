@@ -15,7 +15,7 @@ Contexto para Claude Code. Léelo completo al iniciar cada sesión.
 **Senda** (nombre genérico del producto, independiente de la Fundación; configurable). Un mismo producto con dos objetivos:
 
 1. **MVP para una fundación educativa** que está comenzando y no tiene dinero: estudiantes por carrera, usuario y contraseña, talleres y evaluaciones con entregas, cuotas y pagos, y **bloqueo de acceso por mora de más de 30 días**. Web responsiva, sin app.
-2. **Proyecto final del curso AI Agentic Engineer (Datapath)**, presentación en vivo el **lunes 23 de noviembre de 2026** (pasó del viernes 20; confirmado el 19 de noviembre). Encima del MVP va el **asistente académico Senda con RAG** que responde con documentos oficiales y datos reales del estudiante, sin alucinar.
+2. **Proyecto final del curso AI Agentic Engineer (Datapath)**, presentación prevista en vivo el **lunes 23 de noviembre de 2026**. Aymer se enfermó ese día y la entrega pasó a un **video explicativo más el enlace de este repositorio** (público; el README es la guía para el profesor). Encima del MVP va el **asistente académico Senda con RAG** que responde con documentos oficiales y datos reales del estudiante, sin alucinar.
 
 Prioridad: primero el flujo de la demo funcionando de punta a punta; luego lo demás.
 
@@ -118,7 +118,7 @@ Cuando lleguen los datos reales de la Fundación: base nueva, mismas migraciones
 - `docs/README.md` – índice.
 - `docs/decisiones/` – ADR numerados (contexto, decisión, alternativas, consecuencias) para decisiones que no caben en un `design.md`.
 - `docs/bitacora/` – **una entrada por día de trabajo**: qué se hizo, conceptos aprendidos, problemas y cómo se resolvieron. Es la materia prima de la sustentación y del manual de metodología (repositorio aparte `manual-ingenieria-agentica`). Al cerrar cada día, propone la entrada.
-- `docs/operacion/` y `docs/presentacion/` – se llenan al acercarse el despliegue y la demo.
+- `docs/operacion/` – despliegue y operación. El material de la presentación (diapositivas y guion) se guarda fuera del repositorio.
 
 ## Reglas que no se negocian
 

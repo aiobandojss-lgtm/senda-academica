@@ -70,7 +70,7 @@ Preguntas para el asistente (cuenta de Paola):
 | `migrations/` | Esquema de D1 |
 | `db/seed/` | Generador de datos ficticios deterministas y cuentas de demostración |
 | `eval/` | Evaluación del asistente: preguntas, calificador y reportes |
-| `docs/` | Decisiones, bitácora, documentos del RAG (`docs/rag/`), operación y presentación |
+| `docs/` | Decisiones, bitácora, identidad visual, documentos del RAG (`docs/rag/`) y operación |
 | `CLAUDE.md` y `.claude/` | Contexto, skills, hooks y subagente del agente |
 | `PLAN.md` | Plan de trabajo día a día |
 
