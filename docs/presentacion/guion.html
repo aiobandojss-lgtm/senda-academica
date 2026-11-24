@@ -117,8 +117,8 @@
     <article class="g-lectura" id="g-lectura" aria-live="polite"></article>
     <aside class="g-lateral">
       <div>
-        <div class="g-etiqueta">En la pantalla compartida</div>
-        <div class="mini"><iframe src="diapositivas.html?miniatura" title="Lo que ve el jurado" tabindex="-1" aria-hidden="true"></iframe></div>
+        <div class="g-etiqueta">En la pantalla que grabas</div>
+        <div class="mini"><iframe src="diapositivas.html?miniatura" title="Lo que se graba" tabindex="-1" aria-hidden="true"></iframe></div>
       </div>
       <div>
         <div class="g-etiqueta">Sigue</div>
@@ -159,7 +159,7 @@ const {
 const TEXTOS = {
   portada: {
     guion: [
-      { d: "Hola a todos. Mi nombre es Aymer Ivan Obando Valois, soy ingeniero de sistemas en Cali. Les presento **Senda**: una plataforma académica para una fundación educativa, con un asistente que **no inventa**." },
+      { d: "Hola. Mi nombre es Aymer Ivan Obando Valois, soy ingeniero de sistemas en Cali. Por un tema de salud no pude presentar en vivo, así que preparé este video. Les presento **Senda**: una plataforma académica para una fundación educativa, con un asistente que **no inventa**." },
     ],
     entender: "«Senda» es el nombre del producto, independiente de la Fundación. La Fundación real es Funafrocol, pero la demo pública muestra «Fundación (demo)» hasta que autoricen por escrito: el nombre es una variable del Worker, no está escrito en el código.",
   },
@@ -172,7 +172,7 @@ const TEXTOS = {
   },
   plataforma: {
     guion: [
-      { d: "Les muestro el flujo completo, en vivo, con tres personas: Paola, estudiante; Liliana, docente; y la administración de la Fundación." },
+      { d: "Les muestro el flujo completo en la plataforma publicada, no en una maqueta, con tres personas: Paola, estudiante; Liliana, docente; y la administración de la Fundación." },
       { h: "Cambia a la ventana de **Paola** (Edge, vista de celular), en la pantalla de ingreso." },
     ],
     entender: "Cada persona va en su propia ventana porque la sesión vive en una cookie del navegador: dos personas en la misma ventana se pisarían la sesión.",
@@ -280,7 +280,7 @@ const TEXTOS = {
   agente: {
     guion: [
       { h: "Vuelve a **VS Code** → abre `CLAUDE.md` y despliega la carpeta `.claude/` (skills, hooks y agents)." },
-      { d: "Lo construí con Claude Code, pero con reglas. Este **CLAUDE.md** tiene lo que no se negocia, como Habeas Data y los secretos. Aquí están las **skills** de OpenSpec; los **hooks**, que le impiden leer los secretos o editar una migración aplicada; y el **subagente revisor**, que revisa el código contra la spec: este fin de semana encontró dos afirmaciones mías equivocadas." },
+      { d: "Lo construí con Claude Code, pero con reglas. Este **CLAUDE.md** tiene lo que no se negocia, como Habeas Data y los secretos. Aquí están las **skills** de OpenSpec; los **hooks**, que le impiden leer los secretos o editar una migración aplicada; y el **subagente revisor**, que revisa el código contra la spec: en la última revisión encontró dos afirmaciones mías equivocadas." },
       { d: "Y las decisiones las tomo yo: apruebo cada spec, elijo entre opciones y cargo los secretos." },
     ],
     entender: "Skill: instrucciones empaquetadas que el agente carga para una tarea (las 6 de OpenSpec están en .claude/skills/). Hook: un script que corre antes o después de cada acción del agente y puede bloquearla (.claude/hooks/guardian-reglas.mjs, activado en .claude/settings.json). Subagente: otra instancia del agente, con su propio contexto y solo lectura (.claude/agents/revisor-spec.md). MCP: un protocolo para conectarle herramientas al agente, como el navegador de Playwright.",
@@ -289,6 +289,7 @@ const TEXTOS = {
     guion: [
       { h: "Vuelve a las diapositivas." },
       { d: "Senda funciona hoy, publicado y probado, en el plan gratuito. Lo que sigue: mostrarle las specs a la rectora de la Fundación, que puede cambiar reglas y alcances; cada cambio entrará por el mismo camino. Después, producción con sus datos reales, y avisos de cartera por WhatsApp con n8n." },
+      { d: "Todo está en el repositorio: el README tiene el enlace de la demo, las cuentas para probarla y dónde está la evidencia de cada criterio." },
       { d: "Lo que me llevo: con un agente, **la diferencia la hace la disciplina**: spec primero, pruebas que fallan por la razón correcta y medir antes de decidir. Muchas gracias." },
     ],
     entender: "Si preguntan por producción: un dominio propio de la Fundación, el plan pago de Workers (ADR-003) y R2 para los archivos (ADR-002). Hoy los archivos van en Workers KV porque R2 exige registrar un medio de pago.",
@@ -337,7 +338,7 @@ function pintarGuion() {
   const prox = PASOS[estado.paso + 1];
   $("#g-siguiente").innerHTML = prox
     ? `<strong>${formato(prox.titulo)}</strong><br><span>${prox.diapositiva === paso.diapositiva ? "Misma diapositiva" : "Cambia la diapositiva"} · ${BLOQUES[prox.bloque].nombre}</span>`
-    : "<strong>Fin.</strong><br><span>Siguen las preguntas del jurado.</span>";
+    : "<strong>Fin.</strong><br><span>Detén la grabación.</span>";
   $("#b-anterior").disabled = estado.paso === 0;
   $("#b-siguiente").disabled = estado.paso === PASOS.length - 1;
 

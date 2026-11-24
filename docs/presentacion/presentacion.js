@@ -11,7 +11,7 @@ window.Senda = (() => {
 
   const BLOQUES = [
     { nombre: "El problema", segundos: 50 },
-    { nombre: "Demo en vivo", segundos: 240 },
+    { nombre: "La demo", segundos: 240 },
     { nombre: "Sin inventar", segundos: 120 },
     { nombre: "Cómo se construyó", segundos: 150 },
     { nombre: "Cierre", segundos: 40 },

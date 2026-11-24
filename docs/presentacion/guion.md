@@ -2,6 +2,13 @@
 
 **Versión 2** (domingo 22). **Las diapositivas están en [diapositivas.html](diapositivas.html) y el texto para leer en [guion.html](guion.html)**: se abren con doble clic (en el mismo navegador, para que se sincronicen), las diapositivas en la pantalla compartida y el guion en la otra pantalla. Este documento queda como referencia: los tiempos, la preparación, el plan B y las preguntas esperadas.
 
+> **Cambio del 23 de noviembre: la presentación pasa a video.** Aymer se enfermó y no pudo presentar en vivo; envía un video y el enlace del repositorio, cuyo README es la guía para el profesor.
+>
+> - **Mismo guion, un clip por bloque.** Son 5, y el guion muestra «Bloque x de 5». Si algo sale mal, se repite solo ese clip.
+> - **Cómo se graba.** Clipchamp, que viene en Windows 11, graba la pantalla 1 con el micrófono y al final une los clips. El guion va en la pantalla 2.
+> - **Antes de grabar:** recargar el seed remoto, y grabar antes del jueves 26. Después de esa fecha la entrega de Paola sale «tardía».
+> - **Después de grabar:** recargar el seed otra vez, para que el profesor encuentre la demo limpia. Luego subir el video a YouTube como «No listado».
+
 - **Formato:** unos 10 minutos de demo en vivo, más preguntas ([rúbrica](../rubrica.md)).
 - **Hilo conductor:** contar la metodología del curso **usando el producto como evidencia**. La rúbrica pide tres momentos: el problema, la demo del flujo principal y una decisión técnica de la que estés orgulloso.
 - **Decisión técnica elegida por Aymer:** las guardas contra la alucinación del asistente.
